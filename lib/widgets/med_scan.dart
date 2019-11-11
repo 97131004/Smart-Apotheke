@@ -66,13 +66,21 @@ class _MedScanState extends State<MedScan> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Gefundene Medikamente'),
+    return WillPopScope(
+      onWillPop: gotoHome, //back to home page, skipping scanner
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Gefundene Medikamente'),
+        ),
+        body: getMedsDone
+            ? MedList.build(context, widget.meds)
+            : LoadingBar.build(),
       ),
-      body: getMedsDone
-          ? MedList.build(context, widget.meds)
-          : LoadingBar.build(),
     );
+  }
+
+  Future<bool> gotoHome() async {
+    Navigator.pop(context);
+    return true;
   }
 }

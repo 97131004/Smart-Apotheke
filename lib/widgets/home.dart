@@ -8,16 +8,16 @@ import 'scanner.dart';
 import 'med_search.dart';
 import 'calendar.dart';
 
-class App extends StatefulWidget {
-  App({Key key}) : super(key: key);
+class Home extends StatefulWidget {
+  Home({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return _AppState();
+    return _HomeState();
   }
 }
 
-class _AppState extends State<App> {
+class _HomeState extends State<Home> {
   List<Med> dummy = [
     Med('Ibu ratio 400 akut Schmerztablletten Filmtabletten', '10019621',
         'http://www.beipackzettel.de/medikament/Ibu%2520ratio%2520400%2520akut%2520Schmerztablletten%2520Filmtabletten/A77827'),

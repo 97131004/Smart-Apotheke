@@ -131,7 +131,6 @@ class _MedInfoState extends State<MedInfo> {
                 //title
                 String html = node.innerHtml;
                 if (html.length > 0 && html[0] == ' ') {
-                  print(node.innerHtml);
                   node.innerHtml = html.replaceFirst(new RegExp(r"^\s+"), '') +
                       ' (PZN: ' +
                       widget.med.pzn +

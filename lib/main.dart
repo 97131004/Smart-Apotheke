@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/app.dart';
+import 'widgets/home.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -13,6 +13,6 @@ void main() {
       scaffoldBackgroundColor: Colors.white,
       primaryTextTheme: TextTheme(title: TextStyle(color: Colors.white)),
     ),
-    home: App(),
+    home: Home(),
   ));
 }
