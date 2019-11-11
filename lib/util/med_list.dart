@@ -5,7 +5,7 @@ import '../widgets/med_info.dart';
 import '../data/med.dart';
 import 'nampr.dart';
 
-class MedListCore {
+class MedList {
   static Widget build(BuildContext context, List<Med> meds) {
     return Theme(
       data: ThemeData(

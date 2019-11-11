@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'med_list_scan.dart';
+import 'med_scan.dart';
 import '../util/nampr.dart';
 import '../data/med.dart';
 
@@ -50,7 +50,7 @@ class _ScannerState extends State<Scanner> {
     Navigator.push(
       context,
       NoAnimationMaterialPageRoute(
-          builder: (context) => MedListScan(meds: medicaments)),
+          builder: (context) => MedScan(meds: medicaments)),
     );
   }
 }

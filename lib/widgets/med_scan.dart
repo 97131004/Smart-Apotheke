@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import '../util/med_list_core.dart';
+import '../util/med_list.dart';
+import '../util/loading_bar.dart';
 import '../util/helper.dart';
 import '../data/med.dart';
 
-class MedListScan extends StatefulWidget {
+class MedScan extends StatefulWidget {
   final List<Med> meds;
 
-  MedListScan({Key key, @required this.meds}) : super(key: key);
+  MedScan({Key key, @required this.meds}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return _MedListScanState();
+    return _MedScanState();
   }
 }
 
-class _MedListScanState extends State<MedListScan> {
+class _MedScanState extends State<MedScan> {
   bool getMedsDone = false;
 
   @override
@@ -70,8 +71,8 @@ class _MedListScanState extends State<MedListScan> {
         title: Text('Gefundene Medikamente'),
       ),
       body: getMedsDone
-          ? MedListCore.build(context, widget.meds)
-          : Helper.buildLoadingBar(),
+          ? MedList.build(context, widget.meds)
+          : LoadingBar.build(),
     );
   }
 }

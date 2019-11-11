@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../util/med_list_core.dart';
+import '../util/med_list.dart';
 import '../util/nampr.dart';
 import '../data/med.dart';
 import '../data/globals.dart' as globals;
 import 'scanner.dart';
-import 'med_list_search.dart';
+import 'med_search.dart';
 import 'calendar.dart';
 
 class App extends StatefulWidget {
@@ -56,7 +56,7 @@ class _AppState extends State<App> {
         children: <Widget>[
           Text(
               'Hier kommt die History-Liste der vorher gefundenen Medikamente. Derzeit nur Dummy-Liste.'),
-          MedListCore.build(context, globals.meds),
+          MedList.build(context, globals.meds),
         ],
       ),
     );
@@ -72,7 +72,7 @@ class _AppState extends State<App> {
   void gotoSearch() {
     Navigator.push(
       context,
-      NoAnimationMaterialPageRoute(builder: (context) => MedListSearch()),
+      NoAnimationMaterialPageRoute(builder: (context) => MedSearch()),
     );
   }
 

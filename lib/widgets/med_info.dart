@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_html/flutter_html.dart';
 import 'package:html/dom.dart' as dom;
 
+import '../util/loading_bar.dart';
 import '../util/helper.dart';
 import '../data/med.dart';
 
@@ -66,7 +67,7 @@ class _MedInfoState extends State<MedInfo> {
         ),
         body: getMedInfoDone
             ? Scrollbar(child: buildHtml())
-            : Helper.buildLoadingBar(),
+            : LoadingBar.build(),
         floatingActionButton: Visibility(
           visible: getMedInfoDone,
           child: Container(

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-class MedListSearch extends StatefulWidget {
-  MedListSearch({Key key}) : super(key: key);
+class MedSearch extends StatefulWidget {
+  MedSearch({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return _MedListSearchState();
+    return _MedSearchState();
   }
 }
 
-class _MedListSearchState extends State<MedListSearch> {
+class _MedSearchState extends State<MedSearch> {
   @override
   void initState() {
     super.initState();
