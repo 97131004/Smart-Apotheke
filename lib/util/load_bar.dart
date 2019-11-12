@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class LoadingBar {
+class LoadBar {
   static Widget build() {
     return Container(
       child: Column(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../util/med_list.dart';
-import '../util/loading_bar.dart';
+import '../util/load_bar.dart';
 import '../util/helper.dart';
 import '../data/med.dart';
 
@@ -74,7 +74,7 @@ class _MedScanState extends State<MedScan> {
         ),
         body: getMedsDone
             ? MedList.build(context, widget.meds)
-            : LoadingBar.build(),
+            : LoadBar.build(),
       ),
     );
   }
