@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'widgets/maps.dart';
 import 'widgets/home.dart';
 
 void main() {
@@ -13,6 +14,6 @@ void main() {
       scaffoldBackgroundColor: Colors.white,
       primaryTextTheme: TextTheme(title: TextStyle(color: Colors.white)),
     ),
-    home: Home(),
+    home: Maps(),//Home(),
   ));
 }
