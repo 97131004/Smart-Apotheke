@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_html/flutter_html.dart';
 import 'package:html/dom.dart' as dom;
 
+import '../util/med_get.dart';
 import '../util/load_bar.dart';
-import '../util/helper.dart';
 import '../data/med.dart';
 
 class MedInfo extends StatefulWidget {
@@ -30,28 +29,30 @@ class _MedInfoState extends State<MedInfo> {
     super.initState();
     scrollController = ScrollController();
 
-    getMedInfo();
+    if (widget.med.url.length > 0) {
+      getMedInfo();
+    } else {
+      medInfoData = '';
+      setState(() {
+        getMedInfoDone = true;
+      });
+    }
   }
 
   Future getMedInfo() async {
-    final resp = await http.get(widget.med.url);
-    String html =
-        Helper.parseMid(resp.body, '<div class="content_area">', '<footer>');
-    if (html != '') {
-      int chapterCount = '#chapter'.allMatches(html).length;
+    String resp = await MedGet.getMedInfo(widget.med);
+
+    if (resp != null && resp.length > 0) {
+      medInfoData = resp;
+      int chapterCount = '#chapter'.allMatches(medInfoData).length;
 
       scrollKeys = new List<GlobalKey>();
       for (int i = 0; i < chapterCount; i++) {
         scrollKeys.add(new GlobalKey());
       }
-
-      html = html.replaceFirst(
-          '<a href="#kapitelverzeichnis">Kapitelverzeichnis</a>', '');
-      html = html.replaceFirst('<ul class="catalogue no-bullet">', '');
-
-      medInfoData = html;
     } else {
       //error
+      medInfoData = '';
     }
 
     setState(() {
@@ -66,10 +67,10 @@ class _MedInfoState extends State<MedInfo> {
           title: Text(widget.med.name),
         ),
         body: getMedInfoDone
-            ? Scrollbar(child: buildHtml())
+            ? ((medInfoData.length > 0) ? buildHtml() : buildNotFound())
             : LoadBar.build(),
         floatingActionButton: Visibility(
-          visible: getMedInfoDone,
+          visible: getMedInfoDone && (medInfoData.length > 0),
           child: Container(
             height: 50.0,
             width: 50.0,
@@ -83,8 +84,13 @@ class _MedInfoState extends State<MedInfo> {
         ));
   }
 
+  Widget buildNotFound() {
+    return Text('Beipackzettel nicht gefunden.');
+  }
+
   Widget buildHtml() {
-    return ListView(
+    return Scrollbar(
+        child: ListView(
       controller: scrollController,
       children: <Widget>[
         Html(
@@ -173,6 +179,6 @@ class _MedInfoState extends State<MedInfo> {
           },
         ),
       ],
-    );
+    ));
   }
 }
