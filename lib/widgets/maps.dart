@@ -26,6 +26,11 @@ class _MapsState extends State<Maps> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   Map<String, PlacesSearchResult> foundPlaces = <String, PlacesSearchResult>{};
 
+  bool markerIsTabbed = false;
+  String name = "";
+  String desc = "";
+  String oh = "";
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +57,7 @@ class _MapsState extends State<Maps> {
       body: Stack(
         children: <Widget>[
           _googleMapsContainer(context),
+          _buildContainer(),
         ],
       ),
     );
@@ -70,6 +76,116 @@ class _MapsState extends State<Maps> {
         },
         markers: Set<Marker>.of(markers.values),
       ),
+    );
+  }
+
+  Widget _buildContainer() {
+    return Visibility(
+        visible: markerIsTabbed,
+        child:Align(
+          alignment: Alignment.bottomLeft,
+          child: Container(
+            margin: EdgeInsets.symmetric(vertical: 20.0),
+            height: 150.0,
+            width:  300.0,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: <Widget>[
+                SizedBox(width: 10.0),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: _boxes(
+                    "https://www.abda.de/fileadmin/_processed_/d/3/csm_Apo_Logo_Neu_HKS13_neues_BE_42f1ed22ad.jpg"),
+                ),
+              ],
+          ),
+        ),
+      )
+    );
+  }
+
+  Widget _boxes(String _image) {
+    return  GestureDetector(
+      onTap: () {
+        //_gotoLocation(lat,long);
+      },
+      child:Container(
+        child: new FittedBox(
+          fit: BoxFit.fitWidth,
+          child: Material(
+              color: Colors.white,
+              elevation: 14.0,
+              borderRadius: BorderRadius.circular(24.0),
+              shadowColor: Color(0x802196F3),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Container(
+                    width: 150,
+                    height: 150,
+                    child: ClipRRect(
+                      borderRadius: new BorderRadius.circular(30.0),
+                      child: Image(
+                        fit: BoxFit.fill,
+                        image: NetworkImage(_image),
+                      ),
+                    ),),
+                  Container(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: myDetailsContainer1(name, desc, oh),
+                    ),
+                  ),
+
+                ],)
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget myDetailsContainer1(String nameA, String descA, String openingHours) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Container(
+              child: Text(nameA,
+                style: TextStyle(
+                    color: Color(0xff6200ee),
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.bold),
+              )),
+        ),
+        SizedBox(height:5.0),
+        Container(
+            child: Text(
+              descA,
+              style: TextStyle(
+                color: Colors.black54,
+                fontSize: 18.0,
+              ),
+            )),
+        SizedBox(height:5.0),
+        Container(
+            child: Text(
+              openingHours,
+              style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold),
+            )),
+        SizedBox(height:5.0),
+        Container(
+            child: IconButton(
+              icon: Icon(Icons.call),
+              tooltip: "Apotheke anrufen",
+              onPressed: () {
+                // todo
+              },
+            )),
+      ],
     );
   }
 
@@ -94,6 +210,7 @@ class _MapsState extends State<Maps> {
           if(!foundPlaces.containsKey(f.id)) {
             foundPlaces[f.id] = f;
           }
+          print(f.name);
           addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
         });
       }
@@ -123,27 +240,37 @@ class _MapsState extends State<Maps> {
           infoWindow: InfoWindow(title: id, snippet: '')
       );
     } else {
-      var open = place.openingHours.openNow? 'Jetzt geöffnet' : 'Momentan geschlossen';
-      marker = Marker(
+      if(place.openingHours != null) {
+        var open = place.openingHours.openNow? 'Jetzt geöffnet' : 'Momentan geschlossen';
+        marker = Marker(
           markerId: markerId,
           position: latlng,
           infoWindow: InfoWindow(title: place.name, snippet: open),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
           onTap: () {
-            _onMarkerTapped(markerId);
+            _onMarkerTapped(id);
           },
-      );
+        );
+      }
     }
 
-    setState(() {
-      // adding a new marker to map
-      if(!markers.containsKey(markerId)) {
-        markers[markerId] = marker;
-      }
-    });
+    if(marker != null) {
+      setState(() {
+        // adding a new marker to map
+        if(!markers.containsKey(markerId)) {
+          markers[markerId] = marker;
+        }
+      });
+    }
   }
 
-  void _onMarkerTapped(id) {
-    // todo: open place info
+  Future _onMarkerTapped(id) async {
+    print(markerIsTabbed);
+    setState(() {
+      markerIsTabbed = true;
+      name = foundPlaces[id].name;
+      desc = foundPlaces[id].formattedAddress;
+      oh = foundPlaces[id].openingHours.toString();
+    });
   }
 }
