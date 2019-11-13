@@ -24,7 +24,7 @@ class _MapsState extends State<Maps> {
 
   GoogleMapController controller;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-
+  Map<String, PlacesSearchResult> foundPlaces = <String, PlacesSearchResult>{};
 
   @override
   void initState() {
@@ -35,9 +35,33 @@ class _MapsState extends State<Maps> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              // todo: go back to previous page
+            }),
         title: Text('Apotheken in Ihrer Nähe'),
+        actions: <Widget>[
+          IconButton(
+              icon: Icon(Icons.arrow_forward),
+              onPressed: () {
+                // todo: go to next page
+              }),
+        ],
       ),
-      body: Center(child: GoogleMap(
+      body: Stack(
+        children: <Widget>[
+          _googleMapsContainer(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _googleMapsContainer(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      child: GoogleMap(
         initialCameraPosition: _berlin,
         mapType: MapType.normal,
         onMapCreated: _onMapCreated,
@@ -45,7 +69,6 @@ class _MapsState extends State<Maps> {
 
         },
         markers: Set<Marker>.of(markers.values),
-      ),
       ),
     );
   }
@@ -55,7 +78,7 @@ class _MapsState extends State<Maps> {
 
     // move to current location
     var location = await getCurrentLocation();
-    controller.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(
+    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
       target: LatLng(location.latitude, location.longitude),
       zoom: 13.0,
     )));
@@ -68,8 +91,10 @@ class _MapsState extends State<Maps> {
     setState(() {
       if (result.status == "OK") {
         result.results.forEach((f){
-          print(f.name);
-          addMarker(f.name, LatLng(f.geometry.location.lat, f.geometry.location.lng));
+          if(!foundPlaces.containsKey(f.id)) {
+            foundPlaces[f.id] = f;
+          }
+          addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
         });
       }
     });
@@ -87,17 +112,28 @@ class _MapsState extends State<Maps> {
     }
   }
 
-  void addMarker(var id, LatLng latlng) {
+  void addMarker(var id, LatLng latlng, {PlacesSearchResult place}) {
     final MarkerId markerId = MarkerId(id);
+    Marker marker;
 
-    final Marker marker = Marker(
-      markerId: markerId,
-      position: latlng,
-      infoWindow: InfoWindow(title: id, snippet: '*'),
-      //onTap: () {
-      //  _onMarkerTapped(markerId);
-      //},
-    );
+    if(id == "Mein Standort") {
+      marker = Marker(
+          markerId: markerId,
+          position: latlng,
+          infoWindow: InfoWindow(title: id, snippet: '')
+      );
+    } else {
+      var open = place.openingHours.openNow? 'Jetzt geöffnet' : 'Momentan geschlossen';
+      marker = Marker(
+          markerId: markerId,
+          position: latlng,
+          infoWindow: InfoWindow(title: place.name, snippet: open),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          onTap: () {
+            _onMarkerTapped(markerId);
+          },
+      );
+    }
 
     setState(() {
       // adding a new marker to map
@@ -105,5 +141,9 @@ class _MapsState extends State<Maps> {
         markers[markerId] = marker;
       }
     });
+  }
+
+  void _onMarkerTapped(id) {
+    // todo: open place info
   }
 }
