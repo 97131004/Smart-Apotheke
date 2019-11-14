@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as LocationManager;
+import 'package:url_launcher/url_launcher.dart';
 
 class Maps extends StatefulWidget {
   Maps({Key key}) : super(key: key);
@@ -30,6 +31,7 @@ class _MapsState extends State<Maps> {
   String name = "";
   String desc = "";
   String oh = "";
+  String photo;
 
   @override
   void initState() {
@@ -88,14 +90,13 @@ class _MapsState extends State<Maps> {
             margin: EdgeInsets.symmetric(vertical: 20.0),
             height: 150.0,
             width:  300.0,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
+            child: Column(
+              //scrollDirection: Axis.horizontal,
               children: <Widget>[
                 SizedBox(width: 10.0),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: _boxes(
-                    "https://www.abda.de/fileadmin/_processed_/d/3/csm_Apo_Logo_Neu_HKS13_neues_BE_42f1ed22ad.jpg"),
+                  child: _boxes(photo),
                 ),
               ],
           ),
@@ -111,7 +112,7 @@ class _MapsState extends State<Maps> {
       },
       child:Container(
         child: new FittedBox(
-          fit: BoxFit.fitWidth,
+          fit: BoxFit.fill,
           child: Material(
               color: Colors.white,
               elevation: 14.0,
@@ -121,19 +122,19 @@ class _MapsState extends State<Maps> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Container(
-                    width: 150,
-                    height: 150,
+                    width: 80,
+                    height: 80,
                     child: ClipRRect(
                       borderRadius: new BorderRadius.circular(30.0),
                       child: Image(
                         fit: BoxFit.fill,
-                        image: NetworkImage(_image),
+                        image: _apoImage(),//NetworkImage(buildPhotoURL(photo)),
                       ),
                     ),),
                   Container(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: myDetailsContainer1(name, desc, oh),
+                      child: detailsContainer(name, desc, oh),
                     ),
                   ),
 
@@ -144,7 +145,21 @@ class _MapsState extends State<Maps> {
     );
   }
 
-  Widget myDetailsContainer1(String nameA, String descA, String openingHours) {
+  NetworkImage _apoImage() {
+    NetworkImage image = new NetworkImage("https://www.abda.de/fileadmin/_processed_/d/3/csm_Apo_Logo_Neu_HKS13_neues_BE_42f1ed22ad.jpg");
+    /*try {
+      image = new NetworkImage(buildPhotoURL(photo));
+    } catch(Exception) {
+      image = new NetworkImage("https://www.abda.de/fileadmin/_processed_/d/3/csm_Apo_Logo_Neu_HKS13_neues_BE_42f1ed22ad.jpg");
+    }*/
+    return image;
+  }
+
+  String buildPhotoURL(String photoReference) {
+    return "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=${kGoogleApiKey}";
+  }
+
+  Widget detailsContainer(String nameA, String descA, String openingHours) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
@@ -154,7 +169,7 @@ class _MapsState extends State<Maps> {
               child: Text(nameA,
                 style: TextStyle(
                     color: Color(0xff6200ee),
-                    fontSize: 24.0,
+                    fontSize: 20.0,
                     fontWeight: FontWeight.bold),
               )),
         ),
@@ -164,7 +179,7 @@ class _MapsState extends State<Maps> {
               descA,
               style: TextStyle(
                 color: Colors.black54,
-                fontSize: 18.0,
+                fontSize: 12.0,
               ),
             )),
         SizedBox(height:5.0),
@@ -173,7 +188,7 @@ class _MapsState extends State<Maps> {
               openingHours,
               style: TextStyle(
                   color: Colors.black54,
-                  fontSize: 18.0,
+                  fontSize: 12.0,
                   fontWeight: FontWeight.bold),
             )),
         SizedBox(height:5.0),
@@ -181,9 +196,7 @@ class _MapsState extends State<Maps> {
             child: IconButton(
               icon: Icon(Icons.call),
               tooltip: "Apotheke anrufen",
-              onPressed: () {
-                // todo
-              },
+              onPressed: () => launch("tel://017655595223"),
             )),
       ],
     );
@@ -241,11 +254,11 @@ class _MapsState extends State<Maps> {
       );
     } else {
       if(place.openingHours != null) {
-        var open = place.openingHours.openNow? 'Jetzt geöffnet' : 'Momentan geschlossen';
+        oh = place.openingHours.openNow? 'Jetzt geöffnet' : 'Momentan geschlossen';
         marker = Marker(
           markerId: markerId,
           position: latlng,
-          infoWindow: InfoWindow(title: place.name, snippet: open),
+          infoWindow: InfoWindow(title: place.name, snippet: oh),
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
           onTap: () {
             _onMarkerTapped(id);
@@ -268,9 +281,14 @@ class _MapsState extends State<Maps> {
     print(markerIsTabbed);
     setState(() {
       markerIsTabbed = true;
+      if(foundPlaces[id].photos.length != 0) {
+        try{
+          photo = foundPlaces[id].photos.first.photoReference;
+          print(photo);
+        } catch (Exception) { }
+      }
       name = foundPlaces[id].name;
       desc = foundPlaces[id].formattedAddress;
-      oh = foundPlaces[id].openingHours.toString();
     });
   }
 }
