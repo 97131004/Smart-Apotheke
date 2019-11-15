@@ -1,5 +1,7 @@
 import 'package:http/http.dart' as http;
+import 'package:flutter_pagewise/flutter_pagewise.dart';
 
+import '../data/globals.dart' as globals;
 import '../data/med.dart';
 import 'helper.dart';
 
@@ -93,5 +95,22 @@ class MedGet {
     }
 
     return list;
+  }
+
+  static void getMedSearchPrefix(
+      PagewiseLoadController ctrler, int pageIndex, String searchValue) {
+    if (pageIndex == 0 && searchValue.length > 0) {
+      //print(searchValue);
+
+      //adding local search results on top
+      List<Med> localMedsFound = globals.meds
+          .where((item) =>
+              item.name.toLowerCase().contains(searchValue.toLowerCase()))
+          .toList();
+
+      for (var i = 0; i < localMedsFound.length; i++) {
+        ctrler.loadedItems.insert(i, localMedsFound[i]);
+      }
+    }
   }
 }

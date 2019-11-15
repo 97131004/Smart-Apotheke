@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../util/med_list.dart';
 import '../util/nampr.dart';
-import '../data/med.dart';
 import '../data/globals.dart' as globals;
 import 'scanner.dart';
 import 'med_search.dart';
@@ -18,18 +17,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<Med> dummy = [
-    Med('Ibu ratio 400 akut Schmerztablletten Filmtabletten', '10019621',
-        'http://www.beipackzettel.de/medikament/Ibu%2520ratio%2520400%2520akut%2520Schmerztablletten%2520Filmtabletten/A77827'),
-    Med('Simvastatin - CT 40mg', '4144658',
-        'http://www.beipackzettel.de/medikament/Simvastatin%2520-%2520CT%252040mg%2520Filmtabletten/A88644'),
-  ];
-
   @override
   void initState() {
     super.initState();
-
-    globals.meds = dummy;
   }
 
   @override

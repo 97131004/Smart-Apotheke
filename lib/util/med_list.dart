@@ -36,9 +36,21 @@ class MedList {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              (item.name != '') ? item.name : '<PZN unbekannt>',
-              style: Theme.of(context).textTheme.title,
+            Stack(
+              children: <Widget>[
+                if (item.isHistory)
+                Icon(
+                  Icons.history,
+                  size: 25,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: (item.isHistory) ? 30 : 0),
+                  child: Text(
+                    (item.name != '') ? item.name : '<PZN unbekannt>',
+                    style: Theme.of(context).textTheme.title,
+                  ),
+                )
+              ],
             ),
             Text(
               'PZN: ' + item.pzn,

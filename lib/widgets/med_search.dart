@@ -15,7 +15,7 @@ class MedSearch extends StatefulWidget {
 
 class _MedSearchState extends State<MedSearch> {
   bool getSearchDone = false;
-  static int pageCount = 10;
+  static int pageCount = 5;
   static String searchValue = '';
   String lastSearchValue = '';
 
@@ -24,8 +24,9 @@ class _MedSearchState extends State<MedSearch> {
     super.initState();
   }
 
-  PagewiseLoadController plvController = PagewiseLoadController(
+  static PagewiseLoadController plvController = PagewiseLoadController(
     pageFuture: (pageIndex) {
+      MedGet.getMedSearchPrefix(plvController, pageIndex, searchValue);
       return MedGet.getMedSearch(searchValue, pageIndex, pageCount);
     },
     pageSize: pageCount,
@@ -51,38 +52,41 @@ class _MedSearchState extends State<MedSearch> {
                       ),
                     ))),
             SizedBox(height: 10),
-            if (getSearchDone)
-              Expanded(
-                child: PagewiseListView(
-                  pageLoadController: plvController,
-                  showRetry: true,
-                  itemBuilder: (context, entry, index) {
-                    return MedList.buildItem(context, entry, index);
-                  },
-                  noItemsFoundBuilder: (context) {
-                    return Text('No Items Found');
-                  },
-                  /*
+            //if (getSearchDone)
+            Expanded(
+              child: PagewiseListView(
+                pageLoadController: plvController,
+                showRetry: true,
+                itemBuilder: (context, entry, index) {
+                  return MedList.buildItem(context, entry, index);
+                },
+                noItemsFoundBuilder: (context) {
+                  return (searchValue.length > 0)
+                      ? Text('No Items Found')
+                      : null;
+                },
+                loadingBuilder: (context) {
+                  return (searchValue.length > 0)
+                      ? CircularProgressIndicator()
+                      : null;
+                },
+                /*
                 retryBuilder: (context, callback) {
                   return RaisedButton(
                       child: Text('Retry'), onPressed: () => callback());
-                },
-                loadingBuilder: (context) {
-                  return Text('Loading...');
                 },
                 errorBuilder: (context, error) {
                   return Text('Error: $error');
                 },
                 */
-                ),
-              )
+              ),
+            ),
           ],
         ));
   }
 
   void search(String value) {
-    getSearchDone = true;
-    if (value != lastSearchValue) {
+    if (value != lastSearchValue && value.length > 0) {
       searchValue = value;
       lastSearchValue = value;
       plvController.reset();
