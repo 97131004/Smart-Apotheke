@@ -21,12 +21,9 @@ dependencies:
     sdk: flutter
   http: ^0.12.0+2
   flutter_html: ^0.11.0
-<<<<<<< HEAD
   mlkit: ^0.15.0
   image_picker: ^0.6.1+10
-=======
   flutter_pagewise: ^1.2.3
->>>>>>> 9115ce0e58da580d37c3dac8cfffd718d77ccc32
   
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
