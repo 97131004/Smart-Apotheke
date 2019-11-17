@@ -1,6 +1,5 @@
 import 'package:http/http.dart' as http;
 import 'package:flutter_pagewise/flutter_pagewise.dart';
-
 import '../data/globals.dart' as globals;
 import '../data/med.dart';
 import 'helper.dart';
