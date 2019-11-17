@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/app.dart';
+import 'widgets/home.dart';
+import 'widgets/med_search.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -13,6 +14,7 @@ void main() {
       scaffoldBackgroundColor: Colors.white,
       primaryTextTheme: TextTheme(title: TextStyle(color: Colors.white)),
     ),
-    home: App(),
+    home: Home(),
+    //home: MedSearch(),
   ));
 }

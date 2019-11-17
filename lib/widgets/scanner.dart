@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mlkit/mlkit.dart';
 
 
-import 'med_list_scan.dart';
+import 'med_scan.dart';
 import '../util/nampr.dart';
 import '../data/med.dart';
 
@@ -120,8 +120,12 @@ File _file;
     Navigator.push(
       context,
       NoAnimationMaterialPageRoute(
+<<<<<<< HEAD
          builder: (context) => textfound(labels: _currentLabels,),
       )
+=======
+          builder: (context) => MedScan(meds: medicaments)),
+>>>>>>> 9115ce0e58da580d37c3dac8cfffd718d77ccc32
     );
   }
  
