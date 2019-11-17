@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:maph_group3/data/globals.dart' as prefix0;
 import 'package:mlkit/mlkit.dart';
 
 import 'med_scan.dart';
@@ -18,13 +19,7 @@ class Scanner extends StatefulWidget {
 }
 
 class _ScannerState extends State<Scanner> {
-  List<Med> medicaments = [
-    Med('optionaler_name_oder_leerer_string', '10019621'),
-    Med('optionaler_name_oder_leerer_string', '01502726'),
-    Med('', 'test'),
-    Med('', '00000000'),
-    Med('optionaler_name_oder_leerer_string', '01343682')
-  ];
+  List<Med> medicaments;
 
   @override
   void initState() {
@@ -32,7 +27,6 @@ class _ScannerState extends State<Scanner> {
   }
 
   File _file;
-  List<VisionText> _currentLabels = [];
   FirebaseVisionTextDetector detector = FirebaseVisionTextDetector.instance;
 
   @override
@@ -85,8 +79,9 @@ class _ScannerState extends State<Scanner> {
       });
       try {
         var currentLabels = await detector.detectFromPath(_file?.path);
+        
         setState(() {
-          _currentLabels = currentLabels;
+          medicaments = pznSearch(currentLabels);
         });
         gotoMedListFound();
       } catch (e) {
@@ -106,7 +101,7 @@ class _ScannerState extends State<Scanner> {
       try {
         var currentLabels = await detector.detectFromPath(_file?.path);
         setState(() {
-          _currentLabels = currentLabels;
+           medicaments = pznSearch(currentLabels);
         });
         gotoMedListFound();
       } catch (e) {
@@ -116,71 +111,8 @@ class _ScannerState extends State<Scanner> {
       print(e.toString());
     }
   }
-
-  void gotoMedListFound() {
-    Navigator.push(
-        context,
-        NoAnimationMaterialPageRoute(
-          builder: (context) => textfound(
-            labels: _currentLabels,
-          ),
-           
-        ));
-  }
-}
-
-//show the found texts (just to test)
-class textfound extends StatelessWidget {
-  List<VisionText> labels;
-  textfound({Key key, @required this.labels}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("PZN List"),
-      ),
-      body: _buildBody(),
-    );
-  }
-
-  Widget _buildBody() {
-    return Container(
-      child: Column(
-        children: <Widget>[
-          //_buildImage(),
-          _buildList(labels)
-        ],
-      ),
-    );
-  }
-
-  Widget _buildList(List<VisionText> texts) {
-    List<String> pznList = pznSearch(texts);
-    if (texts.length == 0) {
-      return Text('empty');
-    }
-    return Expanded(
-      child: Container(
-        child: ListView.builder(
-          padding: const EdgeInsets.all(1.0),
-          itemCount: pznList.length,
-          itemBuilder: (context, i) {
-            return _buildRow(pznList[i]);
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRow(String text) {
-    return ListTile(
-      title: Text(text),
-      dense: true,
-    );
-  }
-
-  List<String> pznSearch(List<VisionText> texts) {
-    List<String> pznNrs = [];
+ List<Med> pznSearch(List<VisionText> texts) {
+    List<Med> pznNrs = [];
     for (var item in texts) {
       String text = item.text ;
       text = text.toUpperCase().replaceAll(' ', '');
@@ -191,7 +123,7 @@ class textfound extends StatelessWidget {
         if (!isNumeric(pznNr)) {
           pznNr = pznNr.replaceAll(new RegExp('[a-zA-Z]'), '');
         }
-        pznNrs.add(pznNr);
+        pznNrs.add(Med('Name', pznNr));
         text = text.substring(pos + pznNr.length + 3, text.length);
       }
     }
@@ -204,4 +136,15 @@ class textfound extends StatelessWidget {
     }
     return double.tryParse(s) != null;
   }
+  void gotoMedListFound() {
+    Navigator.push(
+        context,
+        NoAnimationMaterialPageRoute(
+          builder: (context) => MedScan(
+            meds: medicaments ,
+          ),
+           
+        ));
+  }
 }
+
