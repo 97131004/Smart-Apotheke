@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.12.0+2
+  html: ^0.14.0+3
   flutter_html: ^0.11.0
   google_maps_flutter: ^0.5.21+8
   flutter_google_places: ^0.2.3
