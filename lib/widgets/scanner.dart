@@ -79,9 +79,9 @@ class _ScannerState extends State<Scanner> {
       });
       try {
         var currentLabels = await detector.detectFromPath(_file?.path);
-        
+        var results = await pznSearch(currentLabels);
         setState(() {
-          medicaments = pznSearch(currentLabels);
+         medicaments = results;
         });
         gotoMedListFound();
       } catch (e) {
@@ -100,8 +100,9 @@ class _ScannerState extends State<Scanner> {
       });
       try {
         var currentLabels = await detector.detectFromPath(_file?.path);
+        var results = await pznSearch(currentLabels);
         setState(() {
-           medicaments = pznSearch(currentLabels);
+           medicaments = results;
         });
         gotoMedListFound();
       } catch (e) {
@@ -111,7 +112,7 @@ class _ScannerState extends State<Scanner> {
       print(e.toString());
     }
   }
- List<Med> pznSearch(List<VisionText> texts) {
+ Future<List<Med>> pznSearch(List<VisionText> texts) async {
     List<Med> pznNrs = [];
     for (var item in texts) {
       String text = item.text ;
@@ -123,7 +124,7 @@ class _ScannerState extends State<Scanner> {
         if (!isNumeric(pznNr)) {
           pznNr = pznNr.replaceAll(new RegExp('[a-zA-Z]'), '');
         }
-        pznNrs.add(Med('Name', pznNr));
+        pznNrs.add(Med('', pznNr));
         text = text.substring(pos + pznNr.length + 3, text.length);
       }
     }
