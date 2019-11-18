@@ -19,7 +19,7 @@ class MedInfo extends StatefulWidget {
 }
 
 class _MedInfoState extends State<MedInfo> {
-  bool getMedInfoDone = false;
+  bool getMedInfoDataDone = false;
   String medInfoData = '';
   List<GlobalKey> scrollKeys;
   ScrollController scrollController;
@@ -30,17 +30,17 @@ class _MedInfoState extends State<MedInfo> {
     scrollController = ScrollController();
 
     if (widget.med.url.length > 0) {
-      getMedInfo();
+      getMedInfoData();
     } else {
       medInfoData = '';
       setState(() {
-        getMedInfoDone = true;
+        getMedInfoDataDone = true;
       });
     }
   }
 
-  Future getMedInfo() async {
-    String resp = await MedGet.getMedInfo(widget.med);
+  Future getMedInfoData() async {
+    String resp = await MedGet.getMedInfoData(widget.med);
 
     if (resp != null && resp.length > 0) {
       medInfoData = resp;
@@ -56,7 +56,7 @@ class _MedInfoState extends State<MedInfo> {
     }
 
     setState(() {
-      getMedInfoDone = true;
+      getMedInfoDataDone = true;
     });
   }
 
@@ -66,11 +66,11 @@ class _MedInfoState extends State<MedInfo> {
         appBar: AppBar(
           title: Text(widget.med.name),
         ),
-        body: getMedInfoDone
+        body: getMedInfoDataDone
             ? ((medInfoData.length > 0) ? buildHtml() : buildNotFound())
             : LoadBar.build(),
         floatingActionButton: Visibility(
-          visible: getMedInfoDone && (medInfoData.length > 0),
+          visible: getMedInfoDataDone && (medInfoData.length > 0),
           child: Container(
             height: 50.0,
             width: 50.0,
