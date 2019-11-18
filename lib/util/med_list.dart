@@ -21,10 +21,10 @@ class MedList {
 
   static Widget _buildItem(BuildContext context, int index) {
     final Med item = medicaments[index];
-    return buildItem(context, item, index);
+    return buildItem(context, item);
   }
 
-  static Widget buildItem(BuildContext context, Med item, int index) {
+  static Widget buildItem(BuildContext context, Med item) {
     return Theme(
       data: ThemeData(
         dividerColor: Colors.transparent,
