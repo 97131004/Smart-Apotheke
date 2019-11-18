@@ -57,23 +57,7 @@ class _MedScanState extends State<MedScan> {
         appBar: AppBar(
           title: Text('Gefundene Medikamente'),
         ),
-        body: Container(
-            alignment: Alignment.center,
-            //Text('Hier die Rezept-/Texterkennung durch Kamera'),
-            child: new Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  getMedsDone
-                      ? MedList.build(context, widget.meds)
-                      : LoadBar.build(),
-                  RaisedButton.icon(
-                    icon: Icon(Icons.update),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    }, label: Text("Try again"),
-                  )
-                ])),
-        //body: getMedsDone ? buildList() : LoadBar.build(),
+        body: getMedsDone ? buildList() : LoadBar.build(),
       ),
     );
   }
