@@ -14,20 +14,27 @@ class MedSearch extends StatefulWidget {
 }
 
 class _MedSearchState extends State<MedSearch> {
-  bool getSearchDone = false;
-  static int pageCount = 5;
+  static bool getSearchDone = false;
+  static int pageCount = 8;
   static String searchValue = '';
   String lastSearchValue = '';
 
   @override
   void initState() {
     super.initState();
+
+    getSearchDone = false;
+    searchValue = '';
   }
 
-  static PagewiseLoadController plvController = PagewiseLoadController(
+  static PagewiseLoadController plc = PagewiseLoadController(
     pageFuture: (pageIndex) {
-      MedGet.getMedSearchPrefix(plvController, pageIndex, searchValue);
-      return MedGet.getMedSearch(searchValue, pageIndex, pageCount);
+      if (searchValue.length > 0) {
+        getSearchDone = true;
+        MedGet.getMedsPrefix(plc, pageIndex, searchValue);
+        return MedGet.getMeds(searchValue, pageIndex, pageCount);
+      }
+      return null;
     },
     pageSize: pageCount,
   );
@@ -44,9 +51,10 @@ class _MedSearchState extends State<MedSearch> {
             Padding(
                 padding: EdgeInsets.all(5),
                 child: TextField(
+                    autofocus: true,
                     onSubmitted: search,
                     decoration: new InputDecoration(
-                      hintText: 'Medikament / PZN',
+                      hintText: 'Name / PZN',
                       prefixIcon: const Icon(
                         Icons.search,
                       ),
@@ -55,10 +63,13 @@ class _MedSearchState extends State<MedSearch> {
             //if (getSearchDone)
             Expanded(
               child: PagewiseListView(
-                pageLoadController: plvController,
+                pageLoadController: plc,
                 showRetry: true,
                 itemBuilder: (context, entry, index) {
-                  return MedList.buildItem(context, entry, index);
+                  if (getSearchDone) {
+                    return MedList.buildItem(context, entry);
+                  }
+                  return null;
                 },
                 noItemsFoundBuilder: (context) {
                   return (searchValue.length > 0)
@@ -89,7 +100,7 @@ class _MedSearchState extends State<MedSearch> {
     if (value != lastSearchValue && value.length > 0) {
       searchValue = value;
       lastSearchValue = value;
-      plvController.reset();
+      plc.reset();
     }
   }
 }
