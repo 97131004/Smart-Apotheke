@@ -81,7 +81,7 @@ class _ScannerState extends State<Scanner> {
         var currentLabels = await detector.detectFromPath(_file?.path);
         var results = await pznSearch(currentLabels);
         setState(() {
-         medicaments = results;
+          medicaments = results;
         });
         gotoMedListFound();
       } catch (e) {
@@ -102,7 +102,7 @@ class _ScannerState extends State<Scanner> {
         var currentLabels = await detector.detectFromPath(_file?.path);
         var results = await pznSearch(currentLabels);
         setState(() {
-           medicaments = results;
+          medicaments = results;
         });
         gotoMedListFound();
       } catch (e) {
@@ -112,20 +112,27 @@ class _ScannerState extends State<Scanner> {
       print(e.toString());
     }
   }
- Future<List<Med>> pznSearch(List<VisionText> texts) async {
+
+  Future<List<Med>> pznSearch(List<VisionText> texts) async {
     List<Med> pznNrs = [];
     for (var item in texts) {
-      String text = item.text ;
-      text = text.toUpperCase().replaceAll(' ', '');
+      String text = item.text;
+      text = text.toUpperCase();
       while (text.contains("PZN")) {
         text = text.replaceAll(':', '');
         int pos = text.indexOf("PZN");
-        String pznNr = text.substring(pos + 3, pos + 11);
-        if (!isNumeric(pznNr)) {
-          pznNr = pznNr.replaceAll(new RegExp('[a-zA-Z]'), '');
+        String pznNr = '';
+        int i;
+        for (i = pos + 3; i <= text.length; i++) {
+          String acuChar = text[i];
+          if ((!isNumeric(acuChar) && !(acuChar == ' '))||(acuChar == '\n') ) {
+            break;
+          }
+          else if(isNumeric(acuChar))pznNr += acuChar;
+          if(pznNr.length == 8) break;
         }
         pznNrs.add(Med('', pznNr));
-        text = text.substring(pos + pznNr.length + 3, text.length);
+        text = text.substring(i+1, text.length);
       }
     }
     return pznNrs;
@@ -137,15 +144,14 @@ class _ScannerState extends State<Scanner> {
     }
     return double.tryParse(s) != null;
   }
+
   void gotoMedListFound() {
     Navigator.push(
         context,
         NoAnimationMaterialPageRoute(
           builder: (context) => MedScan(
-            meds: medicaments ,
+            meds: medicaments,
           ),
-           
         ));
   }
 }
-
