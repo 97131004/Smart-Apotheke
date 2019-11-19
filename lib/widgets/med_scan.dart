@@ -108,25 +108,52 @@ class _MedScanState extends State<MedScan> {
                   color: Colors.lightBlue[100],
                 ),
                 */
+                SizedBox(height: 10),
                 ButtonTheme(
-                  buttonColor: Colors.grey[200],
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
-                    icon: Icon(Icons.edit),
+                    shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(30.0),
+                    ),
                     onPressed: () => gotoSearch(),
-                    label: Text("Name / PZN manuell eingeben"),
+                    color: Colors.grey[200],
+                    icon: Icon(Icons.edit),
+                    label: Text(
+                      "Name / PZN manuell eingeben",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'Raleway',
+                        fontSize: 22.0,
+                      ),
+                    ),
                   ),
                 ),
+                SizedBox(height: 10),
                 ButtonTheme(
-                  buttonColor: Colors.lightBlue[200],
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
-                    icon: Icon(Icons.update),
+                    shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(30.0),
+                    ),
                     onPressed: () => gotoScanner(),
-                    label: Text("Nochmals versuchen"),
+                    color: Colors.lightBlue[200],
+                    icon: Icon(Icons.update),
+                    label: Text(
+                      "Nochmals versuchen",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'Raleway',
+                        fontSize: 22.0,
+                      ),
+                    ),
                   ),
+                  // child: RaisedButton.icon(
+                  //   icon: Icon(Icons.update),
+                  //   onPressed: () => gotoScanner(),
+                  //   label: Text("Nochmals versuchen"),
+                  // ),
                 ),
               ],
             );
