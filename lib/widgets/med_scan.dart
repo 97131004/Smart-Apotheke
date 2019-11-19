@@ -109,7 +109,7 @@ class _MedScanState extends State<MedScan> {
                 ),
                 */
                 ButtonTheme(
-                  buttonColor: Colors.grey[200],
+                  buttonColor: Colors.grey[300],
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
@@ -119,13 +119,13 @@ class _MedScanState extends State<MedScan> {
                   ),
                 ),
                 ButtonTheme(
-                  buttonColor: Colors.lightBlue[200],
+                  buttonColor: Colors.grey[100],
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
                     icon: Icon(Icons.update),
                     onPressed: () => gotoScanner(),
-                    label: Text("Nochmals versuchen"),
+                    label: Text("Nochmals scannen"),
                   ),
                 ),
               ],

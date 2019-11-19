@@ -90,95 +90,97 @@ class _MedInfoState extends State<MedInfo> {
 
   Widget buildHtml() {
     return Scrollbar(
-        child: ListView(
-      controller: scrollController,
-      children: <Widget>[
-        Html(
-          data: medInfoData,
-          padding: EdgeInsets.all(8.0),
-          onLinkTap: (url) {
-            //print("Opening URL: $url");
-            if (url.startsWith('#chapter_')) {
-              String ind = url.replaceAll('#chapter_', '');
-              int iScrollKey = int.tryParse(ind);
-              iScrollKey = iScrollKey - 1;
-              if (iScrollKey >= 0 && iScrollKey < scrollKeys.length) {
-                Scrollable.ensureVisible(scrollKeys[iScrollKey].currentContext);
-              }
-            }
-          },
-          useRichText: false,
-          customRender: (node, children) {
-            if (node is dom.Element) {
-              if (node.id.startsWith('chapter_') && node.id != 'chapter_-1') {
-                //chapter
-                String id = node.id;
-                String ind = id.replaceAll('chapter_', '');
+      child: ListView(
+        controller: scrollController,
+        children: <Widget>[
+          Html(
+            data: medInfoData,
+            padding: EdgeInsets.all(8.0),
+            onLinkTap: (url) {
+              if (url.startsWith('#chapter_')) {
+                String ind = url.replaceAll('#chapter_', '');
                 int iScrollKey = int.tryParse(ind);
                 iScrollKey = iScrollKey - 1;
-                if (!(iScrollKey >= 0 && iScrollKey < scrollKeys.length)) {
-                  iScrollKey = null;
+                if (iScrollKey >= 0 && iScrollKey < scrollKeys.length) {
+                  Scrollable.ensureVisible(
+                      scrollKeys[iScrollKey].currentContext);
                 }
-                return Column(
-                    key: (scrollKeys != null && iScrollKey != null)
-                        ? scrollKeys[iScrollKey]
-                        : null,
-                    children: <Widget>[
-                      DefaultTextStyle(
-                        child: Column(children: children),
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      )
-                    ]);
-              } else if (node.id == 'chapter_-1') {
-                //title
-                String html = node.innerHtml;
-                if (html.length > 0 && html[0] == ' ') {
-                  node.innerHtml = html.replaceFirst(new RegExp(r"^\s+"), '') +
-                      ' (PZN: ' +
-                      widget.med.pzn +
-                      ')';
-                }
-                return DefaultTextStyle(
-                  child: Column(children: children),
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
-                  ),
-                );
-              } else if (node.className == 'accordion') {
-                //links group
-                return Container(
-                  padding: EdgeInsets.fromLTRB(0, 5, 0, 25),
-                  child: DefaultTextStyle(
+              }
+            },
+            useRichText: false,
+            customRender: (node, children) {
+              if (node is dom.Element) {
+                if (node.id.startsWith('chapter_') && node.id != 'chapter_-1') {
+                  //chapter
+                  String id = node.id;
+                  String ind = id.replaceAll('chapter_', '');
+                  int iScrollKey = int.tryParse(ind);
+                  iScrollKey = iScrollKey - 1;
+                  if (!(iScrollKey >= 0 && iScrollKey < scrollKeys.length)) {
+                    iScrollKey = null;
+                  }
+                  return Column(
+                      key: (scrollKeys != null && iScrollKey != null)
+                          ? scrollKeys[iScrollKey]
+                          : null,
+                      children: <Widget>[
+                        DefaultTextStyle(
+                          child: Column(children: children),
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        )
+                      ]);
+                } else if (node.id == 'chapter_-1') {
+                  //title
+                  String html = node.innerHtml;
+                  if (html.length > 0 && html[0] == ' ') {
+                    node.innerHtml =
+                        html.replaceFirst(new RegExp(r"^\s+"), '') +
+                            ' (PZN: ' +
+                            widget.med.pzn +
+                            ')';
+                  }
+                  return DefaultTextStyle(
                     child: Column(children: children),
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 24,
                     ),
-                  ),
-                );
-              } else if (node.localName == 'li') {
-                //each link from links group
-                return Container(
-                  alignment: Alignment.centerLeft,
-                  padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-                  child: Column(children: children),
-                );
-              } else if (node.className == 'catalogue no-bullet') {
-                //links group subtopics (removing)
-                node.remove();
+                  );
+                } else if (node.className == 'accordion') {
+                  //links group
+                  return Container(
+                    padding: EdgeInsets.fromLTRB(0, 5, 0, 25),
+                    child: DefaultTextStyle(
+                      child: Column(children: children),
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  );
+                } else if (node.localName == 'li') {
+                  //each link from links group
+                  return Container(
+                    alignment: Alignment.centerLeft,
+                    padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                    child: Column(children: children),
+                  );
+                } else if (node.className == 'catalogue no-bullet') {
+                  //links group subtopics (removing)
+                  node.remove();
+                }
               }
-            }
-            return null;
-          },
-        ),
-      ],
-    ));
+              return null;
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

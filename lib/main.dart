@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:maph_group3/widgets/med_scan.dart';
+import 'package:maph_group3/widgets/personal.dart';
 
 import 'data/med.dart';
 import 'widgets/home.dart';
@@ -29,5 +30,6 @@ void main() {
     home: Home(),
     //home: MedSearch(),
     //home: MedScan(meds: medicaments),
+    //home: Personal(),
   ));
 }
