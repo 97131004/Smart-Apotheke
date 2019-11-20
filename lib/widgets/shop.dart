@@ -47,8 +47,53 @@ class _ShopState extends State<Shop> {
       children: <Widget>[
           Html(
             data: shoppingInfo,
-            padding: EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(10.0),
+            useRichText: false,
             onLinkTap: (url) { launch("https://www.medpex.de" + url);},
+            customRender: (node, children) {
+              if (node is dom.Element) {
+                if (node.className == "product-list-entry") {
+                  return Column(
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: orderMed,
+                          child: Container(
+                            padding: EdgeInsets.all(5.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1),
+                            ),
+                            child: DefaultTextStyle(
+                              child: Column(children: children),
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                        ),
+                      ]
+                  );
+                }
+                if (node.className == "image") {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Column(children: children),
+                  );
+                }
+                if (node.className == "prices") {
+                  return Align(
+                    alignment: Alignment.topRight,
+                    child: Column(children: children),
+                  );
+                }
+                return null;
+              }
+              return null;
+            },
           ),
         ],
     );
@@ -62,10 +107,12 @@ class _ShopState extends State<Shop> {
     if(html != null) {
       shoppingInfo = Helper.parseMid(html, '<div id="product-list">', '<div class="pagenav">');
       shoppingInfo = '<div id="product-list">' + shoppingInfo;
-      // replace unsupported tags
+      // replace unsupported and unnecessary tags
       shoppingInfo = shoppingInfo.replaceAll(new RegExp("<input.*>"), "");
       shoppingInfo = shoppingInfo.replaceAll(new RegExp("<form.*>"), "");
       shoppingInfo = shoppingInfo.replaceAll(new RegExp("<option.*</option>"), "");
+      shoppingInfo = shoppingInfo.replaceAll(new RegExp("<div class=\"caption\".*</div>"), "");
+      shoppingInfo = shoppingInfo.replaceAll(new RegExp("<div class=\"rating\".*</div>"), "");
     } else {
       // display: couldnt load shopping data
     }
@@ -81,5 +128,31 @@ class _ShopState extends State<Shop> {
     if (response.statusCode == 200)
       return response.body;
     else return null;
+  }
+
+  void orderMed() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text("Bestellen"),
+          content: new Text("Medikament jetzt bestellen?"),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Abbrechen"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            new FlatButton(
+              child: new Text("Fortfahren"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
