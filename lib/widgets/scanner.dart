@@ -44,7 +44,7 @@ class _ScannerState extends State<Scanner> {
                 children: <Widget>[
                   RaisedButton.icon(
                     icon: Image.asset(
-                      'images/gallery.jpg',
+                      'assets/gallery.jpg',
                       width: 100,
                       height: 100,
                     ),
@@ -55,7 +55,7 @@ class _ScannerState extends State<Scanner> {
                   ),
                   RaisedButton.icon(
                     icon: Image.asset(
-                      'images/camera.png',
+                      'assets/camera.png',
                       width: 100,
                       height: 100,
                     ),

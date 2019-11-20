@@ -1,5 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-
+import 'package:flutter/scheduler.dart';
 import '../util/med_list.dart';
 import '../util/nampr.dart';
 import '../data/globals.dart' as globals;
@@ -7,6 +8,9 @@ import '../widgets/personal.dart';
 import 'scanner.dart';
 import 'med_search.dart';
 import 'calendar.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:steel_crypt/steel_crypt.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
@@ -21,10 +25,97 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    passwordenter();
+  }
+
+  TextEditingController pass = new TextEditingController();
+  TextEditingController ePass = new TextEditingController();
+  String hash;
+  Future<String> get localPath async {
+    final dir = await getApplicationDocumentsDirectory();
+    return dir.path;
+  }
+
+  Future<File> get localFile async {
+    final path = await localPath;
+    return new File('$path/db.txt');
+  }
+
+  Future<String> readData() async {
+    try {
+      final file = await localFile;
+      String body = await file.readAsString();
+      return body;
+    } catch (e) {
+      await writeData('');
+      return 'The file <db.txt> dont exists. Creating a new one....';
+    }
+  }
+
+  Future<File> writeData(String data) async {
+    final file = await localFile;
+    return file.writeAsString('$data');
+  }
+
+  passwordenter() async {
+    Alert alert = await createAlert(context);
+    SchedulerBinding.instance
+        .addPostFrameCallback(alert == null ? null : (_) => alert.show());
+  }
+
+  Future<Alert> createAlert(BuildContext context) async {
+    String hash = await readData();
+    print(hash);
+    if (hash.isEmpty) {
+      var alert = Alert(
+          context: context,
+          title: "SET YOUR PASSWORD",
+          content: Column(
+            children: <Widget>[
+              TextField(
+                controller: pass,
+                obscureText: true,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.lock),
+                  labelText: 'Password',
+                ),
+              ),
+              TextField(
+                controller: ePass,
+                obscureText: true,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.lock),
+                  labelText: 'Re-entered Password',
+                ),
+              ),
+            ],
+          ),
+          buttons: [
+            DialogButton(
+              onPressed: () => _submitpasswort(),
+              child: Text(
+                "SUBMIT",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            )
+          ]);
+      return alert;
+    } else
+      return null;
+  }
+
+  Future _submitpasswort() async {
+    if (pass.text == ePass.text && pass.text.isNotEmpty) {
+      var hasher = HashCrypt("SHA-3/512");
+      String hash = hasher.hash(pass.text);
+      await writeData(hash);
+      Navigator.pop(context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    //passwordenter();
     return Scaffold(
       drawer: Drawer(
         child: ListView(
