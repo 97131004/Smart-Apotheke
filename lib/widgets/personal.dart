@@ -16,11 +16,7 @@ class Personal extends StatefulWidget {
   }
 }
 
-enum Page {
-  home,
-  iban,
-  pass,
-}
+enum Page { home, iban, pass, addr }
 
 class _PersonalState extends State<Personal> {
   Page curPage = Page.home;
@@ -42,90 +38,13 @@ class _PersonalState extends State<Personal> {
         body: ListView(
           children: <Widget>[
             if (curPage == Page.home)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      'IBAN:\nXXXX XXXX XXXX XXXX XXXX XX',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  ListTile(
-                    title: Text('IBAN ändern'),
-                    trailing: Icon(Icons.keyboard_arrow_right),
-                    onTap: () {
-                      setState(() {
-                        curPage = Page.iban;
-                      });
-                    },
-                  ),
-                  ListTile(
-                    title: Text('Passwort ändern'),
-                    trailing: Icon(Icons.keyboard_arrow_right),
-                    onTap: () {
-                      setState(() {
-                        curPage = Page.pass;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            if (curPage == Page.iban)
-              Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Text('IBAN:'),
-                    TextField(
-                      decoration: InputDecoration(
-                          hintText: 'XXXX XXXX XXXX XXXX XXXX XX'),
-                    ),
-                    SizedBox(height: 20),
-                    Text('Zur Bestätigung aktuelles Passwort eingeben:'),
-                    TextField(
-                      obscureText: true,
-                      decoration:
-                          InputDecoration(hintText: passHintText),
-                    ),
-                    SizedBox(height: 20),
-                    buildSaveButton(() => print('button1')),
-                  ],
-                ),
-              ),
-              if (curPage == Page.pass)
-              Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Text('Aktuelles Passwort:'),
-                    TextField(
-                      decoration: InputDecoration(
-                          hintText: passHintText),
-                    ),
-                    SizedBox(height: 20),
-                    Text('Neues Passwort:'),
-                    TextField(
-                      decoration: InputDecoration(
-                          hintText: passHintText),
-                    ),
-                    SizedBox(height: 20),
-                    Text('Neues Passwort wiederholen:'),
-                    TextField(
-                      decoration: InputDecoration(
-                          hintText: passHintText),
-                    ),
-                    SizedBox(height: 20),
-                    buildSaveButton(() => print('button2')),
-                  ],
-                ),
-              ),
+              buildHome()
+            else if (curPage == Page.iban)
+              buildIban()
+            else if (curPage == Page.pass)
+              buildPass()
+            else if (curPage == Page.addr)
+              buildAddr()
           ],
         ),
       ),
@@ -153,11 +72,142 @@ class _PersonalState extends State<Personal> {
         break;
       case Page.pass:
       case Page.iban:
+      case Page.addr:
         setState(() {
           curPage = Page.home;
         });
         break;
     }
     return false;
+  }
+
+  Widget buildHome() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        ListTile(
+          title: Text('IBAN ändern'),
+          trailing: Icon(Icons.keyboard_arrow_right),
+          onTap: () {
+            setState(() {
+              curPage = Page.iban;
+            });
+          },
+        ),
+        ListTile(
+          title: Text('Adresse ändern'),
+          trailing: Icon(Icons.keyboard_arrow_right),
+          onTap: () {
+            setState(() {
+              curPage = Page.addr;
+            });
+          },
+        ),
+        ListTile(
+          title: Text('Passwort ändern'),
+          trailing: Icon(Icons.keyboard_arrow_right),
+          onTap: () {
+            setState(() {
+              curPage = Page.pass;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget buildIban() {
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Text('Aktuelle IBAN endet auf 99'),
+          SizedBox(height: 20),
+          Text('Neue IBAN:'),
+          TextField(
+            decoration:
+                InputDecoration(hintText: 'XXXX XXXX XXXX XXXX XXXX XX'),
+          ),
+          SizedBox(height: 20),
+          Text('Zur Bestätigung aktuelles Passwort eingeben:'),
+          TextField(
+            obscureText: true,
+            decoration: InputDecoration(hintText: passHintText),
+          ),
+          SizedBox(height: 20),
+          buildSaveButton(() => print('button1')),
+        ],
+      ),
+    );
+  }
+
+  Widget buildAddr() {
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Text('Vorname:'),
+          TextField(
+            decoration: InputDecoration(hintText: 'Max'),
+          ),
+          SizedBox(height: 20),
+          Text('Name:'),
+          TextField(
+            decoration: InputDecoration(hintText: 'Mustermann'),
+          ),
+          SizedBox(height: 20),
+          Text('Postleitzahl:'),
+          TextField(
+            decoration: InputDecoration(hintText: '12345'),
+          ),
+          SizedBox(height: 20),
+          Text('Stadt:'),
+          TextField(
+            decoration: InputDecoration(hintText: 'Musterstadt'),
+          ),
+          SizedBox(height: 20),
+          Text('Zur Bestätigung aktuelles Passwort eingeben:'),
+          TextField(
+            obscureText: true,
+            decoration: InputDecoration(hintText: passHintText),
+          ),
+          SizedBox(height: 20),
+          buildSaveButton(() => print('button3')),
+        ],
+      ),
+    );
+  }
+
+  Widget buildPass() {
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Text('Aktuelles Passwort:'),
+          TextField(
+            decoration: InputDecoration(hintText: passHintText),
+          ),
+          SizedBox(height: 20),
+          Text('Neues Passwort:'),
+          TextField(
+            decoration: InputDecoration(hintText: passHintText),
+          ),
+          SizedBox(height: 20),
+          Text('Neues Passwort wiederholen:'),
+          TextField(
+            decoration: InputDecoration(hintText: passHintText),
+          ),
+          SizedBox(height: 20),
+          buildSaveButton(() => print('button2')),
+        ],
+      ),
+    );
   }
 }
