@@ -41,10 +41,10 @@ class _PersonalState extends State<Personal> {
               buildHome()
             else if (curPage == Page.iban)
               buildIban()
-            else if (curPage == Page.pass)
-              buildPass()
             else if (curPage == Page.addr)
               buildAddr()
+            else if (curPage == Page.pass)
+              buildPass()
           ],
         ),
       ),
