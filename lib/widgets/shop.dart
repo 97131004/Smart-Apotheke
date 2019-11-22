@@ -3,10 +3,12 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:http/http.dart' as http;
 import 'package:maph_group3/util/helper.dart';
 import 'package:maph_group3/util/load_bar.dart';
+import 'package:maph_group3/util/nampr.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:html/dom.dart' as dom;
 
 import '../data/med.dart';
+import 'maps.dart';
 
 class Shop extends StatefulWidget {
   final Med med;
@@ -36,9 +38,46 @@ class _ShopState extends State<Shop> {
       appBar: AppBar(
         title: Text('Bestellen'),
       ),
-      body: shoppingInfoLoaded
-          ? buildHtml()
-          : LoadBar.build(),
+      body: Column(
+        children: <Widget>[
+          buildLocalSearchButton(),
+          Expanded(
+            child: shoppingInfoLoaded
+                ? buildHtml()
+                : LoadBar.build(),
+          )
+        ],
+      )
+    );
+  }
+
+  Widget buildLocalSearchButton() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+        child: RaisedButton(
+          shape: RoundedRectangleBorder(
+              borderRadius: new BorderRadius.circular(18.0),
+              side: BorderSide(color: Colors.black)
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              NoAnimationMaterialPageRoute(builder: (context) => Maps()),
+            );},
+          child: Row(
+            children: <Widget>[
+              Icon(Icons.search),
+              Center(
+                child: Text('Nach Apotheken in der Nähe suchen',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20)
+                ),
+              )
+            ],
+          ),
+        ),
+      )
     );
   }
 
@@ -53,17 +92,21 @@ class _ShopState extends State<Shop> {
             customRender: (node, children) {
               if (node is dom.Element) {
                 if (node.className == "product-list-entry") {
-                  return Column(
+                  return
+                    Column(
                       children: <Widget>[
                         GestureDetector(
                           onTap: orderMed,
                           child: Container(
                             padding: EdgeInsets.all(5.0),
                             decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(8.0)),
                               border: Border.all(width: 1),
                             ),
                             child: DefaultTextStyle(
-                              child: Column(children: children),
+                              child: Column(
+                                children: children,
+                              ),
                               style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
@@ -78,18 +121,18 @@ class _ShopState extends State<Shop> {
                       ]
                   );
                 }
-                if (node.className == "image") {
+                /*if (node.className == "image") {
                   return Align(
                     alignment: Alignment.topLeft,
-                    child: Column(children: children),
+                    child: Row(children: children),
                   );
                 }
                 if (node.className == "prices") {
                   return Align(
                     alignment: Alignment.topRight,
-                    child: Column(children: children),
+                    child: Row(children: children),
                   );
-                }
+                }*/
                 return null;
               }
               return null;

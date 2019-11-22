@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:google_maps_webservice/places.dart';
@@ -45,23 +47,39 @@ class _MapsState extends State<Maps> {
         leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              // todo: go back to previous page
+              Navigator.pop(context);
             }),
         title: Text('Apotheken in Ihrer Nähe'),
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(Icons.arrow_forward),
-              onPressed: () {
-                // todo: go to next page
-              }),
-        ],
+        //actions: <Widget>[],
       ),
       body: Stack(
         children: <Widget>[
           _googleMapsContainer(context),
           _buildContainer(),
+          _buildSearchInThisArea(),
         ],
       ),
+    );
+  }
+
+  Widget _buildSearchInThisArea() {
+    return Align(
+      alignment: Alignment.topCenter,
+        child: Opacity(
+            opacity: 0.8,
+          child: RaisedButton(
+            onPressed: searchInSelectedArea,
+            child: Row(
+              children: <Widget>[
+                Icon(Icons.crop_free),
+                Padding(
+                  padding: EdgeInsets.all(5.0),
+                ),
+                Text("In diesem Bereich suchen")
+              ],
+            ),
+          ),
+        ),
     );
   }
 
@@ -91,7 +109,6 @@ class _MapsState extends State<Maps> {
             height: 150.0,
             width:  300.0,
             child: Column(
-              //scrollDirection: Axis.horizontal,
               children: <Widget>[
                 SizedBox(width: 10.0),
                 Padding(
@@ -122,41 +139,28 @@ class _MapsState extends State<Maps> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Container(
-                    width: 80,
-                    height: 80,
+                    width: 120,
+                    height: 100,
                     child: ClipRRect(
-                      borderRadius: new BorderRadius.circular(30.0),
+                      borderRadius: new BorderRadius.circular(8.0),
                       child: Image(
                         fit: BoxFit.fill,
-                        image: _apoImage(),//NetworkImage(buildPhotoURL(photo)),
+                        image: _apoImage(),
                       ),
-                    ),),
+                    ),
+                  ),
                   Container(
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.fromLTRB(0.0, 15.0, 15.0, 5.0),
                       child: detailsContainer(name, desc, oh),
                     ),
                   ),
-
-                ],)
+                ],
+              )
           ),
         ),
       ),
     );
-  }
-
-  NetworkImage _apoImage() {
-    NetworkImage image = new NetworkImage("https://www.abda.de/fileadmin/_processed_/d/3/csm_Apo_Logo_Neu_HKS13_neues_BE_42f1ed22ad.jpg");
-    /*try {
-      image = new NetworkImage(buildPhotoURL(photo));
-    } catch(Exception) {
-      image = new NetworkImage("https://www.abda.de/fileadmin/_processed_/d/3/csm_Apo_Logo_Neu_HKS13_neues_BE_42f1ed22ad.jpg");
-    }*/
-    return image;
-  }
-
-  String buildPhotoURL(String photoReference) {
-    return "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=${kGoogleApiKey}";
   }
 
   Widget detailsContainer(String nameA, String descA, String openingHours) {
@@ -168,7 +172,7 @@ class _MapsState extends State<Maps> {
           child: Container(
               child: Text(nameA,
                 style: TextStyle(
-                    color: Color(0xff6200ee),
+                    color: Colors.indigo,
                     fontSize: 20.0,
                     fontWeight: FontWeight.bold),
               )),
@@ -200,6 +204,49 @@ class _MapsState extends State<Maps> {
             )),
       ],
     );
+  }
+
+  NetworkImage _apoImage() {
+    NetworkImage image = new NetworkImage("https://www.abda.de/fileadmin/_processed_/d/3/csm_Apo_Logo_Neu_HKS13_neues_BE_42f1ed22ad.jpg");
+    /*var url = buildPhotoURL(photo);
+    NetworkImage image;
+
+    try{
+      image = new NetworkImage(url);
+    } catch(Exception) {
+      image = new NetworkImage('https://www.abda.de/fileadmin/_processed_/d/3/csm_Apo_Logo_Neu_HKS13_neues_BE_42f1ed22ad.jpg');
+    }*/
+    return image;
+  }
+
+  String buildPhotoURL(String photoReference) {
+    return 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=$photoReference&key=$kGoogleApiKey';
+  }
+
+  Future searchInSelectedArea() async {
+    markers.clear();
+    // get current position
+
+    LatLng centerOfMap = await getCenterOfMap();
+
+    addMarker("Mein Standort", centerOfMap);
+
+    // add markers
+    final loc = Location(centerOfMap.latitude, centerOfMap.longitude);
+    final result = await _places.searchByText("apotheke", location: loc, radius: 1000);
+
+    setState(() {
+      print(result.status);
+      if (result.status == "OK") {
+        result.results.forEach((f){
+          if(!foundPlaces.containsKey(f.id)) {
+            foundPlaces[f.id] = f;
+          }
+          print(f.name);
+          addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
+        });
+      }
+    });
   }
 
   Future _onMapCreated(GoogleMapController mapsController) async {
@@ -240,6 +287,19 @@ class _MapsState extends State<Maps> {
     } catch (e) {
       return _berlin.target;
     }
+  }
+
+  Future<LatLng> getCenterOfMap() async {
+    final devicePixelRatio = Platform.isAndroid
+        ? MediaQuery.of(context).devicePixelRatio
+        : 1.0;
+
+    var coords = await controller.getLatLng(ScreenCoordinate(
+      x: (context.size.width * devicePixelRatio) ~/ 2.0,
+      y: (context.size.height * devicePixelRatio) ~/ 2.0,
+    ));
+
+    return coords;
   }
 
   void addMarker(var id, LatLng latlng, {PlacesSearchResult place}) {

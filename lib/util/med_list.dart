@@ -6,77 +6,97 @@ import '../data/med.dart';
 import 'nampr.dart';
 
 class MedList {
+  static List<Med> medicaments;
+
   static Widget build(BuildContext context, List<Med> meds) {
+    medicaments = meds;
+
+    return Scrollbar(
+        child: ListView.builder(
+      shrinkWrap: true,
+      itemCount: meds.length,
+      itemBuilder: _buildItem,
+    ));
+  }
+
+  static Widget _buildItem(BuildContext context, int index) {
+    final Med item = medicaments[index];
+    return buildItem(context, item);
+  }
+
+  static Widget buildItem(BuildContext context, Med item) {
     return Theme(
       data: ThemeData(
         dividerColor: Colors.transparent,
         accentColor: Colors.black, //arrow color when selected
       ),
-      child: Scrollbar(
-          child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: meds.length,
-        itemBuilder: (_context, index) {
-          final Med item = meds[index];
-          return ExpansionTile(
-            backgroundColor: Colors.amber[400], //background color when selected
-            title: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: ExpansionTile(
+        backgroundColor: Colors.amber[400], //background color when selected
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Stack(
               children: <Widget>[
-                Text(
-                  (item.name != '') ? item.name : '<PZN unbekannt>',
-                  style: Theme.of(_context).textTheme.title,
+                if (item.isHistory)
+                Icon(
+                  Icons.history,
+                  size: 25,
                 ),
-                Text(
-                  'PZN: ' + item.pzn,
-                  style: Theme.of(_context).textTheme.subhead,
-                ),
+                Padding(
+                  padding: EdgeInsets.only(left: (item.isHistory) ? 30 : 0),
+                  child: Text(
+                    (item.name != '') ? item.name : '<PZN unbekannt>',
+                    style: Theme.of(context).textTheme.title,
+                  ),
+                )
               ],
             ),
-            children: <Widget>[
-              if (item.name != '')
-                FlatButton(
-                  padding: EdgeInsets.all(16),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Beipackzettel anzeigen',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  onPressed: () => gotoMedInfo(_context, item),
-                  color: Colors.white38,
+            Text(
+              'PZN: ' + item.pzn,
+              style: Theme.of(context).textTheme.subhead,
+            ),
+          ],
+        ),
+        children: <Widget>[
+          if (item.name != '')
+            FlatButton(
+              padding: EdgeInsets.all(16),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Beipackzettel anzeigen',
+                  style: TextStyle(fontSize: 16),
                 ),
-              if (item.name != '')
-                FlatButton(
-                  padding: EdgeInsets.all(16),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Bestellen',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  onPressed: () => gotoShop(_context, item),
-                  color: Colors.white38,
+              ),
+              onPressed: () => gotoMedInfo(context, item),
+              color: Colors.white38,
+            ),
+          if (item.name != '')
+            FlatButton(
+              padding: EdgeInsets.all(16),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Bestellen',
+                  style: TextStyle(fontSize: 16),
                 ),
-            ],
-          );
-        },
-      )),
+              ),
+              onPressed: () => gotoShop(context, item),
+              color: Colors.white38,
+            ),
+        ],
+      ),
     );
   }
 
   static void gotoMedInfo(BuildContext context, Med m) {
-    if (m.url != '') {
-      Navigator.push(
-        context,
-        NoAnimationMaterialPageRoute(builder: (context) => MedInfo(med: m)),
-      );
-    }
+    Navigator.push(
+      context,
+      NoAnimationMaterialPageRoute(builder: (context) => MedInfo(med: m)),
+    );
   }
 
   static void gotoShop(BuildContext context, Med m) {

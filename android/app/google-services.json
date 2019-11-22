@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "278284751623",
+    "firebase_url": "https://canal-kid.firebaseio.com",
+    "project_id": "canal-kid",
+    "storage_bucket": "canal-kid.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278284751623:android:f879d23ec256968109aba2",
+        "android_client_info": {
+          "package_name": "com.maph.maph_group3"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "278284751623-9sljelirm6hl3ae7chtk66j2i05fulf9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQAoPtVpxUxqDIycGfkEv4Bf-wdgLBSzA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "278284751623-9sljelirm6hl3ae7chtk66j2i05fulf9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

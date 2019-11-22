@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:maph_group3/widgets/med_scan.dart';
+import 'package:maph_group3/widgets/personal.dart';
 
-import 'widgets/maps.dart';
+import 'data/med.dart';
 import 'widgets/home.dart';
 import 'widgets/shop.dart';
 
 
 void main() {
+  List<Med> medicaments = [
+    Med('', '10019621'),
+    Med('', '1502726'),
+    Med('', 'test'),
+    Med('', '00000000'),
+    Med('', '01343682')
+  ];
+
+  //medicaments = [];
+
   runApp(MaterialApp(
     title: 'MAPH',
     theme: ThemeData(
@@ -16,6 +28,10 @@ void main() {
       scaffoldBackgroundColor: Colors.white,
       primaryTextTheme: TextTheme(title: TextStyle(color: Colors.white)),
     ),
-    home: Shop(),//Home(),
+    //home: Home(),
+    //home: MedSearch(),
+    //home: MedScan(meds: medicaments),
+    //home: Personal(),
+    home: Shop(),
   ));
 }
