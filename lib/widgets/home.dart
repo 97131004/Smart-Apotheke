@@ -108,7 +108,7 @@ class _HomeState extends State<Home>  {
           children: <Widget>[
             DrawerHeader(
               child: Text(
-                '<Appname>',
+                '<Vorname> <Name>',
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
               decoration: BoxDecoration(

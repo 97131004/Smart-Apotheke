@@ -41,7 +41,9 @@ class _MedScanState extends State<MedScan> {
       String pzn = widget.meds[i].pzn;
       if (Helper.isNumber(pzn)) {
         List<Med> med = await MedGet.getMeds(pzn, 0, 1);
-        widget.meds[i] = med[0];
+        if (med.length > 0) {
+          widget.meds[i] = med[0];
+        }
       }
     }
     setState(() {
