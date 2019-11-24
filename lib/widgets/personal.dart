@@ -6,6 +6,7 @@ import '../data/globals.dart' as globals;
 import 'scanner.dart';
 import 'med_search.dart';
 import 'calendar.dart';
+import 'package:maph_group3/util/password.dart';
 
 class Personal extends StatefulWidget {
   Personal({Key key}) : super(key: key);
@@ -30,7 +31,10 @@ class _PersonalState extends State<Personal> {
   void initState() {
     super.initState();
   }
-
+  String status = '';
+  TextEditingController oldp = new TextEditingController();
+  TextEditingController newp = new TextEditingController();
+  TextEditingController newpW = new TextEditingController();
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -106,23 +110,28 @@ class _PersonalState extends State<Personal> {
                   children: <Widget>[
                     Text('Aktuelles Passwort:'),
                     TextField(
+                      controller: oldp,
                       decoration: InputDecoration(
                           hintText: passHintText),
                     ),
                     SizedBox(height: 20),
                     Text('Neues Passwort:'),
                     TextField(
+                      controller: newp,
                       decoration: InputDecoration(
                           hintText: passHintText),
                     ),
                     SizedBox(height: 20),
                     Text('Neues Passwort wiederholen:'),
                     TextField(
+                      controller: newpW,
                       decoration: InputDecoration(
                           hintText: passHintText),
                     ),
-                    SizedBox(height: 20),
-                    buildSaveButton(() => print('button2')),
+                    
+                     SizedBox(height: 20),
+                    buildSaveButton(() =>onPressedSaveButton() ),
+                    Text(status, style: TextStyle(color: Colors.red),),
                   ],
                 ),
               ),
@@ -145,7 +154,22 @@ class _PersonalState extends State<Personal> {
       ),
     );
   }
-
+  void onPressedSaveButton ()async
+  {
+    bool isdone = false;
+    if(newp.text == newpW.text && newp.text != '')
+    {
+        isdone = await Password.resetPassword(oldp.text, newp.text);
+    }
+    if(!isdone) {
+      setState(() {
+        oldp.text = '';
+        newp.text = '';
+        newpW.text = '';
+        status = 'Passwortänderung fehlgeschlagen. Versuchen Sie bitte nochmal!';
+      });
+    };
+  }
   Future<bool> handleWillPop() async {
     switch (curPage) {
       case Page.home:
