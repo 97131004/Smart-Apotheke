@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:maph_group3/data/globals.dart' as prefix0;
 import 'package:mlkit/mlkit.dart';
 
 import 'med_scan.dart';

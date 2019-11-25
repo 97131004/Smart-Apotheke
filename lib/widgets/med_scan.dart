@@ -138,6 +138,7 @@ class _MedScanState extends State<MedScan> {
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
+                    icon: Icon(Icons.update),
                     shape: new RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(30.0),
                     ),

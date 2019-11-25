@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import '../util/med_list.dart';
 import '../util/nampr.dart';
 import '../data/globals.dart' as globals;
@@ -9,7 +7,7 @@ import 'scanner.dart';
 import 'med_search.dart';
 import 'calendar.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:maph_group3/util/password.dart';
+import 'package:maph_group3/util/personaldata.dart';
 
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
