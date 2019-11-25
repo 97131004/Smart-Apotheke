@@ -20,9 +20,9 @@ class Home extends StatefulWidget {
   }
 }
 
-class _HomeState extends State<Home>  {
+class _HomeState extends State<Home> {
   @override
-  Future initState()  {
+  Future initState() {
     super.initState();
     passwordenter(context);
   }
@@ -32,7 +32,7 @@ class _HomeState extends State<Home>  {
   String hash;
   Alert alert;
   void passwordenter(BuildContext context) async {
-    if (!(await Password.isPasswordExists())) {
+    if (!(await PersonalData.isPasswordExists())) {
       alert = createAlert(context);
       alert.show();
     }
@@ -60,7 +60,6 @@ class _HomeState extends State<Home>  {
                 labelText: 'Re-entered Password',
               ),
             ),
-            
           ],
         ),
         buttons: [
@@ -76,14 +75,11 @@ class _HomeState extends State<Home>  {
   }
 
   Future _submitpasswort() async {
-    bool isdone = false;
+    //bool isdone = false;
     if (pass.text == ePass.text && pass.text.isNotEmpty) {
-      if (await Password.setpassword(pass.text)) {
-        isdone = true;
-        Navigator.pop(context);
-      }
-    }
-    if (!isdone) {
+      await PersonalData.setpassword(pass.text);
+      Navigator.pop(context);
+    } else {
       setState(() {
         pass.text = '';
         ePass.text = '';

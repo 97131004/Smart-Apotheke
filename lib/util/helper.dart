@@ -1,4 +1,5 @@
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 class Helper {
@@ -27,25 +28,39 @@ class Helper {
     return dir.path;
   }
 
-  static Future<File> localFile(String filename)async {
+  static Future<File> localFile(String filename) async {
     final path = await localPath;
     return new File('$path/$filename');
   }
 
-  static Future<String> readData(String filename) async {
+  static Future<String> readDatafromFile(String filename) async {
     try {
       final file = await localFile(filename);
       String body = await file.readAsString();
       return body;
     } catch (e) {
-      await writeData(filename,'');
-      print( 'The file $filename dont exists. Creating a new one....');
+      await writeDatafromFile(filename, '');
+      print('The file $filename dont exists. Creating a new one....');
       return '';
     }
   }
 
-  static Future<File> writeData(String filename, String data) async {
+  static Future<File> writeDatafromFile(String filename, String data) async {
     final file = await localFile(filename);
     return file.writeAsString('$data');
+  }
+
+  static Future<String> readDataFromsp(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getString(key) ?? '';
+    print('read: $value');
+    return value;
+  }
+
+  static Future writeDatatoSp(String key, String data) async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = data;
+    prefs.setString(key, value);
+    print('saved $value');
   }
 }

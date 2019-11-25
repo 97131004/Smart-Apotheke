@@ -1,48 +1,51 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:steel_crypt/steel_crypt.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../util/helper.dart';
 
-class Password {
-  static File file;
-  static String filename =
-      'db.txt'; //file, where the hash code for encoding / dycription password is stored
+class PersonalData {
+  static String keyPassword = 'password';
+  static String keyIban = 'iban';
+  static String keyName = 'name';
+  static String keyfName = 'vorname';
+  static String keyAdresse = 'adresse';
+  static String keypostcode = 'plz';
+  static String keycity = 'stadt';
   static var hasher = HashCrypt("SHA-3/512");
+
   static Future<bool> isPasswordExists() async {
-    String hash = await Helper.readData(filename);
-    print(hash);
-    if (hash.isEmpty || hash == '')
-      return false;
-    else
-      return true;
+   final value = await Helper.readDataFromsp(keyPassword);
+    //print('read: $value');
+    if (value != '') return true;
+    return false;
   }
 
-  static Future<bool> setpassword(String password) async {
-    try {
+  static Future setpassword(String password) async {
       String hash = hasher.hash(password);
-      await Helper.writeData(filename, hash);
-      return true;
-    } catch (e) {
-      print(e.toString());
-      return false;
-    }
+      Helper.writeDatatoSp(keyPassword, hash);
   }
 
   static Future<bool> checkPassword(String password) async {
-    String hash = await Helper.readData(filename);
-    return hasher.checkhash(password, hash);
+    final value = await Helper.readDataFromsp(keyPassword);
+    if (value != '')return hasher.checkhash(password, value);
+    return false;
   }
 
   static Future<bool> resetPassword(String oldp, String newp) async {
-    if (await checkPassword(oldp) != null) {
-      if (await setpassword(newp)) {
-        print('reset password done!');
+    if (await checkPassword(oldp)) {
+        await setpassword(newp);
         return true;
-      } else
-        print('reset password failed!');
-        return false;
-    } else {
-      return false;
     }
+    return false;
+  }
+  
+  static Future<bool> changeIban(String iban, String password) async {
+    if (await checkPassword(password)) {
+      Helper.writeDatatoSp(keyIban, iban);
+      return true;
+    }
+    return false;
   }
 }

@@ -7,6 +7,7 @@ import 'scanner.dart';
 import 'med_search.dart';
 import 'calendar.dart';
 import 'package:maph_group3/util/password.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Personal extends StatefulWidget {
   Personal({Key key}) : super(key: key);
@@ -73,7 +74,16 @@ class _PersonalState extends State<Personal> {
     bool isdone = false;
     if(newp.text == newpW.text && newp.text != '')
     {
-        isdone = await Password.resetPassword(oldp.text, newp.text);
+        isdone = await PersonalData.resetPassword(oldp.text, newp.text);
+        Fluttertoast.showToast(
+        msg: "Passwortänderung erforlgreich",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.lightBlue,
+        textColor: Colors.black,
+        timeInSecForIos: 1,
+        fontSize: 16.0);
+        Navigator.pop(context);
     }
     if(!isdone) {
       setState(() {
