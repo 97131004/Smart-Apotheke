@@ -41,7 +41,9 @@ class _MedScanState extends State<MedScan> {
       String pzn = widget.meds[i].pzn;
       if (Helper.isNumber(pzn)) {
         List<Med> med = await MedGet.getMeds(pzn, 0, 1);
-        widget.meds[i] = med[0];
+        if (med.length > 0) {
+          widget.meds[i] = med[0];
+        }
       }
     }
     setState(() {
@@ -110,6 +112,7 @@ class _MedScanState extends State<MedScan> {
                 */
                 SizedBox(height: 10),
                 ButtonTheme(
+                  buttonColor: Colors.grey[300],
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
@@ -131,6 +134,7 @@ class _MedScanState extends State<MedScan> {
                 ),
                 SizedBox(height: 10),
                 ButtonTheme(
+                  buttonColor: Colors.grey[100],
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
@@ -138,16 +142,7 @@ class _MedScanState extends State<MedScan> {
                       borderRadius: new BorderRadius.circular(30.0),
                     ),
                     onPressed: () => gotoScanner(),
-                    color: Colors.lightBlue[200],
-                    icon: Icon(Icons.update),
-                    label: Text(
-                      "Nochmals versuchen",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Raleway',
-                        fontSize: 22.0,
-                      ),
-                    ),
+                    label: Text("Nochmals scannen"),
                   ),
                   // child: RaisedButton.icon(
                   //   icon: Icon(Icons.update),

@@ -1,3 +1,6 @@
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+
 class Helper {
   static String parseMid(String source, String delim1, String delim2,
       [int startIndex]) {
@@ -17,5 +20,32 @@ class Helper {
       }
     }
     return true;
+  }
+
+  static Future<String> get localPath async {
+    final dir = await getApplicationDocumentsDirectory();
+    return dir.path;
+  }
+
+  static Future<File> localFile(String filename)async {
+    final path = await localPath;
+    return new File('$path/$filename');
+  }
+
+  static Future<String> readData(String filename) async {
+    try {
+      final file = await localFile(filename);
+      String body = await file.readAsString();
+      return body;
+    } catch (e) {
+      await writeData(filename,'');
+      print( 'The file $filename dont exists. Creating a new one....');
+      return '';
+    }
+  }
+
+  static Future<File> writeData(String filename, String data) async {
+    final file = await localFile(filename);
+    return file.writeAsString('$data');
   }
 }
