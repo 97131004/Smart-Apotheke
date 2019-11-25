@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:http/http.dart' as http;
 import 'package:maph_group3/util/helper.dart';
-import 'package:maph_group3/util/load_bar.dart';
 import 'package:maph_group3/util/nampr.dart';
+import 'package:maph_group3/util/shop_items.dart';
+import 'package:maph_group3/widgets/product_details.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:html/dom.dart' as dom;
+import 'package:html/parser.dart' show parse;
 
 import '../data/med.dart';
 import 'maps.dart';
@@ -25,11 +27,12 @@ class _ShopState extends State<Shop> {
   String shoppingInfo;
   bool shoppingInfoLoaded = false;
 
+  List<ShopListItem> itemList;
+
   @override
   void initState() {
     super.initState();
-
-    getSearchResults("Ibuprofen");
+    //getSearchResults("Ibuprofen");
   }
 
   @override
@@ -42,12 +45,42 @@ class _ShopState extends State<Shop> {
         children: <Widget>[
           buildLocalSearchButton(),
           Expanded(
-            child: shoppingInfoLoaded
-                ? buildHtml()
-                : LoadBar.build(),
-          )
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
+              child: buildListView("Ibuprofen"),
+            )
+          ),
         ],
       )
+    );
+  }
+
+  Widget buildListView(String searchKey) {
+    return FutureBuilder<List<ShopListItem>>(
+      future: getShopData(searchKey),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData)
+          return Center(child: CircularProgressIndicator());
+
+        return GestureDetector(
+          onTap: orderMed,
+          child: ListView(
+            children: snapshot.data.map((item) =>
+                Card(
+                    child: ListTile(
+                      leading: Image.network(item.image),
+                      title: Text(item.name),
+                      subtitle: Text(item.description),
+                      trailing: Container(
+                        child: Text(item.price),
+                      ),
+                      isThreeLine: true,
+                    )
+                )
+               ).toList(),
+            ),
+          );
+        }
     );
   }
 
@@ -96,7 +129,13 @@ class _ShopState extends State<Shop> {
                     Column(
                       children: <Widget>[
                         GestureDetector(
-                          onTap: orderMed,
+                          onTap: () => {
+                            Navigator.push(context,
+                              NoAnimationMaterialPageRoute(
+                                  builder: (context) => ProductDetails(url: "test")
+                              ),
+                            ),
+                          },//orderMed,
                           child: Container(
                             padding: EdgeInsets.all(5.0),
                             decoration: BoxDecoration(
@@ -121,18 +160,6 @@ class _ShopState extends State<Shop> {
                       ]
                   );
                 }
-                /*if (node.className == "image") {
-                  return Align(
-                    alignment: Alignment.topLeft,
-                    child: Row(children: children),
-                  );
-                }
-                if (node.className == "prices") {
-                  return Align(
-                    alignment: Alignment.topRight,
-                    child: Row(children: children),
-                  );
-                }*/
                 return null;
               }
               return null;
@@ -142,14 +169,20 @@ class _ShopState extends State<Shop> {
     );
   }
 
-  Future getSearchResults(String medName) async {
+  Future<List<ShopListItem>> getShopData(String name) async {
+    String url = "https://www.medpex.de/search.do?q=" + name;
+    String html = await Helper.fetchHTML(url);
+    return ShopListParser.parseHtmlToShopListItem(html);
+  }
+
+  /*Future getSearchResults(String medName) async {
     //String url = "https://www.google.com/search?q=" + medName + "&sxsrf=ACYBGNRP9tSbBnmwBlVO_M-uS_gFZ2Sp6Q:1574093322364&source=lnms&tbm=shop&sa=X&ved=0ahUKEwj6ncrKkvTlAhVLKVAKHWi4BKwQ_AUIEigB&biw=740&bih=979";
     String url = "https://www.medpex.de/search.do?q=" + medName;
     String html = await fetchHTML(url);
 
-    if(html != null) {
+    /*if(html != null) {
       shoppingInfo = Helper.parseMid(html, '<div id="product-list">', '<div class="pagenav">');
-      shoppingInfo = '<div id="product-list">' + shoppingInfo;
+      shoppingInfo = '<div id="product-list">' + shoppingInfo + "</div>";
       // replace unsupported and unnecessary tags
       shoppingInfo = shoppingInfo.replaceAll(new RegExp("<input.*>"), "");
       shoppingInfo = shoppingInfo.replaceAll(new RegExp("<form.*>"), "");
@@ -158,20 +191,14 @@ class _ShopState extends State<Shop> {
       shoppingInfo = shoppingInfo.replaceAll(new RegExp("<div class=\"rating\".*</div>"), "");
     } else {
       // display: couldnt load shopping data
-    }
+    }*/
+
+    itemList = ShopListParser.parseHtmlToShopListItem(html);
 
     setState(() {
       shoppingInfoLoaded = true;
     });
-  }
-
-  Future<String> fetchHTML(String url) async {
-    final response = await http.get(url);
-
-    if (response.statusCode == 200)
-      return response.body;
-    else return null;
-  }
+  }*/
 
   void orderMed() {
     showDialog(
@@ -185,7 +212,7 @@ class _ShopState extends State<Shop> {
               child: new Text("Abbrechen"),
               onPressed: () {
                 Navigator.of(context).pop();
-              },
+             },
             ),
             new FlatButton(
               child: new Text("Fortfahren"),

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:maph_group3/util/helper.dart';
 
 class ProductDetails extends StatefulWidget {
-  ProductDetails({Key key}) : super(key: key);
+  final String url;
+
+  ProductDetails({Key key, @required this.url}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -10,9 +13,12 @@ class ProductDetails extends StatefulWidget {
 }
 
 class _ProductDetailsState extends State<ProductDetails> {
+
   @override
   void initState() {
     super.initState();
+
+    loadMedProductDetails();
   }
 
   @override
@@ -23,5 +29,12 @@ class _ProductDetailsState extends State<ProductDetails> {
       ),
       body: Text('Produktdaten'),
     );
+  }
+
+  Future loadMedProductDetails() async {
+    print(widget.url);
+    //String url = "https://www.medpex.de/search.do?q=";
+    String html = await Helper.fetchHTML(widget.url);
+    print(html);
   }
 }

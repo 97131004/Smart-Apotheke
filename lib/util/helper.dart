@@ -1,3 +1,6 @@
+import 'package:http/http.dart' as http;
+
+
 class Helper {
   static String parseMid(String source, String delim1, String delim2,
       [int startIndex]) {
@@ -17,5 +20,13 @@ class Helper {
       }
     }
     return true;
+  }
+
+  static Future<String> fetchHTML(String url) async {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200)
+      return response.body;
+    else return null;
   }
 }
