@@ -95,21 +95,6 @@ class _MedScanState extends State<MedScan> {
             //last item
             return Column(
               children: <Widget>[
-                /*
-                FlatButton(
-                  padding: EdgeInsets.all(16),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Name / PZN manuell eingeben',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  onPressed: () => gotoSearch(),
-                  color: Colors.lightBlue[100],
-                ),
-                */
                 SizedBox(height: 10),
                 ButtonTheme(
                   buttonColor: Colors.grey[300],
@@ -125,9 +110,7 @@ class _MedScanState extends State<MedScan> {
                     label: Text(
                       "Name / PZN manuell eingeben",
                       style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Raleway',
-                        fontSize: 22.0,
+                        fontSize: 16.0,
                       ),
                     ),
                   ),

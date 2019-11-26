@@ -9,54 +9,59 @@ import 'helper.dart';
 class MedGet {
   static Future<List<Med>> getMeds(
       String searchValue, int pageIndex, int pageCount) async {
-    final resp = await http.get('https://www.docmorris.de/search?query="' +
-        searchValue +
-        '"&page=' +
-        pageIndex.toString() +
-        '&resultsPerPage=' +
-        pageCount.toString());
-    //print(resp.body);
-
     List<Med> list = new List<Med>();
 
-    if (resp.statusCode == HttpStatus.ok) {
-      String html = resp.body;
+    try {
+      final resp = await http.get('https://www.docmorris.de/search?query="' +
+          searchValue +
+          '"&page=' +
+          pageIndex.toString() +
+          '&resultsPerPage=' +
+          pageCount.toString());
+      //print(resp.body);
 
-      List<String> pzns =
-          Helper.parseMid(html, 'exactag.product_id = \'', '\';').split(',');
+      if (resp.statusCode == HttpStatus.ok) {
+        String html = resp.body;
 
-      if (pzns.length > 1) {
-        //multi-page
-        int searchIndex = 0;
-        int index = 0;
+        List<String> pzns =
+            Helper.parseMid(html, 'exactag.product_id = \'', '\';').split(',');
 
-        if (index == pzns.length - 1) return list;
+        if (pzns.length > 1) {
+          //multi-page
+          int searchIndex = 0;
+          int index = 0;
 
-        while (true) {
-          searchIndex =
-              html.indexOf('<span class="link name">', searchIndex + 1);
-          if (searchIndex == -1) break;
+          if (index == pzns.length - 1) return list;
 
-          String medName = Helper.parseMid(
-              html, '<span class="link name">', '</span>', searchIndex);
+          while (true) {
+            searchIndex =
+                html.indexOf('<span class="link name">', searchIndex + 1);
+            if (searchIndex == -1) break;
 
-          //print(medName);
+            String medName = Helper.parseMid(
+                html, '<span class="link name">', '</span>', searchIndex);
 
-          if (index < pzns.length) {
-            Med m = new Med(medName, pzns[index]);
-            //print(pzns[index]);
-            await MedGet.getMedInfo(m);
-            list.add(m);
-            index++;
+            //print(medName);
+
+            if (index < pzns.length) {
+              Med m = new Med(medName, pzns[index]);
+              //print(pzns[index]);
+              await MedGet.getMedInfo(m);
+              list.add(m);
+              index++;
+            }
           }
+        } else if (pzns.length == 1) {
+          //single-page
+          String medName =
+              Helper.parseMid(html, '<h1 itemprop="name">', '</h1>');
+          Med m = new Med(medName, pzns[0]);
+          await MedGet.getMedInfo(m);
+          list.add(m);
         }
-      } else if (pzns.length == 1) {
-        //single-page
-        String medName = Helper.parseMid(html, '<h1 itemprop="name">', '</h1>');
-        Med m = new Med(medName, pzns[0]);
-        await MedGet.getMedInfo(m);
-        list.add(m);
       }
+    } catch (err) {
+      print('Caught error: $err');
     }
 
     return list;
@@ -108,26 +113,30 @@ class MedGet {
   }
 
   static Future<String> getMedInfoData(Med item) async {
-    final resp = await http.get(item.url);
+    try {
+      final resp = await http.get(item.url);
 
-    if (resp.statusCode == HttpStatus.ok) {
-      String html =
-          Helper.parseMid(resp.body, '<div class="content_area">', '<footer>');
-      if (html.length > 0 &&
-          html.indexOf('<p>Die gesuchte Seite wurde nicht gefunden. ' +
-                  '<a href="/">Zur Startseite</a></p>') ==
-              -1 &&
-          html.indexOf('<h1>500 - Etwas lief schief</h1>') == -1 &&
-          html.indexOf(
-                  'Für dieses Arzneimittel ist momentan keine Patienteninformation ' +
-                      'verfügbar. <a href="javascript:history.back()">Zurück</a>') ==
-              -1) {
-        html = html.replaceFirst(
-            '<a href="#kapitelverzeichnis">Kapitelverzeichnis</a>', '');
-        html = html.replaceFirst('<ul class="catalogue no-bullet">', '');
+      if (resp.statusCode == HttpStatus.ok) {
+        String html = Helper.parseMid(
+            resp.body, '<div class="content_area">', '<footer>');
+        if (html.length > 0 &&
+            html.indexOf('<p>Die gesuchte Seite wurde nicht gefunden. ' +
+                    '<a href="/">Zur Startseite</a></p>') ==
+                -1 &&
+            html.indexOf('<h1>500 - Etwas lief schief</h1>') == -1 &&
+            html.indexOf(
+                    'Für dieses Arzneimittel ist momentan keine Patienteninformation ' +
+                        'verfügbar. <a href="javascript:history.back()">Zurück</a>') ==
+                -1) {
+          html = html.replaceFirst(
+              '<a href="#kapitelverzeichnis">Kapitelverzeichnis</a>', '');
+          html = html.replaceFirst('<ul class="catalogue no-bullet">', '');
 
-        return html;
+          return html;
+        }
       }
+    } catch (err) {
+      print('Caught error: $err');
     }
 
     return null;

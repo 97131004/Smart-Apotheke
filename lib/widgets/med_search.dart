@@ -72,7 +72,7 @@ class _MedSearchState extends State<MedSearch> {
                 },
                 noItemsFoundBuilder: (context) {
                   return (searchValue.length > 0)
-                      ? Text('No Items Found')
+                      ? Text('Keine Medikamente gefunden.')
                       : null;
                 },
                 loadingBuilder: (context) {
@@ -80,15 +80,18 @@ class _MedSearchState extends State<MedSearch> {
                       ? CircularProgressIndicator()
                       : null;
                 },
-                /*
                 retryBuilder: (context, callback) {
-                  return RaisedButton(
-                      child: Text('Retry'), onPressed: () => callback());
+                  return Column(
+                    children: <Widget>[
+                      Text(
+                        'Fehler beim Suchen.\n' +
+                            'Prüfen Sie Ihre Internetverbindung.\n' +
+                            'Bitte gehen Sie zurück und versuchen es erneut.',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  );
                 },
-                errorBuilder: (context, error) {
-                  return Text('Error: $error');
-                },
-                */
               ),
             ),
           ],
