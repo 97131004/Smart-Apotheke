@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../util/no_internet_alert.dart';
 import '../util/nampr.dart';
 import '../util/helper.dart';
 import '../util/med_list.dart';
@@ -25,6 +26,12 @@ class _MedScanState extends State<MedScan> {
 
   @override
   void initState() {
+    Helper.hasInternet().then((internet) {
+      if (internet == null || !internet) {
+        NoInternetAlert.show(context);
+      }
+    });
+
     super.initState();
 
     if (widget.meds != null && widget.meds.length > 0) {
@@ -54,7 +61,11 @@ class _MedScanState extends State<MedScan> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: gotoHome, //back to home page, skipping scanner
+      onWillPop: () async {
+        //back to home page, skipping scanner
+        Navigator.pop(context);
+        return true;
+      },
       child: Scaffold(
         appBar: AppBar(
           title: Text('Gefundene Medikamente'),
@@ -104,7 +115,13 @@ class _MedScanState extends State<MedScan> {
                     shape: new RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(30.0),
                     ),
-                    onPressed: () => gotoSearch(),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        NoAnimationMaterialPageRoute(
+                            builder: (context) => MedSearch()),
+                      );
+                    },
                     color: Colors.grey[200],
                     icon: Icon(Icons.edit),
                     label: Text(
@@ -125,42 +142,18 @@ class _MedScanState extends State<MedScan> {
                     shape: new RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(30.0),
                     ),
-                    onPressed: () => gotoScanner(),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                     label: Text("Nochmals scannen"),
                   ),
-                  // child: RaisedButton.icon(
-                  //   icon: Icon(Icons.update),
-                  //   onPressed: () => gotoScanner(),
-                  //   label: Text("Nochmals versuchen"),
-                  // ),
                 ),
               ],
             );
           }
           return null;
-          /*
-        display.add(null);
-        display.addAll(widget.meds);
-        display.add(null);
-        */
         },
       ),
     );
-  }
-
-  Future<bool> gotoHome() async {
-    Navigator.pop(context);
-    return true;
-  }
-
-  void gotoSearch() {
-    Navigator.push(
-      context,
-      NoAnimationMaterialPageRoute(builder: (context) => MedSearch()),
-    );
-  }
-
-  void gotoScanner() async {
-    Navigator.pop(context);
   }
 }

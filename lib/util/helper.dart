@@ -1,7 +1,7 @@
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
-
+import 'package:connectivity/connectivity.dart';
 
 class Helper {
   static String parseMid(String source, String delim1, String delim2,
@@ -65,5 +65,13 @@ class Helper {
     print('saved $value');
   }
 
- 
+  static Future<bool> hasInternet() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile) {
+      return true;
+    } else if (connectivityResult == ConnectivityResult.wifi) {
+      return true;
+    }
+    return false;
+  }
 }

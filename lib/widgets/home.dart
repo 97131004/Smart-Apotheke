@@ -20,8 +20,9 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   @override
-  Future initState() {
+  void initState() {
     super.initState();
+
     passwordenter(context);
   }
 

@@ -47,7 +47,9 @@ class MedGet {
               Med m = new Med(medName, pzns[index]);
               //print(pzns[index]);
               await MedGet.getMedInfo(m);
-              list.add(m);
+              if (m.name.length > 0 && m.pzn != '00000000') {
+                list.add(m);
+              }
               index++;
             }
           }
@@ -57,7 +59,9 @@ class MedGet {
               Helper.parseMid(html, '<h1 itemprop="name">', '</h1>');
           Med m = new Med(medName, pzns[0]);
           await MedGet.getMedInfo(m);
-          list.add(m);
+          if (m.name.length > 0 && m.pzn != '00000000') {
+            list.add(m);
+          }
         }
       }
     } catch (err) {
