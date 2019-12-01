@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../util/no_internet_alert.dart';
 import '../util/nampr.dart';
 import '../util/helper.dart';
 import '../util/med_list.dart';
@@ -25,6 +26,12 @@ class _MedScanState extends State<MedScan> {
 
   @override
   void initState() {
+    Helper.hasInternet().then((internet) {
+      if (internet == null || !internet) {
+        NoInternetAlert.show(context);
+      }
+    });
+
     super.initState();
 
     if (widget.meds != null && widget.meds.length > 0) {
@@ -41,7 +48,9 @@ class _MedScanState extends State<MedScan> {
       String pzn = widget.meds[i].pzn;
       if (Helper.isNumber(pzn)) {
         List<Med> med = await MedGet.getMeds(pzn, 0, 1);
-        widget.meds[i] = med[0];
+        if (med.length > 0) {
+          widget.meds[i] = med[0];
+        }
       }
     }
     setState(() {
@@ -52,7 +61,11 @@ class _MedScanState extends State<MedScan> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: gotoHome, //back to home page, skipping scanner
+      onWillPop: () async {
+        //back to home page, skipping scanner
+        Navigator.pop(context);
+        return true;
+      },
       child: Scaffold(
         appBar: AppBar(
           title: Text('Gefundene Medikamente'),
@@ -93,38 +106,45 @@ class _MedScanState extends State<MedScan> {
             //last item
             return Column(
               children: <Widget>[
-                /*
-                FlatButton(
-                  padding: EdgeInsets.all(16),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Name / PZN manuell eingeben',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  onPressed: () => gotoSearch(),
-                  color: Colors.lightBlue[100],
-                ),
-                */
+                SizedBox(height: 10),
                 ButtonTheme(
                   buttonColor: Colors.grey[300],
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
+                    shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(30.0),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        NoAnimationMaterialPageRoute(
+                            builder: (context) => MedSearch()),
+                      );
+                    },
+                    color: Colors.grey[200],
                     icon: Icon(Icons.edit),
-                    onPressed: () => gotoSearch(),
-                    label: Text("Name / PZN manuell eingeben"),
+                    label: Text(
+                      "Name / PZN manuell eingeben",
+                      style: TextStyle(
+                        fontSize: 16.0,
+                      ),
+                    ),
                   ),
                 ),
+                SizedBox(height: 10),
                 ButtonTheme(
                   buttonColor: Colors.grey[100],
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
                     icon: Icon(Icons.update),
-                    onPressed: () => gotoScanner(),
+                    shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(30.0),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                     label: Text("Nochmals scannen"),
                   ),
                 ),
@@ -132,29 +152,8 @@ class _MedScanState extends State<MedScan> {
             );
           }
           return null;
-          /*
-        display.add(null);
-        display.addAll(widget.meds);
-        display.add(null);
-        */
         },
       ),
     );
-  }
-
-  Future<bool> gotoHome() async {
-    Navigator.pop(context);
-    return true;
-  }
-
-  void gotoSearch() {
-    Navigator.push(
-      context,
-      NoAnimationMaterialPageRoute(builder: (context) => MedSearch()),
-    );
-  }
-
-  void gotoScanner() async {
-    Navigator.pop(context);
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pagewise/flutter_pagewise.dart';
 
+import '../util/no_internet_alert.dart';
+import '../util/helper.dart';
 import '../util/med_get.dart';
 import '../util/med_list.dart';
 
@@ -21,6 +23,12 @@ class _MedSearchState extends State<MedSearch> {
 
   @override
   void initState() {
+    Helper.hasInternet().then((internet) {
+      if (internet == null || !internet) {
+        NoInternetAlert.show(context);
+      }
+    });
+
     super.initState();
 
     getSearchDone = false;
@@ -72,7 +80,7 @@ class _MedSearchState extends State<MedSearch> {
                 },
                 noItemsFoundBuilder: (context) {
                   return (searchValue.length > 0)
-                      ? Text('No Items Found')
+                      ? Text('Keine Medikamente gefunden.')
                       : null;
                 },
                 loadingBuilder: (context) {
@@ -80,15 +88,18 @@ class _MedSearchState extends State<MedSearch> {
                       ? CircularProgressIndicator()
                       : null;
                 },
-                /*
                 retryBuilder: (context, callback) {
-                  return RaisedButton(
-                      child: Text('Retry'), onPressed: () => callback());
+                  return Column(
+                    children: <Widget>[
+                      Text(
+                        'Fehler beim Suchen.\n' +
+                            'Prüfen Sie Ihre Internetverbindung.\n' +
+                            'Bitte gehen Sie zurück und versuchen es erneut.',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  );
                 },
-                errorBuilder: (context, error) {
-                  return Text('Error: $error');
-                },
-                */
               ),
             ),
           ],

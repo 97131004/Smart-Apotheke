@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:maph_group3/data/globals.dart' as prefix0;
 import 'package:mlkit/mlkit.dart';
 
 import 'med_scan.dart';
@@ -44,7 +43,7 @@ class _ScannerState extends State<Scanner> {
                 children: <Widget>[
                   RaisedButton.icon(
                     icon: Image.asset(
-                      'images/gallery.jpg',
+                      'assets/gallery.jpg',
                       width: 100,
                       height: 100,
                     ),
@@ -55,7 +54,7 @@ class _ScannerState extends State<Scanner> {
                   ),
                   RaisedButton.icon(
                     icon: Image.asset(
-                      'images/camera.png',
+                      'assets/camera.png',
                       width: 100,
                       height: 100,
                     ),

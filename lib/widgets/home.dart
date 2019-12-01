@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../util/med_list.dart';
 import '../util/nampr.dart';
 import '../data/globals.dart' as globals;
@@ -7,6 +6,8 @@ import '../widgets/personal.dart';
 import 'scanner.dart';
 import 'med_search.dart';
 import 'calendar.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:maph_group3/util/personaldata.dart';
 
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
@@ -21,10 +22,74 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+
+    passwordenter(context);
+  }
+
+  TextEditingController pass = new TextEditingController();
+  TextEditingController ePass = new TextEditingController();
+  String hash;
+  Alert alert;
+  void passwordenter(BuildContext context) async {
+    if (!(await PersonalData.isPasswordExists())) {
+      alert = createAlert(context);
+      alert.show();
+    }
+  }
+
+  Alert createAlert(BuildContext context) {
+    var alert = Alert(
+        context: context,
+        title: "SET YOUR PASSWORD",
+        content: Column(
+          children: <Widget>[
+            TextField(
+              controller: pass,
+              obscureText: true,
+              decoration: InputDecoration(
+                icon: Icon(Icons.lock),
+                labelText: 'Password',
+              ),
+            ),
+            TextField(
+              controller: ePass,
+              obscureText: true,
+              decoration: InputDecoration(
+                icon: Icon(Icons.lock),
+                labelText: 'Re-entered Password',
+              ),
+            ),
+          ],
+        ),
+        buttons: [
+          DialogButton(
+            onPressed: () => _submitpasswort(),
+            child: Text(
+              "SUBMIT",
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          )
+        ]);
+    return alert;
+  }
+
+  Future _submitpasswort() async {
+    //bool isdone = false;
+    if (pass.text == ePass.text && pass.text.isNotEmpty) {
+      await PersonalData.setpassword(pass.text);
+      Navigator.pop(context);
+    } else {
+      setState(() {
+        pass.text = '';
+        ePass.text = '';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Future.delayed(Duration.zero, () => passwordenter(context));
+    //passwordenter();
     return Scaffold(
       drawer: Drawer(
         child: ListView(

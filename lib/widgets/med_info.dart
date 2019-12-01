@@ -3,6 +3,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:html/dom.dart' as dom;
 
+import '../util/helper.dart';
+import '../util/no_internet_alert.dart';
 import '../util/med_get.dart';
 import '../util/load_bar.dart';
 import '../data/med.dart';
@@ -26,9 +28,22 @@ class _MedInfoState extends State<MedInfo> {
 
   @override
   void initState() {
-    super.initState();
-    scrollController = ScrollController();
+    Helper.hasInternet().then((internet) {
+      if (internet == null || !internet) {
+        NoInternetAlert.show(context);
+      }
+    });
 
+    super.initState();
+
+    scrollController = ScrollController();
+    getMedInfoDataInit();
+  }
+
+  void getMedInfoDataInit() {
+    setState(() {
+      getMedInfoDataDone = false;
+    });
     if (widget.med.url.length > 0) {
       getMedInfoData();
     } else {
@@ -85,7 +100,31 @@ class _MedInfoState extends State<MedInfo> {
   }
 
   Widget buildNotFound() {
-    return Text('Beipackzettel nicht gefunden.');
+    return Column(
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.all(20),
+          child: Text(
+            'Beipackzettel nicht gefunden.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+        ButtonTheme(
+          buttonColor: Colors.grey[300],
+          minWidth: double.infinity,
+          height: 50.0,
+          child: RaisedButton.icon(
+            shape: new RoundedRectangleBorder(
+              borderRadius: new BorderRadius.circular(30.0),
+            ),
+            onPressed: getMedInfoDataInit,
+            color: Colors.grey[200],
+            icon: Icon(Icons.refresh),
+            label: Text("Nochmals versuchen"),
+          ),
+        )
+      ],
+    );
   }
 
   Widget buildHtml() {
