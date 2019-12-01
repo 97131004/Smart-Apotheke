@@ -56,6 +56,7 @@ class _MapsState extends State<Maps> {
       ),
       body: Stack(
         children: <Widget>[
+          _googleMapsContainer(context),
           Column(
             children: <Widget>[
               _googleMapsContainer(context),
@@ -73,6 +74,11 @@ class _MapsState extends State<Maps> {
 
   Widget _buildApoList() {
     if(isLoaded) {
+      if(foundPlaces.length == 0) {
+        return new ListTile(
+          title: Text("No place found"),
+        );
+      }
       return new ListView.builder(
         itemCount: foundPlaces.length,
         itemBuilder: (BuildContext context, int index) {
@@ -81,11 +87,12 @@ class _MapsState extends State<Maps> {
             children: <Widget>[
               new ListTile(
                 title: new Text("${foundPlaces[key].name}"),
-                subtitle: new Text("${foundPlaces[key].formattedAddress}"),
+                subtitle: new Text("${foundPlaces[key].formattedAddress}\n" + (foundPlaces[key].openingHours.openNow? 'Jetzt geöffnet' : 'Momentan geschlossen')),
+                trailing: SizedBox(
+                  child: Icon(Icons.call),
+                ),
+                onTap: () => goToLocation(foundPlaces[key]),
               ),
-              new Divider(
-                height: 2.0,
-              )
             ],
           );
         },
@@ -136,7 +143,7 @@ class _MapsState extends State<Maps> {
     return Visibility(
         visible: markerIsTabbed,
         child:Align(
-          alignment: Alignment.bottomLeft,
+          alignment: Alignment.centerLeft,
           child: Container(
             margin: EdgeInsets.symmetric(vertical: 20.0),
             height: 150.0,
@@ -233,7 +240,7 @@ class _MapsState extends State<Maps> {
             child: IconButton(
               icon: Icon(Icons.call),
               tooltip: "Apotheke anrufen",
-              onPressed: () => launch("tel://017655595223"),
+              onPressed: () => launch("tel://03012345678"),
             )),
       ],
     );
@@ -270,7 +277,7 @@ class _MapsState extends State<Maps> {
 
     // add markers
     final loc = Location(centerOfMap.latitude, centerOfMap.longitude);
-    final result = await _places.searchByText("apotheke", location: loc, radius: 1000);
+    final result = await _places.searchByText("apotheke", location: loc, radius: 500);
 
     setState(() {
       print(result.status);
@@ -300,7 +307,7 @@ class _MapsState extends State<Maps> {
 
     // add markers
     final loc = Location(location.latitude, location.longitude);
-    final result = await _places.searchByText("apotheke", location: loc, radius: 5000);
+    final result = await _places.searchByText("apotheke", location: loc, radius: 500);
 
     setState(() {
       if (result.status == "OK") {
@@ -335,7 +342,7 @@ class _MapsState extends State<Maps> {
 
     var coords = await controller.getLatLng(ScreenCoordinate(
       x: (context.size.width * devicePixelRatio) ~/ 2.0,
-      y: (context.size.height * devicePixelRatio) ~/ 2.0,
+      y: (context.size.height * devicePixelRatio) ~/ 4.0,
     ));
 
     return coords;
@@ -390,4 +397,13 @@ class _MapsState extends State<Maps> {
       desc = foundPlaces[id].formattedAddress;
     });
   }
+
+  goToLocation(PlacesSearchResult foundPlace) async {
+    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+      target: LatLng(foundPlace.geometry.location.lat, foundPlace.geometry.location.lng),
+      zoom: 14.0,
+    )));
+
+  }
+
 }

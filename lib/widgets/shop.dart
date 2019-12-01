@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:http/http.dart' as http;
 import 'package:maph_group3/util/helper.dart';
 import 'package:maph_group3/util/nampr.dart';
 import 'package:maph_group3/util/shop_items.dart';
 import 'package:maph_group3/widgets/product_details.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart' show parse;
 
 import '../data/med.dart';
 import 'maps.dart';
@@ -27,7 +25,7 @@ class _ShopState extends State<Shop> {
   String shoppingInfo;
   bool shoppingInfoLoaded = false;
 
-  List<ShopListItem> itemList;
+  List<ShopItem> itemList;
 
   @override
   void initState() {
@@ -44,6 +42,13 @@ class _ShopState extends State<Shop> {
       body: Column(
         children: <Widget>[
           buildLocalSearchButton(),
+          Visibility(
+            visible: true,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
+              child: buildCard("TEST"),
+            ),
+          ),
           Expanded(
             child: Padding(
               padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
@@ -55,36 +60,94 @@ class _ShopState extends State<Shop> {
     );
   }
 
+  Widget buildCard(String searchKey) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      child: Container(
+          decoration: new BoxDecoration (
+            borderRadius: new BorderRadius.circular(5),
+            border: Border.all(color: Colors.black54),
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [Colors.blue, Colors.white]
+            ),
+          ),
+          child: buildListTileOwnProd()
+      ),
+    );
+  }
+
+  ListTile buildListTileOwnProd() {
+    return ListTile(
+      contentPadding: EdgeInsets.all(10),
+      onTap: () => {Navigator.push(
+         context,
+         NoAnimationMaterialPageRoute(builder: (context) => ProductDetails())),
+      },
+      leading: Image.asset('assets/dummy_med.png'),
+      title: Text("Iboprofen ratiopharm 400mg"),
+      subtitle: Text("Filmtabletten, 20 Stück\nratiopharm GmbH\n\nAnbieter: MAPH_group3", style: TextStyle(fontSize: 12)),
+      trailing: Column(
+        children: <Widget>[
+          Text("Direkt hier bestellen!", style: TextStyle(color: Colors.red),),
+          Column(
+            children: <Widget>[
+              Text("3,99 €", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              Text("5,99 €", style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough)),
+              Text("0,19 €"),
+            ]
+          ),
+        ],
+      )
+    );
+  }
+
   Widget buildListView(String searchKey) {
-    return FutureBuilder<List<ShopListItem>>(
+    return FutureBuilder<List<ShopItem>>(
       future: getShopData(searchKey),
       builder: (context, snapshot) {
         if (!snapshot.hasData)
           return Center(child: CircularProgressIndicator());
 
         return ListView(
-            children: snapshot.data.map((item) =>
-                Card(
-                    child: ListTile(
-                      leading: Image.network(item.image),
-                      title: Text(item.name),
-                      subtitle: Text(item.dosage + "\n" + item.brand, style: TextStyle(fontSize: 12)),
-                      trailing: Container(
-                        child: Column(
-                          children: <Widget>[
-                            Text(item.price, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
-                            if(item.crossedOutPrice != null) Text(item.crossedOutPrice, style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough),),
-                            Text(item.pricePerUnit),
-                          ],
-                        )
-                      ),
-                      isThreeLine: true,
-                    )
+          children: snapshot.data.map((item) =>
+            Card(
+              child: ListTile(
+                onTap: () async {
+                  String url;
+                  if(item.merchant == "Medpex") {
+                    url = "https://www.medpex.de/" + item.link;
+                  } else if (item.merchant == "DocMorris") {
+                    url = "https://www.docmorris.de/" + item.link;
+                  }
+                  if (await canLaunch(url)) {
+                    await launch(url);
+                  } else {
+                    throw 'Could not launch $url';
+                  }
+                },
+                leading: Image.network(item.image),
+                title: Text(item.name),
+                subtitle: Text(item.dosage + "\n" + item.brand + "\n\nAnbieter: " + item.merchant, style: TextStyle(fontSize: 12)),
+                trailing: Container(
+                child: Column(
+                  children: <Widget>[
+
+                    Text(item.price, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                    if(item.crossedOutPrice != null) Text(item.crossedOutPrice, style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough),),
+                    Text(item.pricePerUnit),
+                  ],
                 )
-            ).toList(),
-          );
-        }
-    );
+              ),
+              isThreeLine: true,
+            )
+          )
+        ).toList(),
+      );
+    });
   }
 
   Widget buildLocalSearchButton() {
@@ -172,36 +235,18 @@ class _ShopState extends State<Shop> {
     );
   }
 
-  Future<List<ShopListItem>> getShopData(String name) async {
-    String url = "https://www.medpex.de/search.do?q=" + name;
-    String html = await Helper.fetchHTML(url);
-    return ShopListParser.parseHtmlToShopListItemMedpex(html);
+  Future<List<ShopItem>> getShopData(String name) async {
+    String urlMedpex = "https://www.medpex.de/search.do?q=" + name;
+    String htmlMedpex = await Helper.fetchHTML(urlMedpex);
+    var listMedPex = ShopListParser.parseHtmlToShopListItemMedpex(htmlMedpex);
+
+    String urlDocMorris = "https://www.docmorris.de/search?query=" + name;
+    String htmlDocMorris = await Helper.fetchHTML(urlDocMorris);
+    var listDocMorris = ShopListParser.parseHtmlToShopListItemDocMorris(htmlDocMorris);
+
+    //var newList = new List.from(listMedPex)..addAll(listDocMorris);
+    return listMedPex;
   }
-
-  /*Future getSearchResults(String medName) async {
-    //String url = "https://www.google.com/search?q=" + medName + "&sxsrf=ACYBGNRP9tSbBnmwBlVO_M-uS_gFZ2Sp6Q:1574093322364&source=lnms&tbm=shop&sa=X&ved=0ahUKEwj6ncrKkvTlAhVLKVAKHWi4BKwQ_AUIEigB&biw=740&bih=979";
-    String url = "https://www.medpex.de/search.do?q=" + medName;
-    String html = await fetchHTML(url);
-
-    /*if(html != null) {
-      shoppingInfo = Helper.parseMid(html, '<div id="product-list">', '<div class="pagenav">');
-      shoppingInfo = '<div id="product-list">' + shoppingInfo + "</div>";
-      // replace unsupported and unnecessary tags
-      shoppingInfo = shoppingInfo.replaceAll(new RegExp("<input.*>"), "");
-      shoppingInfo = shoppingInfo.replaceAll(new RegExp("<form.*>"), "");
-      shoppingInfo = shoppingInfo.replaceAll(new RegExp("<option.*</option>"), "");
-      shoppingInfo = shoppingInfo.replaceAll(new RegExp("<div class=\"caption\".*</div>"), "");
-      shoppingInfo = shoppingInfo.replaceAll(new RegExp("<div class=\"rating\".*</div>"), "");
-    } else {
-      // display: couldnt load shopping data
-    }*/
-
-    itemList = ShopListParser.parseHtmlToShopListItem(html);
-
-    setState(() {
-      shoppingInfoLoaded = true;
-    });
-  }*/
 
   void orderMed() {
     showDialog(
@@ -227,5 +272,13 @@ class _ShopState extends State<Shop> {
         );
       },
     );
+  }
+
+  _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
