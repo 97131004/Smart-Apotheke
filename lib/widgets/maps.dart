@@ -256,13 +256,13 @@ class _MapsState extends State<Maps> {
     var location = await getCurrentLocation();
     controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
       target: LatLng(location.latitude, location.longitude),
-      zoom: 13.0,
+      zoom: 14.0,
     )));
     addMarker("Mein Standort", LatLng(location.latitude, location.longitude));
 
     // add markers
     final loc = Location(location.latitude, location.longitude);
-    final result = await _places.searchByText("apotheke", location: loc, radius: 1000);
+    final result = await _places.searchByText("apotheke", location: loc, radius: 5000);
 
     setState(() {
       if (result.status == "OK") {

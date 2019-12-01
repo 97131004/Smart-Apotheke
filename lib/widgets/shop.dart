@@ -62,23 +62,26 @@ class _ShopState extends State<Shop> {
         if (!snapshot.hasData)
           return Center(child: CircularProgressIndicator());
 
-        return GestureDetector(
-          onTap: orderMed,
-          child: ListView(
+        return ListView(
             children: snapshot.data.map((item) =>
                 Card(
                     child: ListTile(
                       leading: Image.network(item.image),
                       title: Text(item.name),
-                      subtitle: Text(item.description),
+                      subtitle: Text(item.dosage + "\n" + item.brand, style: TextStyle(fontSize: 12)),
                       trailing: Container(
-                        child: Text(item.price),
+                        child: Column(
+                          children: <Widget>[
+                            Text(item.price, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
+                            if(item.crossedOutPrice != null) Text(item.crossedOutPrice, style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough),),
+                            Text(item.pricePerUnit),
+                          ],
+                        )
                       ),
                       isThreeLine: true,
                     )
                 )
-               ).toList(),
-            ),
+            ).toList(),
           );
         }
     );
@@ -172,7 +175,7 @@ class _ShopState extends State<Shop> {
   Future<List<ShopListItem>> getShopData(String name) async {
     String url = "https://www.medpex.de/search.do?q=" + name;
     String html = await Helper.fetchHTML(url);
-    return ShopListParser.parseHtmlToShopListItem(html);
+    return ShopListParser.parseHtmlToShopListItemMedpex(html);
   }
 
   /*Future getSearchResults(String medName) async {

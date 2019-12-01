@@ -1,9 +1,10 @@
-import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' show parse;
 
 class ShopListItem {
   String name;
-  String description;
+  String pzn;
+  String brand;
+  String dosage;
   String link;
   String image;
   String price;
@@ -15,7 +16,9 @@ class ShopListItem {
     var map = new Map<String, dynamic>();
 
     map["name"] = name;
-    map["desc"] = description;
+    map["pzn"] = pzn;
+    map["brand"] = brand;
+    map["dosage"] = dosage;
     map["link"] = link;
     map["img"] = image;
     map["price"] = price;
@@ -27,7 +30,7 @@ class ShopListItem {
 }
 
 class ShopListParser {
-  static List<ShopListItem> parseHtmlToShopListItem(String html) {
+  static List<ShopListItem> parseHtmlToShopListItemMedpex(String html) {
     List<ShopListItem> resultList = new List<ShopListItem>();
     var htmlDom = parse(html);
     var listElement = htmlDom.getElementById("product-list");//getElementsByTagName("div");
@@ -67,16 +70,19 @@ class ShopListParser {
         var description = formElement.getElementsByClassName("clearfix").first
             .getElementsByClassName("description").first;
         if(description != null) {
-          var desc = description.text;
-          if(desc.endsWith(")")) {
-            desc.replaceFirst(new RegExp("([0-9]*)"), "");
-          }
-          item.description = desc;
+          var desc = description.text.split("\n");
+          item.pzn = desc[4];
+          item.brand = desc[3];
+          item.dosage = desc[2];
         }
         resultList.add(item);
       }
     }
 
     return resultList;
+  }
+
+  static List<ShopListItem> parseHtmlToShopListItemDocMorris(String html) {
+
   }
 }
