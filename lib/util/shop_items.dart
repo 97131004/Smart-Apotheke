@@ -83,6 +83,7 @@ class ShopListParser {
   }
 
   static List<ShopListItem> parseHtmlToShopListItemDocMorris(String html) {
-
+    // TODO
+    return new List<ShopListItem>();
   }
 }

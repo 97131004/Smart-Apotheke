@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as LocationManager;
+import 'package:maph_group3/util/load_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Maps extends StatefulWidget {
@@ -30,6 +31,7 @@ class _MapsState extends State<Maps> {
   Map<String, PlacesSearchResult> foundPlaces = <String, PlacesSearchResult>{};
 
   bool markerIsTabbed = false;
+  bool isLoaded = false;
   String name = "";
   String desc = "";
   String oh = "";
@@ -54,12 +56,43 @@ class _MapsState extends State<Maps> {
       ),
       body: Stack(
         children: <Widget>[
-          _googleMapsContainer(context),
+          Column(
+            children: <Widget>[
+              _googleMapsContainer(context),
+              new Expanded(
+                  child: _buildApoList()
+              ),
+            ],
+          ),
           _buildContainer(),
           _buildSearchInThisArea(),
         ],
       ),
     );
+  }
+
+  Widget _buildApoList() {
+    if(isLoaded) {
+      return new ListView.builder(
+        itemCount: foundPlaces.length,
+        itemBuilder: (BuildContext context, int index) {
+          String key = foundPlaces.keys.elementAt(index);
+          return new Column(
+            children: <Widget>[
+              new ListTile(
+                title: new Text("${foundPlaces[key].name}"),
+                subtitle: new Text("${foundPlaces[key].formattedAddress}"),
+              ),
+              new Divider(
+                height: 2.0,
+              )
+            ],
+          );
+        },
+      );
+    } else {
+      return LoadBar.build();
+    }
   }
 
   Widget _buildSearchInThisArea() {
@@ -85,7 +118,7 @@ class _MapsState extends State<Maps> {
 
   Widget _googleMapsContainer(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height,
+      height: MediaQuery.of(context).size.height/2,
       width: MediaQuery.of(context).size.width,
       child: GoogleMap(
         initialCameraPosition: _berlin,
@@ -224,6 +257,10 @@ class _MapsState extends State<Maps> {
   }
 
   Future searchInSelectedArea() async {
+    setState(() {
+      isLoaded = false;
+    });
+
     markers.clear();
     // get current position
 
@@ -246,6 +283,7 @@ class _MapsState extends State<Maps> {
           addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
         });
       }
+      isLoaded = true;
     });
   }
 
@@ -274,6 +312,7 @@ class _MapsState extends State<Maps> {
           addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
         });
       }
+      isLoaded = true;
     });
   }
 
