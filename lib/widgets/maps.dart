@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -18,7 +19,8 @@ class Maps extends StatefulWidget {
 }
 
 class _MapsState extends State<Maps> {
-  static String kGoogleApiKey = "AIzaSyAP2X_vG7-hXWunjAhzOyAj7BGwYOTSbU4";
+  //static String kGoogleApiKey = "AIzaSyAP2X_vG7-hXWunjAhzOyAj7BGwYOTSbU4";
+  static String kGoogleApiKey = "AIzaSyAFYotTBY_YeedSjlrOTXsVB7EKx79zR3U";
   GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: kGoogleApiKey);
 
   static final CameraPosition _berlin = CameraPosition(
@@ -56,7 +58,6 @@ class _MapsState extends State<Maps> {
       ),
       body: Stack(
         children: <Widget>[
-          _googleMapsContainer(context),
           Column(
             children: <Widget>[
               _googleMapsContainer(context),
@@ -87,7 +88,7 @@ class _MapsState extends State<Maps> {
             children: <Widget>[
               new ListTile(
                 title: new Text("${foundPlaces[key].name}"),
-                subtitle: new Text("${foundPlaces[key].formattedAddress}\n" + (foundPlaces[key].openingHours.openNow? 'Jetzt geöffnet' : 'Momentan geschlossen')),
+                subtitle: new Text("${foundPlaces[key].formattedAddress}\n" + getOpenString(foundPlaces[key])),
                 trailing: SizedBox(
                   child: Icon(Icons.call),
                 ),
@@ -99,6 +100,18 @@ class _MapsState extends State<Maps> {
       );
     } else {
       return LoadBar.build();
+    }
+  }
+
+  String getOpenString(PlacesSearchResult result) {
+    if(result.openingHours != null) {
+      if(result.openingHours.openNow != null) {
+        return 'Jetzt geöffnet';
+      } else {
+        return 'Momentan geschlossen';
+      }
+    } else {
+      return '';
     }
   }
 
@@ -268,7 +281,7 @@ class _MapsState extends State<Maps> {
       isLoaded = false;
     });
 
-    markers.clear();
+    //markers.clear();
     // get current position
 
     LatLng centerOfMap = await getCenterOfMap();
@@ -277,7 +290,7 @@ class _MapsState extends State<Maps> {
 
     // add markers
     final loc = Location(centerOfMap.latitude, centerOfMap.longitude);
-    final result = await _places.searchByText("apotheke", location: loc, radius: 500);
+    final result = await _places.searchByText("apotheke", location: loc, radius: 200);
 
     setState(() {
       print(result.status);
@@ -307,7 +320,7 @@ class _MapsState extends State<Maps> {
 
     // add markers
     final loc = Location(location.latitude, location.longitude);
-    final result = await _places.searchByText("apotheke", location: loc, radius: 500);
+    final result = await _places.searchByText("apotheke", location: loc, radius: 200);
 
     setState(() {
       if (result.status == "OK") {
@@ -318,6 +331,15 @@ class _MapsState extends State<Maps> {
           print(f.name);
           addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
         });
+      } else {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(result.status),
+                content: Text(result.errorMessage),
+              );
+            });
       }
       isLoaded = true;
     });
@@ -360,17 +382,17 @@ class _MapsState extends State<Maps> {
       );
     } else {
       if(place.openingHours != null) {
-        oh = place.openingHours.openNow? 'Jetzt geöffnet' : 'Momentan geschlossen';
-        marker = Marker(
-          markerId: markerId,
-          position: latlng,
-          infoWindow: InfoWindow(title: place.name, snippet: oh),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-          onTap: () {
-            _onMarkerTapped(id);
-          },
-        );
+        oh = place.openingHours.openNow ? 'Jetzt geöffnet' : 'Momentan geschlossen';
       }
+      marker = Marker(
+        markerId: markerId,
+        position: latlng,
+        infoWindow: InfoWindow(title: place.name, snippet: oh),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        onTap: () {
+          _onMarkerTapped(id);
+        },
+      );
     }
 
     if(marker != null) {
@@ -405,5 +427,4 @@ class _MapsState extends State<Maps> {
     )));
 
   }
-
 }

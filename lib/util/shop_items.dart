@@ -117,7 +117,7 @@ class ShopListParser {
               item.link = productDetails.children.first.attributes["href"];
             }
             if(imageElement.children.first.attributes.containsKey("data-src")) {
-              item.image = imageElement.children.first.attributes["data-src"];
+              item.image = "https://www.docmorris.de/" + imageElement.children.first.attributes["data-src"];
             }
           }
           if(productDetails.className.contains("product-description")) {

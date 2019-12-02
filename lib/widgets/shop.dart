@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:maph_group3/util/helper.dart';
 import 'package:maph_group3/util/nampr.dart';
 import 'package:maph_group3/util/shop_items.dart';
 import 'package:maph_group3/widgets/product_details.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:html/dom.dart' as dom;
 
 import '../data/med.dart';
 import 'maps.dart';
@@ -30,7 +28,6 @@ class _ShopState extends State<Shop> {
   @override
   void initState() {
     super.initState();
-    //getSearchResults("Ibuprofen");
   }
 
   @override
@@ -124,7 +121,7 @@ class _ShopState extends State<Shop> {
                     url = "https://www.docmorris.de/" + item.link;
                   }
                   if (await canLaunch(url)) {
-                    await launch(url);
+                    await launch(url, forceWebView: true, enableJavaScript: true);
                   } else {
                     throw 'Could not launch $url';
                   }
@@ -180,61 +177,6 @@ class _ShopState extends State<Shop> {
     );
   }
 
-  Widget buildHtml() {
-    return ListView(
-      children: <Widget>[
-          Html(
-            data: shoppingInfo,
-            padding: EdgeInsets.all(10.0),
-            useRichText: false,
-            onLinkTap: (url) { launch("https://www.medpex.de" + url);},
-            customRender: (node, children) {
-              if (node is dom.Element) {
-                if (node.className == "product-list-entry") {
-                  return
-                    Column(
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () => {
-                            Navigator.push(context,
-                              NoAnimationMaterialPageRoute(
-                                  builder: (context) => ProductDetails(url: "test")
-                              ),
-                            ),
-                          },//orderMed,
-                          child: Container(
-                            padding: EdgeInsets.all(5.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                              border: Border.all(width: 1),
-                            ),
-                            child: DefaultTextStyle(
-                              child: Column(
-                                children: children,
-                              ),
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                        ),
-                      ]
-                  );
-                }
-                return null;
-              }
-              return null;
-            },
-          ),
-        ],
-    );
-  }
-
   Future<List<ShopItem>> getShopData(String name) async {
     String urlMedpex = "https://www.medpex.de/search.do?q=" + name;
     String htmlMedpex = await Helper.fetchHTML(urlMedpex);
@@ -244,11 +186,16 @@ class _ShopState extends State<Shop> {
     String htmlDocMorris = await Helper.fetchHTML(urlDocMorris);
     var listDocMorris = ShopListParser.parseHtmlToShopListItemDocMorris(htmlDocMorris);
 
-    //var newList = new List.from(listMedPex)..addAll(listDocMorris);
-    return listMedPex;
+    // TODO
+    var newList = new List<ShopItem>();
+    for(int i = 0; i < 5; i++) {
+      newList.add(listMedPex[i]);
+      newList.add(listDocMorris[i]);
+    }
+    return newList;
   }
 
-  void orderMed() {
+  void moveToProductOverview() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -272,13 +219,5 @@ class _ShopState extends State<Shop> {
         );
       },
     );
-  }
-
-  _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
   }
 }

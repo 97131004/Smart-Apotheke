@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:maph_group3/util/helper.dart';
 import 'package:maph_group3/util/shop_items.dart';
 
 class ProductDetails extends StatefulWidget {
@@ -28,58 +27,83 @@ class _ProductDetailsState extends State<ProductDetails> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Produktdaten'),
+        title: Text("Produktinfo"),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(10),
-            ),
-            Text(itemToDisplay.name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),),
-            Padding(
-              padding: EdgeInsets.all(10),
-            ),
-            Row(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.all(28),
-                ),
-                Container(
-                  width: 300,
-                  height: 300,
-                  decoration: new BoxDecoration (
-                    borderRadius: new BorderRadius.circular(5),
-                    border: Border.all(color: Colors.black54),
-                  ),
-                  child: Image.asset(itemToDisplay.image)
-                ),
-                Padding(
-                  padding: EdgeInsets.all(10),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.all(10),
-            ),
-            Text(itemToDisplay.desc),
-            Padding(
-              padding: EdgeInsets.all(10),
-            ),
-            TextField(
-              decoration: new InputDecoration(
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black54, width: 2.0),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red, width: 5.0),
-                ),
-                hintText: 'Menge'
-              ),
-            ),
+            buildImageContainer(),
+            buildScrollView(),
+            buildOrderCompleteContainer(),
           ],
         ),
-      )
+      ),
+    );
+  }
+
+  Widget buildImageContainer() {
+    return Center(
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.4,
+        width: MediaQuery.of(context).size.width,
+        decoration: new BoxDecoration (
+          borderRadius: new BorderRadius.horizontal(),
+          border: Border.all(color: Colors.black54),
+        ),
+        padding: EdgeInsets.all(15),
+        child: Image.asset(itemToDisplay.image),
+      ),
+    );
+  }
+
+  Widget buildScrollView() {
+    return Column(
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.all(10),
+          child: Text(itemToDisplay.name, style: TextStyle(fontSize: 30),),
+        ),
+        Container(
+          child: Column(
+            children: <Widget>[
+              Text("Beschreibung", textAlign: TextAlign.right, style: TextStyle(fontSize: 15),),
+              Text(itemToDisplay.desc),
+              Text("STDHEHKDKE"),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget buildOrderCompleteContainer() {
+    return Row(
+      children: <Widget>[
+        Padding(padding: EdgeInsets.all(20),),
+        new Flexible(
+          child: Container(
+            padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+            child: TextField(
+              decoration: new InputDecoration(
+                  border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black54)
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.green, width: 2)
+                  )
+              ),
+            ),
+          ),
+        ),
+        Padding(padding: EdgeInsets.all(10),),
+        new Flexible(
+          child: RaisedButton(
+            onPressed: null,
+            child: Text("Jetzt kaufen", style: TextStyle(color: Colors.green),),
+          ),
+        ),
+        Padding(padding: EdgeInsets.all(20),),
+      ],
     );
   }
 
