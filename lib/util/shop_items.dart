@@ -8,6 +8,7 @@ class ShopItem {
   String link;
   String image;
   String price;
+  int priceInt;
   String crossedOutPrice;
   String pricePerUnit;
   String merchant;
@@ -23,11 +24,16 @@ class ShopItem {
     this.dosage = dosage;
     this.link = link;
     this.image = image;
-    this.price = price;
+    this.setPrice(price);
     this.crossedOutPrice = crossedOutPrice;
     this.pricePerUnit = pricePerUnit;
     this.merchant = merchant;
     this.desc = desc;
+  }
+
+  void setPrice(String price) {
+    this.price = price;
+    this.priceInt = ((double.tryParse(price.substring(0, price.length-2).replaceAll(',', '.')) ?? 0.0)*100).toInt();
   }
 
   Map<String, dynamic> toMap() {
@@ -47,6 +53,12 @@ class ShopItem {
 
     return map;
   }
+
+  int compareTo(ShopItem item) {
+    if(this.priceInt == item.priceInt) return 0;
+    if(this.priceInt > item.priceInt) return 1;
+    else return -1;
+  }
 }
 
 class ShopListParser {
@@ -63,7 +75,7 @@ class ShopListParser {
         var prices = formElement.getElementsByClassName("transaction").first
             .getElementsByClassName("prices").first;
         for(var priceElement in prices.children) {
-          if(priceElement.className == "normal-price") item.price = priceElement.text;
+          if(priceElement.className == "normal-price") item.setPrice(priceElement.text);
           if(priceElement.className == "sp2p normal-price-crossedout") item.crossedOutPrice = priceElement.text;
           if(priceElement.className == "base-price") item.pricePerUnit = priceElement.text;
         }
@@ -132,7 +144,7 @@ class ShopListParser {
                 item.crossedOutPrice = price.children.first.text;
               }
               if(price.className == "price") {
-                item.price = price.children.first.text;
+                item.setPrice(price.children.first.text);
               }
               if(price.className == "additional-info basePrice") {
                 item.pricePerUnit = price.text.split("\n")[1].replaceAll(" ", "");

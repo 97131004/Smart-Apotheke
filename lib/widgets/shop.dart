@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:maph_group3/util/helper.dart';
+import 'package:maph_group3/util/load_bar.dart';
 import 'package:maph_group3/util/nampr.dart';
+import 'package:maph_group3/util/no_internet_alert.dart';
 import 'package:maph_group3/util/shop_items.dart';
 import 'package:maph_group3/widgets/product_details.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../data/globals.dart' as globals;
 import '../data/med.dart';
 import 'maps.dart';
 
@@ -20,13 +23,32 @@ class Shop extends StatefulWidget {
 }
 
 class _ShopState extends State<Shop> {
+  static final String cPriceASC = 'Preis aufsteigend';
+  static final String cPriceDSC = 'Preis absteigend';
+  static final String cPriceSort = 'Keine Sortierung';
+
   String shoppingInfo;
   bool shoppingInfoLoaded = false;
+  String sorting = cPriceSort;
 
-  List<ShopItem> itemList;
+  String medSearchKey;
+  ShopItem localShopItem;
+
+  Future<List<ShopItem>> itemList;
 
   @override
   void initState() {
+    Helper.hasInternet().then((internet) {
+      if (internet == null || !internet) {
+        NoInternetAlert.show(context);
+      }
+    });
+
+    medSearchKey = 'ibuprofen';
+    if(globals.items.containsKey(medSearchKey)) {
+      localShopItem = globals.items[medSearchKey];
+    }
+
     super.initState();
   }
 
@@ -39,17 +61,25 @@ class _ShopState extends State<Shop> {
       body: Column(
         children: <Widget>[
           buildLocalSearchButton(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('Ergebnisse für Medikament $medSearchKey...'),
+              Padding( padding: EdgeInsets.symmetric(horizontal: 16.0),),
+              buildDropDownMenu(),
+            ],
+          ),
           Visibility(
-            visible: true,
+            visible: (localShopItem != null),
             child: Padding(
               padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-              child: buildCard("TEST"),
+              child: buildCard(),
             ),
           ),
           Expanded(
             child: Padding(
               padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-              child: buildListView("Ibuprofen"),
+              child: buildListView(medSearchKey),
             )
           ),
         ],
@@ -57,7 +87,34 @@ class _ShopState extends State<Shop> {
     );
   }
 
-  Widget buildCard(String searchKey) {
+  Widget buildDropDownMenu() {
+    return DropdownButton<String>(
+      value: sorting,
+      icon: Icon(Icons.sort),
+      iconSize: 18,
+      elevation: 16,
+      style: TextStyle(
+          color: Colors.blue
+      ),
+      underline: Container(
+        height: 2,
+        color: Colors.blue,
+      ),
+      onChanged: (String newValue) {
+        setState(() {
+          sorting = newValue;
+        });
+      },
+      items: <String>[cPriceSort, cPriceASC, cPriceDSC].map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget buildCard() {
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
@@ -85,16 +142,16 @@ class _ShopState extends State<Shop> {
          NoAnimationMaterialPageRoute(builder: (context) => ProductDetails())),
       },
       leading: Image.asset('assets/dummy_med.png'),
-      title: Text("Iboprofen ratiopharm 400mg"),
-      subtitle: Text("Filmtabletten, 20 Stück\nratiopharm GmbH\n\nAnbieter: MAPH_group3", style: TextStyle(fontSize: 12)),
+      title: Text(localShopItem.name),
+      subtitle: Text(localShopItem.dosage + '\n' + localShopItem.brand + '\n\n' + localShopItem.merchant, style: TextStyle(fontSize: 12)),
       trailing: Column(
         children: <Widget>[
-          Text("Direkt hier bestellen!", style: TextStyle(color: Colors.red),),
+          Text('In-App bestellen!', style: TextStyle(color: Colors.red),),
           Column(
             children: <Widget>[
-              Text("3,99 €", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              Text("5,99 €", style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough)),
-              Text("0,19 €"),
+              Text(localShopItem.price, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              Text(localShopItem.crossedOutPrice, style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough)),
+              Text(localShopItem.pricePerUnit),
             ]
           ),
         ],
@@ -104,10 +161,21 @@ class _ShopState extends State<Shop> {
 
   Widget buildListView(String searchKey) {
     return FutureBuilder<List<ShopItem>>(
-      future: getShopData(searchKey),
+      future: getShopData(medSearchKey),
       builder: (context, snapshot) {
-        if (!snapshot.hasData)
-          return Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData) {
+          return Center(child: LoadBar.build());
+        }
+
+        snapshot.data.sort((a,b) {
+          if(sorting == cPriceASC) {
+            return a.compareTo(b);
+          }
+          if(sorting == cPriceDSC) {
+            return b.compareTo(a);
+          }
+          return 0;
+        });
 
         return ListView(
           children: snapshot.data.map((item) =>
@@ -115,10 +183,10 @@ class _ShopState extends State<Shop> {
               child: ListTile(
                 onTap: () async {
                   String url;
-                  if(item.merchant == "Medpex") {
-                    url = "https://www.medpex.de/" + item.link;
-                  } else if (item.merchant == "DocMorris") {
-                    url = "https://www.docmorris.de/" + item.link;
+                  if(item.merchant == 'Medpex') {
+                    url = 'https://www.medpex.de/' + item.link;
+                  } else if (item.merchant == 'DocMorris') {
+                    url = 'https://www.docmorris.de/' + item.link;
                   }
                   if (await canLaunch(url)) {
                     await launch(url, forceWebView: true, enableJavaScript: true);
@@ -178,21 +246,26 @@ class _ShopState extends State<Shop> {
   }
 
   Future<List<ShopItem>> getShopData(String name) async {
-    String urlMedpex = "https://www.medpex.de/search.do?q=" + name;
+    String urlMedpex = 'https://www.medpex.de/search.do?q=' + name;
     String htmlMedpex = await Helper.fetchHTML(urlMedpex);
     var listMedPex = ShopListParser.parseHtmlToShopListItemMedpex(htmlMedpex);
 
-    String urlDocMorris = "https://www.docmorris.de/search?query=" + name;
+    String urlDocMorris = 'https://www.docmorris.de/search?query=' + name;
     String htmlDocMorris = await Helper.fetchHTML(urlDocMorris);
     var listDocMorris = ShopListParser.parseHtmlToShopListItemDocMorris(htmlDocMorris);
 
-    // TODO
-    var newList = new List<ShopItem>();
-    for(int i = 0; i < 5; i++) {
-      newList.add(listMedPex[i]);
-      newList.add(listDocMorris[i]);
+    /*List<ShopItem> tempList = [];
+    int length = listMedPex.length > listDocMorris.length ? listDocMorris.length : listMedPex.length;
+    for(int i = 0; i <= length; i++) {
+      tempList.add(listMedPex.elementAt(i));
+      tempList.add(listDocMorris.elementAt(i));
     }
-    return newList;
+
+    setState(() {
+      return tempList;
+    });*/
+
+    return listMedPex;
   }
 
   void moveToProductOverview() {
@@ -200,17 +273,17 @@ class _ShopState extends State<Shop> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: new Text("Bestellen"),
-          content: new Text("Medikament jetzt bestellen?"),
+          title: new Text('Bestellen'),
+          content: new Text('Medikament jetzt bestellen?'),
           actions: <Widget>[
             new FlatButton(
-              child: new Text("Abbrechen"),
+              child: new Text('Abbrechen'),
               onPressed: () {
                 Navigator.of(context).pop();
              },
             ),
             new FlatButton(
-              child: new Text("Fortfahren"),
+              child: new Text('Fortfahren'),
               onPressed: () {
                 Navigator.of(context).pop();
               },

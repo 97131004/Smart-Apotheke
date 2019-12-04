@@ -32,6 +32,8 @@ class _MapsState extends State<Maps> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   Map<String, PlacesSearchResult> foundPlaces = <String, PlacesSearchResult>{};
 
+  var previousMarkerId;
+
   bool markerIsTabbed = false;
   bool isLoaded = false;
   String name = "";
@@ -77,7 +79,7 @@ class _MapsState extends State<Maps> {
     if(isLoaded) {
       if(foundPlaces.length == 0) {
         return new ListTile(
-          title: Text("No place found"),
+          title: Text('Keine Apotheke gefunden.'),
         );
       }
       return new ListView.builder(
@@ -88,9 +90,17 @@ class _MapsState extends State<Maps> {
             children: <Widget>[
               new ListTile(
                 title: new Text("${foundPlaces[key].name}"),
-                subtitle: new Text("${foundPlaces[key].formattedAddress}\n" + getOpenString(foundPlaces[key])),
-                trailing: SizedBox(
-                  child: Icon(Icons.call),
+                // TODO: display address and opening hours in different text styles
+                subtitle: RichText(text: TextSpan(children: [
+                  //TextSpan(text: foundPlaces[key].formattedAddress),
+                  TextSpan(text: getOpenString(foundPlaces[key]), style: TextStyle(fontWeight: FontWeight.bold))
+                ])
+                ),//new Text("${foundPlaces[key].formattedAddress}\n" + getOpenString(foundPlaces[key])),
+                trailing: GestureDetector(
+                  child: SizedBox(
+                    child: Icon(Icons.call),
+                  ),
+                  onTap: () => launch('tel://03012345678'),
                 ),
                 onTap: () => goToLocation(foundPlaces[key]),
               ),
@@ -128,7 +138,7 @@ class _MapsState extends State<Maps> {
                 Padding(
                   padding: EdgeInsets.all(5.0),
                 ),
-                Text("In diesem Bereich suchen")
+                Text('In diesem Bereich suchen')
               ],
             ),
           ),
@@ -252,15 +262,15 @@ class _MapsState extends State<Maps> {
         Container(
             child: IconButton(
               icon: Icon(Icons.call),
-              tooltip: "Apotheke anrufen",
-              onPressed: () => launch("tel://03012345678"),
+              tooltip: 'Apotheke anrufen',
+              onPressed: () => launch('tel://03012345678'),
             )),
       ],
     );
   }
 
   NetworkImage _apoImage() {
-    NetworkImage image = new NetworkImage("https://www.abda.de/fileadmin/_processed_/d/3/csm_Apo_Logo_Neu_HKS13_neues_BE_42f1ed22ad.jpg");
+    NetworkImage image = new NetworkImage('https://www.abda.de/fileadmin/_processed_/d/3/csm_Apo_Logo_Neu_HKS13_neues_BE_42f1ed22ad.jpg');
     /*var url = buildPhotoURL(photo);
     NetworkImage image;
 
@@ -286,15 +296,15 @@ class _MapsState extends State<Maps> {
 
     LatLng centerOfMap = await getCenterOfMap();
 
-    addMarker("Mein Standort", centerOfMap);
+    addMarker('Mein Standort', centerOfMap);
 
     // add markers
     final loc = Location(centerOfMap.latitude, centerOfMap.longitude);
-    final result = await _places.searchByText("apotheke", location: loc, radius: 200);
+    final result = await _places.searchByText('apotheke', location: loc, radius: 200);
 
     setState(() {
       print(result.status);
-      if (result.status == "OK") {
+      if (result.status == 'OK') {
         result.results.forEach((f){
           if(!foundPlaces.containsKey(f.id)) {
             foundPlaces[f.id] = f;
@@ -316,14 +326,14 @@ class _MapsState extends State<Maps> {
       target: LatLng(location.latitude, location.longitude),
       zoom: 14.0,
     )));
-    addMarker("Mein Standort", LatLng(location.latitude, location.longitude));
+    addMarker('Mein Standort', LatLng(location.latitude, location.longitude));
 
     // add markers
     final loc = Location(location.latitude, location.longitude);
-    final result = await _places.searchByText("apotheke", location: loc, radius: 200);
+    final result = await _places.searchByText('apotheke', location: loc, radius: 200);
 
     setState(() {
-      if (result.status == "OK") {
+      if (result.status == 'OK') {
         result.results.forEach((f){
           if(!foundPlaces.containsKey(f.id)) {
             foundPlaces[f.id] = f;
@@ -370,11 +380,11 @@ class _MapsState extends State<Maps> {
     return coords;
   }
 
-  void addMarker(var id, LatLng latlng, {PlacesSearchResult place}) {
+  void addMarker(var id, LatLng latlng, {PlacesSearchResult place, double colorDescriptor}) {
     final MarkerId markerId = MarkerId(id);
     Marker marker;
 
-    if(id == "Mein Standort") {
+    if(id == 'Mein Standort') {
       marker = Marker(
           markerId: markerId,
           position: latlng,
@@ -384,11 +394,14 @@ class _MapsState extends State<Maps> {
       if(place.openingHours != null) {
         oh = place.openingHours.openNow ? 'Jetzt geöffnet' : 'Momentan geschlossen';
       }
+      if(colorDescriptor == null) {
+        colorDescriptor = BitmapDescriptor.hueAzure;
+      }
       marker = Marker(
         markerId: markerId,
         position: latlng,
         infoWindow: InfoWindow(title: place.name, snippet: oh),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        icon: BitmapDescriptor.defaultMarkerWithHue(colorDescriptor),
         onTap: () {
           _onMarkerTapped(id);
         },
@@ -426,5 +439,30 @@ class _MapsState extends State<Maps> {
       zoom: 14.0,
     )));
 
+    setState(() {
+      // set back previous marker color back to azure (its not possible to change color retrospectively)
+      if(previousMarkerId != null) {
+        MarkerId markerId = MarkerId(previousMarkerId);
+        Marker temp = markers[markerId];
+        markers.remove(markerId);
+
+        Marker newMarker = Marker(
+          markerId: markerId,
+          position: temp.position,
+          infoWindow: temp.infoWindow,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          onTap: () {
+            _onMarkerTapped(previousMarkerId);
+          },
+        );
+        markers[markerId] = newMarker;
+      }
+
+      // delete current entry from markers and add same entry as new marker with diff color
+      MarkerId markerId = MarkerId(foundPlace.id);
+      markers.remove(markerId);
+      addMarker(foundPlace.id, LatLng(foundPlace.geometry.location.lat, foundPlace.geometry.location.lng), place: foundPlace, colorDescriptor: BitmapDescriptor.hueGreen);
+      previousMarkerId = foundPlace.id;
+    });
   }
 }
