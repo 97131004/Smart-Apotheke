@@ -52,6 +52,7 @@ class _MedSearchState extends State<MedSearch> {
     return Scaffold(
         appBar: AppBar(
           title: Text('Medikament suchen'),
+          backgroundColor: Colors.green,
         ),
         body: Column(
           children: <Widget>[
@@ -61,9 +62,12 @@ class _MedSearchState extends State<MedSearch> {
                     autofocus: true,
                     onSubmitted: search,
                     decoration: new InputDecoration(
+                     focusedBorder: InputBorder.none,
                       hintText: 'Name / PZN',
                       prefixIcon: const Icon(
+                        
                         Icons.search,
+                        color: Colors.green
                       ),
                     ))),
             SizedBox(height: 10),

@@ -61,6 +61,7 @@ class _PersonalState extends State<Personal> {
       child: Scaffold(
         appBar: AppBar(
           title: Text('Persönliche Daten'),
+          backgroundColor: Colors.green[600]
         ),
         body: ListView(
           children: <Widget>[
