@@ -28,10 +28,10 @@ void main() {
       scaffoldBackgroundColor: Colors.white,
       primaryTextTheme: TextTheme(title: TextStyle(color: Colors.white)),
     ),
-    //home: Home(),
+    home: Home(),
     //home: MedSearch(),
     //home: MedScan(meds: medicaments),
     //home: Personal(),
-    home: Shop(),
+      //home: Shop(),
   ));
 }

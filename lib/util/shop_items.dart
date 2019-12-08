@@ -1,3 +1,5 @@
+import 'dart:core';
+
 import 'package:html/parser.dart' show parse;
 
 class ShopItem {
@@ -13,11 +15,14 @@ class ShopItem {
   String pricePerUnit;
   String merchant;
   String desc = "";
+  int orderQuantity;
+  String searchKey;
+  bool onlyAvailableOnPrescription;
 
   ShopItem.empty();
 
   ShopItem(String name, String pzn, String brand, [String dosage, String link,
-    String image, String price, String crossedOutPrice, String pricePerUnit, String merchant, String desc]) {
+    String image, String price, String crossedOutPrice, String pricePerUnit, String merchant, String desc, String searchKey, bool onlyAvailableOnPrescription]) {
     this.name = name;
     this.pzn = pzn;
     this.brand = brand;
@@ -29,6 +34,8 @@ class ShopItem {
     this.pricePerUnit = pricePerUnit;
     this.merchant = merchant;
     this.desc = desc;
+    this.searchKey = searchKey;
+    this.onlyAvailableOnPrescription = onlyAvailableOnPrescription;
   }
 
   void setPrice(String price) {
@@ -62,7 +69,7 @@ class ShopItem {
 }
 
 class ShopListParser {
-  static List<ShopItem> parseHtmlToShopListItemMedpex(String html) {
+  static Future<List<ShopItem>> parseHtmlToShopListItemMedpex(String html) async {
     List<ShopItem> resultList = new List<ShopItem>();
     var htmlDom = parse(html);
     var listElement = htmlDom.getElementById("product-list");//getElementsByTagName("div");
@@ -107,10 +114,10 @@ class ShopListParser {
       }
     }
 
-    return resultList;
+    return Future<List<ShopItem>>.value(resultList);
   }
 
-  static List<ShopItem> parseHtmlToShopListItemDocMorris(String html) {
+  static Future<List<ShopItem>> parseHtmlToShopListItemDocMorris(String html) async {
     List<ShopItem> resultList = new List<ShopItem>();
     var htmlDom = parse(html);
     var listElement = htmlDom.getElementsByClassName("search__results").first;
@@ -156,6 +163,23 @@ class ShopListParser {
         resultList.add(item);
       }
     }
-    return resultList;
+    return Future<List<ShopItem>>.value(resultList);
+  }
+
+  static Future<List<ShopItem>> mergeLists(List<ShopItem> listA, List<ShopItem> listB) async {
+    if(listA == null || listA.length == 0) {
+      return listB;
+    }
+    if(listB == null || listB.length == 0) {
+      return listA;
+    }
+
+    List<ShopItem> tempList = [];
+    int length = listA.length > listB.length ? listB.length : listA.length;
+    for(int i = 0; i < length - 1; i++) {
+        tempList.add(listA.elementAt(i));
+        tempList.add(listB.elementAt(i));
+    }
+    return Future<List<ShopItem>>.value(tempList);
   }
 }

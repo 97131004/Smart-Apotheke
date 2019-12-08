@@ -89,13 +89,20 @@ class _MapsState extends State<Maps> {
           return new Column(
             children: <Widget>[
               new ListTile(
+                leading: Container(
+                  padding: EdgeInsets.all(8.0),
+                  child: Image(
+                    fit: BoxFit.scaleDown,
+                    image: _apoImage(),
+                  )
+                ),
                 title: new Text("${foundPlaces[key].name}"),
                 // TODO: display address and opening hours in different text styles
-                subtitle: RichText(text: TextSpan(children: [
+                subtitle: new Text("${foundPlaces[key].formattedAddress}\n" + getOpenString(foundPlaces[key])),/*new RichText(text: TextSpan(children: [
                   //TextSpan(text: foundPlaces[key].formattedAddress),
                   TextSpan(text: getOpenString(foundPlaces[key]), style: TextStyle(fontWeight: FontWeight.bold))
                 ])
-                ),//new Text("${foundPlaces[key].formattedAddress}\n" + getOpenString(foundPlaces[key])),
+                ),*/
                 trailing: GestureDetector(
                   child: SizedBox(
                     child: Icon(Icons.call),
@@ -283,7 +290,7 @@ class _MapsState extends State<Maps> {
   }
 
   String buildPhotoURL(String photoReference) {
-    return 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=$photoReference&key=$kGoogleApiKey';
+    return 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=$kGoogleApiKey';
   }
 
   Future searchInSelectedArea() async {

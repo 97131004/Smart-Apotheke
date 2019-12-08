@@ -25,13 +25,15 @@ List<Med> meds = [
 ];
 
 Map<String, ShopItem> items = {
-  'ibuprofen': new ShopItem('Ibu ratio 400 akut Schmerztabletten Filmtabletten',
-      '10019621', 'ratiopharm Gmbh', '20 Filmtabletten', '', '', '3,39 €', '4,99 €',
+  '10019621': new ShopItem('Ibu ratio 400 akut Schmerztabletten Filmtabletten',
+      '10019621', 'ratiopharm Gmbh', '20 Filmtabletten', '', 'assets/dummy_med.png', '3,39 €', '4,99 €',
       '0,17 €', 'MAPH_group3', 'Bei leichten bis mäßig starken Schmerzen wie Kopf-, Zahn-, '
           'Regelschmerzen und Fieber\nIbuprofen, der Wirkstoff von IBU ratiopharm 400 mg akut, '
           'ist ein bewährtes Mittel bei leichten bis mäßigen Kopfschmerzen, Fieber und anderen '
           'Alltagsschmerzen. Mit 400 mg des Wirkstoffes enthalten die Tabletten die höchste '
           'rezeptfreie Dosierung von Ibuprofen. Die Tabletten sollten immer mit einem Glas '
-          'Wasser eingenommen werden.'),
-  'simvastin': new ShopItem.empty(),
+          'Wasser eingenommen werden.', 'ibuprofen', false), // Ibuprofen
+  '4144658': new ShopItem('Simvastatin-CT 40mg', '4144658', 'AbZ-Pharma GmbH', '100 Stück, N3', '',
+      'assets/dummy_med.png', '24,99 €', '', '0,24 €', 'MAPH_group3', '***Beschreibungstext***',
+      'simvastin', true), // Simvastin
 };

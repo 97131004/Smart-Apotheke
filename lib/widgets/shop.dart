@@ -44,7 +44,7 @@ class _ShopState extends State<Shop> {
       }
     });
 
-    medSearchKey = 'ibuprofen';
+    medSearchKey = widget.med.pzn;
     if(globals.items.containsKey(medSearchKey)) {
       localShopItem = globals.items[medSearchKey];
     }
@@ -64,7 +64,7 @@ class _ShopState extends State<Shop> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text('Ergebnisse für Medikament $medSearchKey...'),
+              Text('Ergebnisliste'),
               Padding( padding: EdgeInsets.symmetric(horizontal: 16.0),),
               buildDropDownMenu(),
             ],
@@ -79,7 +79,7 @@ class _ShopState extends State<Shop> {
           Expanded(
             child: Padding(
               padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-              child: buildListView(medSearchKey),
+              child: buildListView(localShopItem.name),
             )
           ),
         ],
@@ -139,7 +139,7 @@ class _ShopState extends State<Shop> {
       contentPadding: EdgeInsets.all(10),
       onTap: () => {Navigator.push(
          context,
-         NoAnimationMaterialPageRoute(builder: (context) => ProductDetails())),
+         NoAnimationMaterialPageRoute(builder: (context) => ProductDetails(searchKey: this.medSearchKey))),
       },
       leading: Image.asset('assets/dummy_med.png'),
       title: Text(localShopItem.name),
@@ -161,7 +161,7 @@ class _ShopState extends State<Shop> {
 
   Widget buildListView(String searchKey) {
     return FutureBuilder<List<ShopItem>>(
-      future: getShopData(medSearchKey),
+      future: getShopData(localShopItem.searchKey),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(child: LoadBar.build());
@@ -248,49 +248,14 @@ class _ShopState extends State<Shop> {
   Future<List<ShopItem>> getShopData(String name) async {
     String urlMedpex = 'https://www.medpex.de/search.do?q=' + name;
     String htmlMedpex = await Helper.fetchHTML(urlMedpex);
-    var listMedPex = ShopListParser.parseHtmlToShopListItemMedpex(htmlMedpex);
+    var listMedPex = await ShopListParser.parseHtmlToShopListItemMedpex(htmlMedpex);
 
     String urlDocMorris = 'https://www.docmorris.de/search?query=' + name;
     String htmlDocMorris = await Helper.fetchHTML(urlDocMorris);
-    var listDocMorris = ShopListParser.parseHtmlToShopListItemDocMorris(htmlDocMorris);
+    var listDocMorris = await ShopListParser.parseHtmlToShopListItemDocMorris(htmlDocMorris);
 
-    /*List<ShopItem> tempList = [];
-    int length = listMedPex.length > listDocMorris.length ? listDocMorris.length : listMedPex.length;
-    for(int i = 0; i <= length; i++) {
-      tempList.add(listMedPex.elementAt(i));
-      tempList.add(listDocMorris.elementAt(i));
-    }
+    var result = await ShopListParser.mergeLists(listMedPex, listDocMorris);
 
-    setState(() {
-      return tempList;
-    });*/
-
-    return listMedPex;
-  }
-
-  void moveToProductOverview() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: new Text('Bestellen'),
-          content: new Text('Medikament jetzt bestellen?'),
-          actions: <Widget>[
-            new FlatButton(
-              child: new Text('Abbrechen'),
-              onPressed: () {
-                Navigator.of(context).pop();
-             },
-            ),
-            new FlatButton(
-              child: new Text('Fortfahren'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+    return result;
   }
 }
