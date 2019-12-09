@@ -86,15 +86,10 @@ class _MedInfoState extends State<MedInfo> {
             : LoadBar.build(),
         floatingActionButton: Visibility(
           visible: getMedInfoDataDone && (medInfoData.length > 0),
-          child: Container(
-            height: 50.0,
-            width: 50.0,
-            child: FittedBox(
-              child: FloatingActionButton(
-                  foregroundColor: Colors.white,
-                  child: Icon(Icons.arrow_upward),
-                  onPressed: () => scrollController.jumpTo(0)),
-            ),
+          child: FloatingActionButton(
+            foregroundColor: Colors.white,
+            child: Icon(Icons.arrow_upward),
+            onPressed: () => scrollController.jumpTo(0),
           ),
         ));
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:maph_group3/data/med.dart';
 import '../util/med_list.dart';
 import '../util/nampr.dart';
 import '../data/globals.dart' as globals;
@@ -19,6 +20,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  TextEditingController pass = new TextEditingController();
+  TextEditingController ePass = new TextEditingController();
+  String hash;
+  Alert alert;
+
   @override
   void initState() {
     super.initState();
@@ -26,10 +32,6 @@ class _HomeState extends State<Home> {
     passwordenter(context);
   }
 
-  TextEditingController pass = new TextEditingController();
-  TextEditingController ePass = new TextEditingController();
-  String hash;
-  Alert alert;
   void passwordenter(BuildContext context) async {
     if (!(await PersonalData.isPasswordExists())) {
       alert = createAlert(context);
@@ -167,16 +169,71 @@ class _HomeState extends State<Home> {
                 NoAnimationMaterialPageRoute(builder: (context) => Scanner()),
               );
             },
-          )
+          ),
         ],
       ),
-      body: ListView(
-        children: <Widget>[
-          Text(
-              'Hier kommt die History-Liste der vorher gefundenen Medikamente. Derzeit nur Dummy-Liste.'),
-          MedList.build(context, globals.meds),
-        ],
+      body: (globals.meds.length > 0)
+          ? MedList.build(
+              context,
+              globals.meds,
+              true,
+              medItemOnLongPress,
+              medItemOnSwipe,
+            )
+          : Center(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Text(
+                  'Keine Medikamente vorhanden. ' +
+                      'Scannen Sie ein Rezept über den Knopf unten rechts.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+      floatingActionButton: FloatingActionButton(
+        foregroundColor: Colors.white,
+        child: Icon(Icons.camera_alt),
+        onPressed: () {
+          Navigator.push(
+            context,
+            NoAnimationMaterialPageRoute(builder: (context) => Scanner()),
+          );
+        },
       ),
     );
+  }
+
+  void medItemOnLongPress(Med med, Offset tapPosition) {
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject();
+    showMenu(
+      items: <PopupMenuEntry>[
+        PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: <Widget>[
+              Icon(Icons.delete),
+              Text("Delete"),
+            ],
+          ),
+        )
+      ],
+      context: context,
+      position: RelativeRect.fromRect(
+          tapPosition & Size.zero, Offset.zero & overlay.size),
+    ).then((value) {
+      if (value == 'delete') {
+        medItemDelete(med);
+      }
+    });
+  }
+
+  void medItemOnSwipe(Med med) {
+    medItemDelete(med);
+  }
+
+  void medItemDelete(Med med) {
+    setState(() {
+      globals.meds.remove(med);
+    });
   }
 }

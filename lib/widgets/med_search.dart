@@ -74,7 +74,7 @@ class _MedSearchState extends State<MedSearch> {
                 showRetry: true,
                 itemBuilder: (context, entry, index) {
                   if (getSearchDone) {
-                    return MedList.buildItem(context, entry);
+                    return MedList.buildItem(context, index, entry);
                   }
                   return null;
                 },

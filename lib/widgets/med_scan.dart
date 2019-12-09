@@ -70,7 +70,9 @@ class _MedScanState extends State<MedScan> {
         appBar: AppBar(
           title: Text('Gefundene Medikamente'),
         ),
-        body: getMedsDone ? buildList() : LoadBar.buildwithtext("Lade MedList..."),
+        body: getMedsDone
+            ? buildList()
+            : LoadBar.buildwithtext("Lade MedList..."),
       ),
     );
   }
@@ -95,7 +97,7 @@ class _MedScanState extends State<MedScan> {
           }
           if (length > 0 && index >= 1 && index <= length) {
             //med items
-            return MedList.buildItem(context, widget.meds[index - 1]);
+            return MedList.buildItem(context, index, widget.meds[index - 1]);
           }
           if (length == 0 && index == length + 1) {
             //med items
@@ -108,7 +110,7 @@ class _MedScanState extends State<MedScan> {
               children: <Widget>[
                 SizedBox(height: 10),
                 ButtonTheme(
-                  buttonColor: Colors.grey[300],
+                  buttonColor: Colors.grey[200],
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
@@ -122,19 +124,13 @@ class _MedScanState extends State<MedScan> {
                             builder: (context) => MedSearch()),
                       );
                     },
-                    color: Colors.grey[200],
                     icon: Icon(Icons.edit),
-                    label: Text(
-                      "Name / PZN manuell eingeben",
-                      style: TextStyle(
-                        fontSize: 16.0,
-                      ),
-                    ),
+                    label: Text("Name / PZN manuell eingeben"),
                   ),
                 ),
                 SizedBox(height: 10),
                 ButtonTheme(
-                  buttonColor: Colors.grey[100],
+                  buttonColor: Colors.grey[200],
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
