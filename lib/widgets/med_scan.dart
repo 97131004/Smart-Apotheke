@@ -64,6 +64,7 @@ class _MedScanState extends State<MedScan> {
     return WillPopScope(
       onWillPop: () async {
         //back to home page, skipping scanner
+        Scanner.imageloaddone = false;
         Navigator.pop(context);
         return true;
       },
