@@ -70,7 +70,7 @@ class _MedScanState extends State<MedScan> {
         appBar: AppBar(
           title: Text('Gefundene Medikamente'),
         ),
-        body: getMedsDone ? buildList() : LoadBar.build(),
+        body: getMedsDone ? buildList() : LoadBar.buildwithtext("Lade MedList..."),
       ),
     );
   }
