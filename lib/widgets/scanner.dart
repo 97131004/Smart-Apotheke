@@ -11,7 +11,7 @@ import '../data/med.dart';
 
 class Scanner extends StatefulWidget {
   Scanner({Key key}) : super(key: key);
-
+  static bool imageloaddone = false;
   @override
   State<StatefulWidget> createState() {
     return _ScannerState();
@@ -20,7 +20,7 @@ class Scanner extends StatefulWidget {
 
 class _ScannerState extends State<Scanner> {
   List<Med> medicaments;
-
+  
   @override
   void initState() {
     super.initState();
@@ -35,9 +35,9 @@ class _ScannerState extends State<Scanner> {
         appBar: AppBar(
           title: Text('Rezept scannen'),
         ),
-        body: imageloaddone? LoadBar.buildwithtext("Scannt..."):loadImage());
+        body: Scanner.imageloaddone? LoadBar.build():loadImage());
   }
-  bool imageloaddone = false;
+  
   Widget loadImage()
   {
     return Center(
@@ -90,7 +90,7 @@ class _ScannerState extends State<Scanner> {
       if(file.existsSync()){setState(() {
         _file = file;
          analyzeImage();
-        imageloaddone = true;
+        Scanner.imageloaddone = true;
       });}
     
     } catch (e) {
@@ -104,7 +104,7 @@ class _ScannerState extends State<Scanner> {
      if(file.existsSync()){setState(() {
         _file = file;
          analyzeImage();
-        imageloaddone = true;
+        Scanner.imageloaddone = true;
       });}
     
        analyzeImage();
@@ -136,10 +136,9 @@ class _ScannerState extends State<Scanner> {
       }
     }
     setState(() {
-      imageloaddone = false;
       medicaments = pznNrs;
-      gotoMedListFound();
     });
+    gotoMedListFound();
   }
 
   bool isNumeric(String s) {

@@ -8,7 +8,7 @@ import 'scanner.dart';
 import 'med_search.dart';
 import 'calendar.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:maph_group3/util/personaldata.dart';
+import 'package:maph_group3/util/personal_data.dart';
 
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);

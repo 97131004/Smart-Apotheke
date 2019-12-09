@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:maph_group3/widgets/scanner.dart';
 
 import '../util/no_internet_alert.dart';
 import '../util/nampr.dart';
@@ -67,13 +68,10 @@ class _MedScanState extends State<MedScan> {
         return true;
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('Gefundene Medikamente'),
-        ),
-        body: getMedsDone
-            ? buildList()
-            : LoadBar.buildwithtext("Lade MedList..."),
-      ),
+          appBar: AppBar(
+            title: Text('Gefundene Medikamente'),
+          ),
+          body: getMedsDone ? buildList() : LoadBar.build()),
     );
   }
 
@@ -138,9 +136,7 @@ class _MedScanState extends State<MedScan> {
                     shape: new RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(30.0),
                     ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    onPressed: () {onScanAgainClick();},
                     label: Text("Nochmals scannen"),
                   ),
                 ),
@@ -151,5 +147,10 @@ class _MedScanState extends State<MedScan> {
         },
       ),
     );
+  }
+
+  void onScanAgainClick() {
+    Scanner.imageloaddone = false;
+    Navigator.pop(context);
   }
 }
