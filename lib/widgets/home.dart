@@ -212,7 +212,7 @@ class _HomeState extends State<Home> {
           child: Row(
             children: <Widget>[
               Icon(Icons.delete),
-              Text("Delete"),
+              Text("Löschen"),
             ],
           ),
         )
