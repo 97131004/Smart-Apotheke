@@ -179,6 +179,7 @@ class _HomeState extends State<Home> {
               true,
               medItemOnLongPress,
               medItemOnSwipe,
+              medItemOnButtonDelete,
             )
           : Center(
               child: Padding(
@@ -229,6 +230,33 @@ class _HomeState extends State<Home> {
 
   void medItemOnSwipe(Med med) {
     medItemDelete(med);
+  }
+
+  void medItemOnButtonDelete(Med med) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Löschen"),
+          content: Text("Wollen Sie diesen Eintrag wirklich löschen?"),
+          actions: [
+            FlatButton(
+              child: Text("Nein"),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            FlatButton(
+              child: Text("Ja"),
+              onPressed: () {
+                medItemDelete(med);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void medItemDelete(Med med) {

@@ -9,14 +9,15 @@ class MedList {
   static Widget build(BuildContext context, List<Med> meds,
       [bool removable = false,
       Function(Med, Offset) onLongPress,
-      Function(Med) onSwipe]) {
+      Function(Med) onSwipe,
+      Function(Med) onButtonDelete]) {
     return Scrollbar(
       child: ListView.builder(
           shrinkWrap: true,
           itemCount: meds.length,
           itemBuilder: (context, index) {
-            return buildItem(
-                context, index, meds[index], removable, onLongPress, onSwipe);
+            return buildItem(context, index, meds[index], removable,
+                onLongPress, onSwipe, onButtonDelete);
           }),
     );
   }
@@ -29,7 +30,8 @@ class MedList {
   static Widget buildItem(BuildContext context, int index, Med item,
       [bool removable = false,
       Function(Med, Offset) onLongPress,
-      Function(Med) onSwipe]) {
+      Function(Med) onSwipe,
+      Function(Med) onButtonDelete]) {
     return Theme(
       data: ThemeData(
         dividerColor: Colors.transparent,
@@ -50,14 +52,15 @@ class MedList {
                     onSwipe(item);
                   }
                 },
-                child: buildItemCore(context, item),
+                child: buildItemCore(context, item, removable, onButtonDelete),
               ),
             )
-          : buildItemCore(context, item),
+          : buildItemCore(context, item, removable, onButtonDelete),
     );
   }
 
-  static Widget buildItemCore(BuildContext context, Med item) {
+  static Widget buildItemCore(BuildContext context, Med item, bool removable,
+      Function(Med) onButtonDelete) {
     return ExpansionTile(
       key: new PageStorageKey<Key>(item.key),
       backgroundColor: Colors.yellow, //background color when selected
@@ -125,6 +128,25 @@ class MedList {
                 NoAnimationMaterialPageRoute(
                     builder: (context) => Shop(med: item)),
               );
+            },
+            color: Colors.white38,
+          ),
+        if (item.name != '' && removable)
+          FlatButton(
+            padding: EdgeInsets.all(16),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Löschen',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+            onPressed: () {
+              if (onButtonDelete != null) {
+                onButtonDelete(item);
+              }
+              return;
             },
             color: Colors.white38,
           ),
