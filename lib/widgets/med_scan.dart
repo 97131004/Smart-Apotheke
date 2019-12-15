@@ -69,10 +69,12 @@ class _MedScanState extends State<MedScan> {
         return true;
       },
       child: Scaffold(
-          appBar: AppBar(
-            title: Text('Gefundene Medikamente'),
-          ),
-          body: getMedsDone ? buildList() : LoadBar.build()),
+        appBar: AppBar(
+          title: Text('Gefundene Medikamente'),
+          backgroundColor: Colors.green,
+        ),
+        body: getMedsDone ? buildList() : LoadBar.build(),
+      ),
     );
   }
 

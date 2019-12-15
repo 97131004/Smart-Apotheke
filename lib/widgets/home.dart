@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+//import 'package:maph_group3/widgets/shop.dart';
 import 'package:maph_group3/data/med.dart';
-import '../util/med_list.dart';
+
 import '../util/nampr.dart';
 import '../data/globals.dart' as globals;
 import '../widgets/personal.dart';
 import 'scanner.dart';
 import 'med_search.dart';
+import 'dummy_medList.dart';
+import 'userguide.dart';
+import 'datenschutzerklaerung.dart';
 import 'calendar.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:maph_group3/util/personal_data.dart';
+
 
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
@@ -28,8 +33,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-
-    passwordenter(context);
+     passwordenter(context);
   }
 
   void passwordenter(BuildContext context) async {
@@ -65,6 +69,7 @@ class _HomeState extends State<Home> {
         ),
         buttons: [
           DialogButton(
+            color: Colors.green,
             onPressed: () => _submitpasswort(),
             child: Text(
               "SUBMIT",
@@ -92,6 +97,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     // Future.delayed(Duration.zero, () => passwordenter(context));
     //passwordenter();
+    
     return Scaffold(
       drawer: Drawer(
         child: ListView(
@@ -104,7 +110,7 @@ class _HomeState extends State<Home> {
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
               decoration: BoxDecoration(
-                color: Theme.of(context).accentColor,
+                color: Colors.green,
               ),
             ),
             ListTile(
@@ -123,12 +129,22 @@ class _HomeState extends State<Home> {
               title: Text('User Guide?'),
               onTap: () {
                 Navigator.pop(context);
+                 Navigator.push(
+                  context,
+                  NoAnimationMaterialPageRoute(
+                      builder: (context) => Userguide()),
+                );
               },
             ),
             ListTile(
               title: Text('Datenschutzerkärung'),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  NoAnimationMaterialPageRoute(
+                      builder: (context) => Datenschutz()),
+                );
               },
             ),
             ListTile(
@@ -140,9 +156,17 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
+    
       appBar: AppBar(
-        title: Text('Medikamente'),
-        actions: <Widget>[
+        title: Text('Smart Apotheke'),
+        backgroundColor: Colors.green,),
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.green[600],
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        
+        children: <Widget>[
           IconButton(
             icon: Icon(Icons.calendar_today),
             onPressed: () {
@@ -172,34 +196,70 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      body: (globals.meds.length > 0)
-          ? MedList.build(
-              context,
-              globals.meds,
-              true,
-              medItemOnLongPress,
-              medItemOnSwipe,
-              medItemOnButtonDelete,
-            )
-          : Center(
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: Text(
-                  'Keine Medikamente vorhanden. ' +
-                      'Scannen Sie ein Rezept über den Knopf unten rechts.',
-                  textAlign: TextAlign.center,
-                ),
+      ),
+      
+      body: Stack(
+        
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(image: DecorationImage(image: AssetImage('assets/home.jpg'),fit: BoxFit.fill)),
+          ),
+          
+          Container(
+           
+         padding: EdgeInsets.all(7.0),
+          decoration: BoxDecoration(
+                color: Colors.lightGreenAccent[100],
               ),
-            ),
-      floatingActionButton: FloatingActionButton(
-        foregroundColor: Colors.white,
-        child: Icon(Icons.camera_alt),
-        onPressed: () {
-          Navigator.push(
-            context,
-            NoAnimationMaterialPageRoute(builder: (context) => Scanner()),
-          );
-        },
+          child:Text(' Ihre Medikamente Liste steht jederzeit zur Verfügung!',style: TextStyle(fontWeight:FontWeight.bold),),
+          ),
+         /*  Container(
+          width: double.infinity,
+          padding: EdgeInsets.only(left: 50.0,right: 50.0, top: 180.0 , bottom: 50.0),
+          child: RaisedButton(
+            elevation: 50,
+            color: Colors.green,
+            shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(10.0)),
+            onPressed: (){
+              Navigator.push(
+                context,
+                NoAnimationMaterialPageRoute(builder: (context) =>MedSearch()),
+              );},
+              child: Text('Shops'),
+          ),
+          ),*/
+          Container(
+          width: double.infinity,
+          padding: EdgeInsets.only(left: 50.0,right: 50.0, top: 220.0 , bottom: 20.0),
+          child:RaisedButton(
+            elevation: 50,
+            color: Colors.green,
+            shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(10.0)),
+            onPressed: (){
+              Navigator.push(
+                context,
+                NoAnimationMaterialPageRoute(builder: (context) =>DummyMedList()),
+              );},
+              child: Text('Medikamente Liste'),
+          ),
+          ),
+         /* Container(
+          width: double.infinity,
+          padding: EdgeInsets.only(left: 50.0,right: 50.0, top: 260.0 , bottom: 20.0),
+          child:RaisedButton(
+            elevation: 50,
+            color: Colors.green,
+            shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(10.0)),
+            onPressed: (){
+              Navigator.push(
+                context,
+                NoAnimationMaterialPageRoute(builder: (context) =>DummyMedList()),
+              );},
+              child: Text('Apotheke'),
+          ),
+          ),*/
+         
+        ],
       ),
     );
   }
