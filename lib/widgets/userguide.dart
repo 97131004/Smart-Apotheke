@@ -25,7 +25,9 @@ class _UserguideState extends State<Userguide> {
        
         boxFit:  BoxFit.contain,
         images: [
-         
+          AssetImage('assets/start.PNG'),
+           AssetImage('assets/scann.PNG'),
+            AssetImage('assets/us.PNG'),
           AssetImage('assets/userguide2.PNG'),
            AssetImage('assets/userguide3.PNG'),
             AssetImage('assets/userguide4.PNG'),

@@ -29,10 +29,10 @@ class _DatenschutzState extends State<Datenschutz> {
                 flex: 1,
                 child: new SingleChildScrollView(
                   padding: EdgeInsets.all(8.0),
-                  child: new Text('MaphGruppe3 gmbH baute die Smart Apotheke App als a CommercialApp Dieser SERVICE wird bereitgestellt von MaphGruppe3 gmbH und ist so zu verwenden, wie es ist. '+
+                  child: new Text('Die HTW Berlin AI Master Group2019 hat die SmartApotheke App als kostenlose App erstellt. Dieser SERVICE wird von der HTW Berlin AI Master Group 2019 kostenlos zur Verfügung gestellt und ist für den bestimmungsgemäßen Gebrauch bestimmt'+
                   'Diese Seite wird verwendet, um Website-Besucher über unsere Richtlinien zur Datasammlung zu informieren, Verwendung und Offenlegung personenbezogener Daten, wenn sich jemand dafür entschieden hat our Bedienung.'+
-                  'Wenn Sie sich entscheiden zu verwenden our Service, dann stimmen Sie der Sammlung und Verwendung von Informationen in Bezug auf diese Politik zu. Die persönlichen Informationen, die we collect wird zur Bereitstellung und Verbesserung des Service verwendet.We Ihre Informationen nicht mit anderen Personen verwenden oder teilen, außer wie in dieser Datenschutzrichtlinie beschrieben.'+
-                  'Die in dieser Datenschutzerklärung verwendeten Begriffe haben die gleiche Bedeutung wie in unseren Allgemeinen Geschäftsbedingungen, auf die unter http://www.microsoft.com zugegriffen werden kann Smart Apotheke sofern nicht anders in dieser Datenschutzrichtlinie definiert.',style: new TextStyle(
+                  'Wenn Sie sich entscheiden zu verwenden our Service, dann stimmen Sie der Sammlung und Verwendung von Informationen in Bezug auf diese Politik zu.  Die von uns erfassten personenbezogenen Daten werden zur Bereitstellung und Verbesserung des Dienstes verwendet. Wir werden Ihre Daten nur wie in dieser Datenschutzerklärung beschrieben verwenden oder an Dritte weitergeben.'+
+                  'Die in dieser Datenschutzerklärung verwendeten Begriffe haben die gleiche Bedeutung wie in unseren Allgemeinen Geschäftsbedingungen, die bei SmartApotheke zugänglich sind, sofern in dieser Datenschutzerklärung nichts anderes festgelegt ist.',style: new TextStyle(
                   fontSize: 16.0, color: Colors.black,fontWeight:FontWeight.bold
                 ),),
         

@@ -211,9 +211,9 @@ class _HomeState extends State<Home> {
           decoration: BoxDecoration(
                 color: Colors.lightGreenAccent[100],
               ),
-          child:Text('Von uns empfohlene Shops und Apotheken. Ihre Medikamente Liste steht jederzeit zur Verfügung!',style: TextStyle(fontWeight:FontWeight.bold),),
+          child:Text(' Ihre Medikamente Liste steht jederzeit zur Verfügung!',style: TextStyle(fontWeight:FontWeight.bold),),
           ),
-          Container(
+         /*  Container(
           width: double.infinity,
           padding: EdgeInsets.only(left: 50.0,right: 50.0, top: 180.0 , bottom: 50.0),
           child: RaisedButton(
@@ -227,7 +227,7 @@ class _HomeState extends State<Home> {
               );},
               child: Text('Shops'),
           ),
-          ),
+          ),*/
           Container(
           width: double.infinity,
           padding: EdgeInsets.only(left: 50.0,right: 50.0, top: 220.0 , bottom: 20.0),
@@ -243,7 +243,7 @@ class _HomeState extends State<Home> {
               child: Text('Medikamente Liste'),
           ),
           ),
-          Container(
+         /* Container(
           width: double.infinity,
           padding: EdgeInsets.only(left: 50.0,right: 50.0, top: 260.0 , bottom: 20.0),
           child:RaisedButton(
@@ -257,7 +257,7 @@ class _HomeState extends State<Home> {
               );},
               child: Text('Apotheke'),
           ),
-          ),
+          ),*/
          
         ],
       ),
