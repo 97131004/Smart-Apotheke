@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:maph_group3/util/nampr.dart';
 import 'package:maph_group3/util/shop_items.dart';
-import 'package:maph_group3/widgets/verify_userdata.dart';
+import 'package:maph_group3/widgets/order_summary.dart';
 import '../data/globals.dart' as globals;
 
 class ProductDetails extends StatefulWidget {
@@ -128,7 +128,8 @@ class _ProductDetailsState extends State<ProductDetails> {
 
   void validateInputAndProceed() {
     if(textEditController.text.isNotEmpty) {
-      Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => VerificationUserData(item: this.localShopItem)));
+      this.localShopItem.orderQuantity = int.parse(textEditController.text);
+      Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => OrderSummary(item: this.localShopItem)));
     } else {
       showDialog(
         context: context,

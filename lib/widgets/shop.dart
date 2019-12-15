@@ -256,6 +256,7 @@ class _ShopState extends State<Shop> {
 
     var result = await ShopListParser.mergeLists(listMedPex, listDocMorris);
 
+    //return listDocMorris;
     return result;
   }
 }
