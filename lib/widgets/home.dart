@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:maph_group3/widgets/shop.dart';
-import '../util/med_list.dart';
+//import 'package:maph_group3/widgets/shop.dart';
+import 'package:maph_group3/data/med.dart';
+
 import '../util/nampr.dart';
 import '../data/globals.dart' as globals;
 import '../widgets/personal.dart';
@@ -11,7 +12,7 @@ import 'userguide.dart';
 import 'datenschutzerklaerung.dart';
 import 'calendar.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:maph_group3/util/personaldata.dart';
+import 'package:maph_group3/util/personal_data.dart';
 
 
 class Home extends StatefulWidget {
@@ -35,7 +36,6 @@ class _HomeState extends State<Home> {
      passwordenter(context);
   }
 
- 
   void passwordenter(BuildContext context) async {
     if (!(await PersonalData.isPasswordExists())) {
       alert = createAlert(context);
@@ -193,7 +193,7 @@ class _HomeState extends State<Home> {
                 NoAnimationMaterialPageRoute(builder: (context) => Scanner()),
               );
             },
-          )
+          ),
         ],
       ),
       ),
@@ -262,5 +262,66 @@ class _HomeState extends State<Home> {
         ],
       ),
     );
+  }
+
+  void medItemOnLongPress(Med med, Offset tapPosition) {
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject();
+    showMenu(
+      items: <PopupMenuEntry>[
+        PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: <Widget>[
+              Icon(Icons.delete),
+              Text("Löschen"),
+            ],
+          ),
+        )
+      ],
+      context: context,
+      position: RelativeRect.fromRect(
+          tapPosition & Size.zero, Offset.zero & overlay.size),
+    ).then((value) {
+      if (value == 'delete') {
+        medItemDelete(med);
+      }
+    });
+  }
+
+  void medItemOnSwipe(Med med) {
+    medItemDelete(med);
+  }
+
+  void medItemOnButtonDelete(Med med) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Löschen"),
+          content: Text("Wollen Sie diesen Eintrag wirklich löschen?"),
+          actions: [
+            FlatButton(
+              child: Text("Nein"),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            FlatButton(
+              child: Text("Ja"),
+              onPressed: () {
+                medItemDelete(med);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void medItemDelete(Med med) {
+    setState(() {
+      globals.meds.remove(med);
+    });
   }
 }

@@ -1,8 +1,11 @@
+import 'package:flutter/material.dart';
+
 class Med {
   String name = '';
   String pzn = '00000000';
   String url = '';
   bool isHistory = false;
+  Key key;
 
   Med(String name, String pzn, [String url, bool isHistory]) {
     this.name = name;
@@ -16,5 +19,6 @@ class Med {
     if (isHistory != null) {
       this.isHistory = isHistory;
     }
+    this.key = UniqueKey();
   }
 }

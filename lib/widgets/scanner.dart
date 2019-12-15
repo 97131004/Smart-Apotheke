@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:maph_group3/util/load_bar.dart';
 import 'package:mlkit/mlkit.dart';
 
 import 'med_scan.dart';
@@ -10,7 +11,7 @@ import '../data/med.dart';
 
 class Scanner extends StatefulWidget {
   Scanner({Key key}) : super(key: key);
-
+  static bool imageloaddone = false;
   @override
   State<StatefulWidget> createState() {
     return _ScannerState();
@@ -19,7 +20,7 @@ class Scanner extends StatefulWidget {
 
 class _ScannerState extends State<Scanner> {
   List<Med> medicaments;
-
+  
   @override
   void initState() {
     super.initState();
@@ -34,7 +35,12 @@ class _ScannerState extends State<Scanner> {
         appBar: AppBar(
           title: Text('Rezept scannen'),
         ),
-        body: Center(
+        body: Scanner.imageloaddone? LoadBar.build():loadImage());
+  }
+  
+  Widget loadImage()
+  {
+    return Center(
           child: Container(
               alignment: Alignment.center,
               //Text('Hier die Rezept-/Texterkennung durch Kamera'),
@@ -67,25 +73,26 @@ class _ScannerState extends State<Scanner> {
                   ),
                 ],
               )),
-        ));
+        );
   }
-
-  void getImagefromGallery() async {
-    try {
-      var file = await ImagePicker.pickImage(source: ImageSource.gallery);
-      setState(() {
-        _file = file;
-      });
-      try {
+  Future analyzeImage() async
+  {
+     try {
         var currentLabels = await detector.detectFromPath(_file?.path);
-        var results = await pznSearch(currentLabels);
-        setState(() {
-          medicaments = results;
-        });
-        gotoMedListFound();
+        await pznSearch(currentLabels);
       } catch (e) {
         print(e.toString());
       }
+  }
+  void getImagefromGallery() async {
+    try {
+      var file = await ImagePicker.pickImage(source: ImageSource.gallery);
+      if(file.existsSync()){setState(() {
+        _file = file;
+         analyzeImage();
+        Scanner.imageloaddone = true;
+      });}
+    
     } catch (e) {
       print(e.toString());
     }
@@ -94,25 +101,19 @@ class _ScannerState extends State<Scanner> {
   void getImagefromCamera() async {
     try {
       var file = await ImagePicker.pickImage(source: ImageSource.camera);
-      setState(() {
+     if(file.existsSync()){setState(() {
         _file = file;
-      });
-      try {
-        var currentLabels = await detector.detectFromPath(_file?.path);
-        var results = await pznSearch(currentLabels);
-        setState(() {
-          medicaments = results;
-        });
-        gotoMedListFound();
-      } catch (e) {
-        print(e.toString());
-      }
+         analyzeImage();
+        Scanner.imageloaddone = true;
+      });}
+    
+       analyzeImage();
     } catch (e) {
       print(e.toString());
     }
   }
 
-  Future<List<Med>> pznSearch(List<VisionText> texts) async {
+  Future pznSearch(List<VisionText> texts) async {
     List<Med> pznNrs = [];
     for (var item in texts) {
       String text = item.text;
@@ -134,7 +135,10 @@ class _ScannerState extends State<Scanner> {
         text = text.substring(i+1, text.length);
       }
     }
-    return pznNrs;
+    setState(() {
+      medicaments = pznNrs;
+    });
+    gotoMedListFound();
   }
 
   bool isNumeric(String s) {
