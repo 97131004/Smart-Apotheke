@@ -7,9 +7,12 @@ import '../widgets/personal.dart';
 import 'scanner.dart';
 import 'med_search.dart';
 import 'dummy_medList.dart';
+import 'userguide.dart';
+import 'datenschutzerklaerung.dart';
 import 'calendar.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:maph_group3/util/personaldata.dart';
+
 
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
@@ -21,17 +24,18 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  @override
-  void initState() {
-    super.initState();
-
-    passwordenter(context);
-  }
-
   TextEditingController pass = new TextEditingController();
   TextEditingController ePass = new TextEditingController();
   String hash;
   Alert alert;
+
+  @override
+  void initState() {
+    super.initState();
+     passwordenter(context);
+  }
+
+ 
   void passwordenter(BuildContext context) async {
     if (!(await PersonalData.isPasswordExists())) {
       alert = createAlert(context);
@@ -125,12 +129,22 @@ class _HomeState extends State<Home> {
               title: Text('User Guide?'),
               onTap: () {
                 Navigator.pop(context);
+                 Navigator.push(
+                  context,
+                  NoAnimationMaterialPageRoute(
+                      builder: (context) => Userguide()),
+                );
               },
             ),
             ListTile(
               title: Text('Datenschutzerkärung'),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  NoAnimationMaterialPageRoute(
+                      builder: (context) => Datenschutz()),
+                );
               },
             ),
             ListTile(

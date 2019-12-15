@@ -20,6 +20,7 @@ class _CalendarState extends State<Calendar> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Kalender'),
+        backgroundColor: Colors.green,
       ),
       body: Text('Kalender hier'),
     );

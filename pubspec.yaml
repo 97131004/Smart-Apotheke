@@ -30,10 +30,12 @@ dependencies:
   shared_preferences: ^0.5.4+5
   fluttertoast: ^3.1.3
   connectivity: ^0.4.2
+  carousel_pro: ^1.0.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
-
+  
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -55,6 +57,10 @@ flutter:
     - assets/gallery.jpg
     - assets/camera.png
     - assets/home.jpg
+    - assets/userguide2.PNG
+    - assets/userguide3.PNG
+    - assets/userguide4.PNG
+   
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
