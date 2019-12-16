@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 
-import 'package:maph_group3/util/personaldata.dart';
+import 'package:maph_group3/util/personal_data.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class Personal extends StatefulWidget {
@@ -61,6 +61,7 @@ class _PersonalState extends State<Personal> {
       child: Scaffold(
         appBar: AppBar(
           title: Text('Persönliche Daten'),
+          backgroundColor: Colors.green[600]
         ),
         body: ListView(
           children: <Widget>[

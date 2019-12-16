@@ -6,14 +6,14 @@ import 'med.dart';
 
 List<Med> meds = [
   Med(
-      'Ibu ratio 400 akut Schmerztablletten Filmtabletten (lokal)',
-      '10019621',
-      'http://www.beipackzettel.de/medikament/Ibu%2520ratio%2520400%2520akut%2520Schmerztablletten%2520Filmtabletten/A77827',
+      'Ibu Lysin ratiopharm 684mg Filmtabletten (lokal)',
+      '10019638',
+      'http://www.beipackzettel.de/medikament/Ibu%2520Lysin%2520ratiopharm%2520684mg%2520Filmtabletten/AB4204',
       true),
   Med(
-      'Ibuprofen ratio 400 akut Schmerztablletten Filmtabletten (lokal)',
-      '10019621',
-      'http://www.beipackzettel.de/medikament/Ibu%2520ratio%2520400%2520akut%2520Schmerztablletten%2520Filmtabletten/A77827',
+      'Eliquis 5mg Filmtabletten (lokal)',
+      '1647809',
+      'http://www.beipackzettel.de/medikament/Eliquis%25205mg%2520Filmtabletten/AC7815',
       true),
   Med(
       'Simvastatin - CT 40mg (lokal)',

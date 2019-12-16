@@ -16,10 +16,10 @@ void main() {
   //medicaments = [];
 
   runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
     title: 'MAPH',
     theme: ThemeData(
-      primaryColor: Colors.lightBlue[600],
-      accentColor: Colors.lightBlue[600],
+      appBarTheme: AppBarTheme( color: Colors.green,),
       accentColorBrightness: Brightness.light,
       backgroundColor: Colors.white,
       scaffoldBackgroundColor: Colors.white,
