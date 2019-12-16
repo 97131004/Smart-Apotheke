@@ -8,7 +8,6 @@ import 'nampr.dart';
 class MedList {
   static Widget build(BuildContext context, List<Med> meds,
       [bool removable = false,
-      Function(Med, Offset) onLongPress,
       Function(Med) onSwipe,
       Function(Med) onButtonDelete]) {
     return Scrollbar(
@@ -16,8 +15,8 @@ class MedList {
           shrinkWrap: true,
           itemCount: meds.length,
           itemBuilder: (context, index) {
-            return buildItem(context, index, meds[index], removable,
-                onLongPress, onSwipe, onButtonDelete);
+            return buildItem(context, index, meds[index], removable, onSwipe,
+                onButtonDelete);
           }),
     );
   }
@@ -29,7 +28,6 @@ class MedList {
 
   static Widget buildItem(BuildContext context, int index, Med item,
       [bool removable = false,
-      Function(Med, Offset) onLongPress,
       Function(Med) onSwipe,
       Function(Med) onButtonDelete]) {
     return Theme(
@@ -40,11 +38,6 @@ class MedList {
       child: (removable)
           ? GestureDetector(
               onTapDown: storePosition,
-              onLongPress: () {
-                if (onLongPress != null) {
-                  onLongPress(item, tapPosition);
-                }
-              },
               child: Dismissible(
                 key: UniqueKey(),
                 onDismissed: (direction) {

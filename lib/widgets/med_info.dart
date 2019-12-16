@@ -25,6 +25,9 @@ class _MedInfoState extends State<MedInfo> {
   String medInfoData = '';
   List<GlobalKey> scrollKeys;
   ScrollController scrollController;
+  double linkSize = 16;
+  double titleSize = 16;
+  double textSize = 14;
 
   @override
   void initState() {
@@ -80,6 +83,32 @@ class _MedInfoState extends State<MedInfo> {
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.med.name),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.zoom_in),
+              onPressed: () {
+                if (linkSize < 22) {
+                  setState(() {
+                    linkSize += 1;
+                    titleSize += 1;
+                    textSize += 1;
+                  });
+                }
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.zoom_out),
+              onPressed: () {
+                if (textSize > 14) {
+                  setState(() {
+                    linkSize -= 1;
+                    titleSize -= 1;
+                    textSize -= 1;
+                  });
+                }
+              },
+            ),
+          ],
         ),
         body: getMedInfoDataDone
             ? ((medInfoData.length > 0) ? buildHtml() : buildNotFound())
@@ -163,7 +192,7 @@ class _MedInfoState extends State<MedInfo> {
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: titleSize,
                           ),
                         )
                       ]);
@@ -194,7 +223,7 @@ class _MedInfoState extends State<MedInfo> {
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: linkSize,
                       ),
                     ),
                   );
@@ -208,6 +237,15 @@ class _MedInfoState extends State<MedInfo> {
                 } else if (node.className == 'catalogue no-bullet') {
                   //links group subtopics (removing)
                   node.remove();
+                } else if (node.className == 'infobox') {
+                  //content text
+                  return DefaultTextStyle(
+                    child: Column(children: children),
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: textSize,
+                    ),
+                  );
                 }
               }
               return null;

@@ -4,7 +4,8 @@ import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 
 class Helper {
-  static String parseMid(String source, String delim1, String delim2, [int startIndex]) {
+  static String parseMid(String source, String delim1, String delim2,
+      [int startIndex]) {
     int iDelim1 = source.indexOf(delim1, (startIndex != null) ? startIndex : 0);
     int iDelim2 = source.indexOf(delim2, iDelim1 + delim1.length);
     if (iDelim1 != -1 && iDelim2 != -1) {
@@ -74,12 +75,10 @@ class Helper {
     }
     return false;
   }
-  
-  static String jsonDecode(String data){
+
+  static String jsonDecode(String data) {
     return jsonDecode(data);
   }
-
-}
 
   static String privacypolicy = """
 <!DOCTYPE html>
