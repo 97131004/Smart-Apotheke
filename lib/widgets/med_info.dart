@@ -82,7 +82,6 @@ class _MedInfoState extends State<MedInfo> {
     }
 
     setState(() {
-      varSizeLoaded = true;
       getMedInfoDataDone = true;
     });
   }
@@ -100,28 +99,31 @@ class _MedInfoState extends State<MedInfo> {
         appBar: AppBar(
           title: Text(widget.med.name),
           actions: <Widget>[
-            if (varSizeLoaded)
-              IconButton(
-                icon: Icon(Icons.zoom_in),
-                onPressed: () {
-                  if (varSize < 6) {
-                    setState(() {
-                      varSize += 1;
-                    });
-                  }
-                },
-              ),
-            if (varSizeLoaded)
-              IconButton(
-                icon: Icon(Icons.zoom_out),
-                onPressed: () {
-                  if (varSize > 0) {
-                    setState(() {
-                      varSize -= 1;
-                    });
-                  }
-                },
-              ),
+            if (getMedInfoDataDone && medInfoData.length > 0)
+            Row(
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.zoom_in),
+                  onPressed: () {
+                    if (varSize < 6) {
+                      setState(() {
+                        varSize += 1;
+                      });
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.zoom_out),
+                  onPressed: () {
+                    if (varSize > 0) {
+                      setState(() {
+                        varSize -= 1;
+                      });
+                    }
+                  },
+                ),
+              ],
+            )
           ],
         ),
         body: getMedInfoDataDone
