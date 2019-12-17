@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:maph_group3/util/load_bar.dart';
 import 'package:mlkit/mlkit.dart';
 import 'package:maph_group3/widgets/image_preview.dart';
+import 'package:maph_group3/util/helper.dart';
 import 'med_scan.dart';
 import '../util/nampr.dart';
 import '../data/med.dart';
@@ -12,6 +14,7 @@ import '../data/med.dart';
 class Scanner extends StatefulWidget {
   Scanner({Key key}) : super(key: key);
   static bool imageloaddone = false;
+  static Uint8List image;
   @override
   State<StatefulWidget> createState() {
     return _ScannerState();
@@ -19,7 +22,7 @@ class Scanner extends StatefulWidget {
 }
 
 class _ScannerState extends State<Scanner> {
-  List<Med> medicaments;
+  static List<Med> medicaments;
 
   @override
   void initState() {
@@ -27,7 +30,6 @@ class _ScannerState extends State<Scanner> {
   }
 
   File _file;
-  FirebaseVisionTextDetector detector = FirebaseVisionTextDetector.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class _ScannerState extends State<Scanner> {
         appBar: AppBar(
           title: Text('Rezept scannen'),
         ),
-        body: Scanner.imageloaddone ? LoadBar.build() : loadImage());
+        body: Scanner.imageloaddone ? loadbar() : loadImage());
   }
 
   Widget loadImage() {
@@ -77,11 +79,24 @@ class _ScannerState extends State<Scanner> {
 
   Future analyzeImage() async {
     try {
-      var currentLabels = await detector.detectFromPath(_file?.path);
-      await pznSearch(currentLabels);
+      FirebaseVisionTextDetector detector = FirebaseVisionTextDetector.instance;
+      var currentLabels = await detector.detectFromBinary(Scanner.image);
+      medicaments = await pznSearch(currentLabels);
+      setState(() {
+        gotoMedListFound();
+      });
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  bool analyzeStart = false;
+  Widget loadbar() {
+    if (!analyzeStart) {
+      analyzeImage();
+      analyzeStart = true;
+    }
+    return LoadBar.build();
   }
 //ImageProvider provider;
 
@@ -89,14 +104,10 @@ class _ScannerState extends State<Scanner> {
     try {
       var file = await ImagePicker.pickImage(source: ImageSource.gallery);
       if (file.existsSync()) {
-      //  provider = ExtendedFileImageProvider(file);
+        //  provider = ExtendedFileImageProvider(file);
+        Scanner.image = file.readAsBytesSync();
         gotoPreview();
-        setState(() {
-          _file = file;
-          //analyzeImage();
-         
-        //  Scanner.imageloaddone = true;
-        });
+        analyzeStart = false;
       }
     } catch (e) {
       print(e.toString());
@@ -107,19 +118,16 @@ class _ScannerState extends State<Scanner> {
     try {
       var file = await ImagePicker.pickImage(source: ImageSource.camera);
       if (file.existsSync()) {
-       // provider = ExtendedFileImageProvider(file);
-        setState(() {
-          _file = file;
-          analyzeImage();
-          Scanner.imageloaddone = true;
-        });
+        Scanner.image = file.readAsBytesSync();
+        gotoPreview();
+        analyzeStart = false;
       }
     } catch (e) {
       print(e.toString());
     }
   }
 
-  Future pznSearch(List<VisionText> texts) async {
+  static Future<List<Med>> pznSearch(List<VisionText> texts) async {
     List<Med> pznNrs = [];
     for (var item in texts) {
       String text = item.text;
@@ -131,26 +139,17 @@ class _ScannerState extends State<Scanner> {
         int i;
         for (i = pos + 3; i <= text.length; i++) {
           String acuChar = text[i];
-          if ((!isNumeric(acuChar) && !(acuChar == ' ')) || (acuChar == '\n')) {
+          if ((!Helper.isNumeric(acuChar) && !(acuChar == ' ')) ||
+              (acuChar == '\n')) {
             break;
-          } else if (isNumeric(acuChar)) pznNr += acuChar;
+          } else if (Helper.isNumeric(acuChar)) pznNr += acuChar;
           if (pznNr.length == 8) break;
         }
         pznNrs.add(Med('', pznNr));
         text = text.substring(i + 1, text.length);
       }
     }
-    setState(() {
-      medicaments = pznNrs;
-    });
-    gotoMedListFound();
-  }
-
-  bool isNumeric(String s) {
-    if (s == null) {
-      return false;
-    }
-    return double.tryParse(s) != null;
+    return pznNrs;
   }
 
   void gotoMedListFound() {
@@ -162,17 +161,15 @@ class _ScannerState extends State<Scanner> {
           ),
         ));
   }
-  void gotoPreview()
-  {
-     Navigator.push(
+
+  void gotoPreview() {
+    Navigator.push(
         context,
         NoAnimationMaterialPageRoute(
-          builder: (context) => ImgPreview (
-            //provider: provider,
-            img:  _file,
-          ),
+          builder: (context) => ImgPreview(
+              //provider: provider,
+              // img:  Scanner.image
+              ),
         ));
   }
-
- 
 }
