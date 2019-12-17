@@ -146,9 +146,7 @@ class _MedScanState extends State<MedScan> {
                     shape: new RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(30.0),
                     ),
-                    onPressed: () {
-                      onScanAgainClick();
-                    },
+                    onPressed: onScanAgainClick,
                     label: Text("Nochmals scannen"),
                   ),
                 ),
