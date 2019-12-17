@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:maph_group3/util/load_bar.dart';
 import 'package:mlkit/mlkit.dart';
-
+import 'package:maph_group3/widgets/image_preview.dart';
 import 'med_scan.dart';
 import '../util/nampr.dart';
 import '../data/med.dart';
@@ -20,7 +20,7 @@ class Scanner extends StatefulWidget {
 
 class _ScannerState extends State<Scanner> {
   List<Med> medicaments;
-  
+
   @override
   void initState() {
     super.initState();
@@ -35,64 +35,69 @@ class _ScannerState extends State<Scanner> {
         appBar: AppBar(
           title: Text('Rezept scannen'),
         ),
-        body: Scanner.imageloaddone? LoadBar.build():loadImage());
+        body: Scanner.imageloaddone ? LoadBar.build() : loadImage());
   }
-  
-  Widget loadImage()
-  {
+
+  Widget loadImage() {
     return Center(
-          child: Container(
-              alignment: Alignment.center,
-              //Text('Hier die Rezept-/Texterkennung durch Kamera'),
-              child: new Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  RaisedButton.icon(
-                    icon: Image.asset(
-                      'assets/gallery.jpg',
-                      width: 100,
-                      height: 100,
-                    ),
-                    textColor: Colors.black,
-                    color: Colors.yellow,
-                    onPressed: () => getImagefromGallery(),
-                    label: new Text("Gallery"),
-                  ),
-                  RaisedButton.icon(
-                    icon: Image.asset(
-                      'assets/camera.png',
-                      width: 100,
-                      height: 100,
-                    ),
-                    onPressed: () => getImagefromCamera(),
-                    textColor: Colors.black,
-                    color: Colors.redAccent,
-                    label: new Text(
-                      "Camera",
-                    ),
-                  ),
-                ],
-              )),
-        );
+      child: Container(
+          alignment: Alignment.center,
+          //Text('Hier die Rezept-/Texterkennung durch Kamera'),
+          child: new Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              RaisedButton.icon(
+                icon: Image.asset(
+                  'assets/gallery.jpg',
+                  width: 100,
+                  height: 100,
+                ),
+                textColor: Colors.black,
+                color: Colors.yellow,
+                onPressed: () => getImagefromGallery(),
+                label: new Text("Gallery"),
+              ),
+              RaisedButton.icon(
+                icon: Image.asset(
+                  'assets/camera.png',
+                  width: 100,
+                  height: 100,
+                ),
+                onPressed: () => getImagefromCamera(),
+                textColor: Colors.black,
+                color: Colors.redAccent,
+                label: new Text(
+                  "Camera",
+                ),
+              ),
+            ],
+          )),
+    );
   }
-  Future analyzeImage() async
-  {
-     try {
-        var currentLabels = await detector.detectFromPath(_file?.path);
-        await pznSearch(currentLabels);
-      } catch (e) {
-        print(e.toString());
-      }
+
+  Future analyzeImage() async {
+    try {
+      var currentLabels = await detector.detectFromPath(_file?.path);
+      await pznSearch(currentLabels);
+    } catch (e) {
+      print(e.toString());
+    }
   }
+//ImageProvider provider;
+
   void getImagefromGallery() async {
     try {
       var file = await ImagePicker.pickImage(source: ImageSource.gallery);
-      if(file.existsSync()){setState(() {
-        _file = file;
-         analyzeImage();
-        Scanner.imageloaddone = true;
-      });}
-    
+      if (file.existsSync()) {
+      //  provider = ExtendedFileImageProvider(file);
+        gotoPreview();
+        setState(() {
+          _file = file;
+          //analyzeImage();
+         
+        //  Scanner.imageloaddone = true;
+        });
+      }
     } catch (e) {
       print(e.toString());
     }
@@ -101,13 +106,14 @@ class _ScannerState extends State<Scanner> {
   void getImagefromCamera() async {
     try {
       var file = await ImagePicker.pickImage(source: ImageSource.camera);
-     if(file.existsSync()){setState(() {
-        _file = file;
-         analyzeImage();
-        Scanner.imageloaddone = true;
-      });}
-    
-       analyzeImage();
+      if (file.existsSync()) {
+       // provider = ExtendedFileImageProvider(file);
+        setState(() {
+          _file = file;
+          analyzeImage();
+          Scanner.imageloaddone = true;
+        });
+      }
     } catch (e) {
       print(e.toString());
     }
@@ -125,14 +131,13 @@ class _ScannerState extends State<Scanner> {
         int i;
         for (i = pos + 3; i <= text.length; i++) {
           String acuChar = text[i];
-          if ((!isNumeric(acuChar) && !(acuChar == ' '))||(acuChar == '\n') ) {
+          if ((!isNumeric(acuChar) && !(acuChar == ' ')) || (acuChar == '\n')) {
             break;
-          }
-          else if(isNumeric(acuChar))pznNr += acuChar;
-          if(pznNr.length == 8) break;
+          } else if (isNumeric(acuChar)) pznNr += acuChar;
+          if (pznNr.length == 8) break;
         }
         pznNrs.add(Med('', pznNr));
-        text = text.substring(i+1, text.length);
+        text = text.substring(i + 1, text.length);
       }
     }
     setState(() {
@@ -157,4 +162,17 @@ class _ScannerState extends State<Scanner> {
           ),
         ));
   }
+  void gotoPreview()
+  {
+     Navigator.push(
+        context,
+        NoAnimationMaterialPageRoute(
+          builder: (context) => ImgPreview (
+            //provider: provider,
+            img:  _file,
+          ),
+        ));
+  }
+
+ 
 }
