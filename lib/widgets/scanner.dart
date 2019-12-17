@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:maph_group3/util/load_bar.dart';
 import 'package:mlkit/mlkit.dart';
-import 'package:maph_group3/widgets/image_preview.dart';
+import 'package:image_editor/image_editor.dart';
 import 'package:maph_group3/util/helper.dart';
 import 'med_scan.dart';
 import '../util/nampr.dart';
@@ -14,7 +13,6 @@ import '../data/med.dart';
 class Scanner extends StatefulWidget {
   Scanner({Key key}) : super(key: key);
   static bool imageloaddone = false;
-  static Uint8List image;
   @override
   State<StatefulWidget> createState() {
     return _ScannerState();
@@ -29,15 +27,18 @@ class _ScannerState extends State<Scanner> {
     super.initState();
   }
 
-  File _file;
-
+  Uint8List image;
+  bool imagechoosed = false;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Rezept scannen'),
-        ),
-        body: Scanner.imageloaddone ? loadbar() : loadImage());
+    if (!imagechoosed)
+      return Scaffold(
+          appBar: AppBar(
+            title: Text('Rezept scannen'),
+          ),
+          body: Scanner.imageloaddone ? LoadBar.build() : loadImage());
+    else
+      return buildPreview(image);
   }
 
   Widget loadImage() {
@@ -80,34 +81,23 @@ class _ScannerState extends State<Scanner> {
   Future analyzeImage() async {
     try {
       FirebaseVisionTextDetector detector = FirebaseVisionTextDetector.instance;
-      var currentLabels = await detector.detectFromBinary(Scanner.image);
+      var currentLabels = await detector.detectFromBinary(image);
       medicaments = await pznSearch(currentLabels);
-      setState(() {
-        gotoMedListFound();
-      });
+      gotoMedListFound();
     } catch (e) {
       print(e.toString());
     }
   }
-
-  bool analyzeStart = false;
-  Widget loadbar() {
-    if (!analyzeStart) {
-      analyzeImage();
-      analyzeStart = true;
-    }
-    return LoadBar.build();
-  }
-//ImageProvider provider;
 
   void getImagefromGallery() async {
     try {
       var file = await ImagePicker.pickImage(source: ImageSource.gallery);
       if (file.existsSync()) {
         //  provider = ExtendedFileImageProvider(file);
-        Scanner.image = file.readAsBytesSync();
-        gotoPreview();
-        analyzeStart = false;
+        image = file.readAsBytesSync();
+        setState(() {
+          imagechoosed = true;
+        });
       }
     } catch (e) {
       print(e.toString());
@@ -118,9 +108,10 @@ class _ScannerState extends State<Scanner> {
     try {
       var file = await ImagePicker.pickImage(source: ImageSource.camera);
       if (file.existsSync()) {
-        Scanner.image = file.readAsBytesSync();
-        gotoPreview();
-        analyzeStart = false;
+        image = file.readAsBytesSync();
+        setState(() {
+          imagechoosed = true;
+        });
       }
     } catch (e) {
       print(e.toString());
@@ -162,14 +153,93 @@ class _ScannerState extends State<Scanner> {
         ));
   }
 
-  void gotoPreview() {
-    Navigator.push(
-        context,
-        NoAnimationMaterialPageRoute(
-          builder: (context) => ImgPreview(
-              //provider: provider,
-              // img:  Scanner.image
+  int rot = 0;
+
+  Widget buildPreview(Uint8List rotateImg) {
+    return Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: Text('Vorschau'),
+        ),
+        body: SingleChildScrollView(
+            child: Column(
+          children: <Widget>[
+      
+            FittedBox(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height / 3 * 2,
+                child: RotatedBox(
+                  quarterTurns: rot,
+                  child: Image.memory(
+                    rotateImg,
+                    scale: 1.0,
+                    filterQuality: FilterQuality.none,
+                    alignment: Alignment.center,
+                    repeat: ImageRepeat.noRepeat,
+                  ),
+                ),
               ),
-        ));
+            ),
+    
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Column(children: <Widget>[
+                  IconButton(
+                    alignment: Alignment.topLeft,
+                    icon: Icon(Icons.clear),
+                    onPressed: () {
+                      setState(() {
+                        imagechoosed = false;
+                      });
+                    },
+                    iconSize: 40,
+                  )
+                ]),
+                Column(children: <Widget>[
+                  IconButton(
+                    alignment: Alignment.topLeft,
+                    icon: Icon(Icons.rotate_right),
+                    onPressed: () {
+                      setState(() {
+                        if (rot == 3) {
+                          rot = 0;
+                        } else {
+                          rot += 1;
+                        }
+                        print(rot);
+                      });
+                    },
+                    iconSize: 60,
+                  )
+                ]),
+                Column(children: <Widget>[
+                  IconButton(
+                    alignment: Alignment.topRight,
+                    icon: Icon(Icons.check),
+                    onPressed: () => backtoScanner(),
+                    iconSize: 50,
+                  )
+                ]),
+              ],
+            )
+          ],
+        )));
+  }
+
+  void backtoScanner() async {
+    ImageEditorOption option = ImageEditorOption();
+    option.addOption(RotateOption(rot * 90));
+
+    image =
+        await ImageEditor.editImage(image: image, imageEditorOption: option);
+    analyzeImage();
+    //Navigator.pop(context);
+    setState(() {
+      Scanner.imageloaddone = true;
+      imagechoosed = false;
+    });
   }
 }
