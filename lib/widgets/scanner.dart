@@ -28,17 +28,23 @@ class _ScannerState extends State<Scanner> {
   }
 
   Uint8List image;
+  int rot = 0;
   bool imagechoosed = false;
+
   @override
   Widget build(BuildContext context) {
     if (!imagechoosed)
-      return Scaffold(
-          appBar: AppBar(
-            title: Text('Rezept scannen'),
-          ),
-          body: Scanner.imageloaddone ? LoadBar.build() : loadImage());
+      buildChooseImage();
     else
-      return buildPreview(image);
+      buildPreview(image);
+  }
+
+  Widget buildChooseImage() {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Rezept scannen'),
+        ),
+        body: Scanner.imageloaddone ? LoadBar.build() : loadImage());
   }
 
   Widget loadImage() {
@@ -76,6 +82,92 @@ class _ScannerState extends State<Scanner> {
             ],
           )),
     );
+  }
+
+  Widget buildPreview(Uint8List rotateImg) {
+    return Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: Text('Vorschau'),
+        ),
+        body: SingleChildScrollView(
+            child: Column(
+          children: <Widget>[
+            FittedBox(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height / 3 * 2,
+                child: RotatedBox(
+                  quarterTurns: rot,
+                  child: Image.memory(
+                    rotateImg,
+                    scale: 1.0,
+                    filterQuality: FilterQuality.none,
+                    alignment: Alignment.center,
+                    repeat: ImageRepeat.noRepeat,
+                  ),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Column(children: <Widget>[
+                  IconButton(
+                    alignment: Alignment.topLeft,
+                    icon: Icon(Icons.clear),
+                    onPressed: () {
+                      setState(() {
+                        imagechoosed = false;
+                      });
+                    },
+                    iconSize: 40,
+                  )
+                ]),
+                Column(children: <Widget>[
+                  IconButton(
+                    alignment: Alignment.topLeft,
+                    icon: Icon(Icons.rotate_right),
+                    onPressed: () {
+                      setState(() {
+                        if (rot == 3) {
+                          rot = 0;
+                        } else {
+                          rot += 1;
+                        }
+                        print(rot);
+                      });
+                    },
+                    iconSize: 60,
+                  )
+                ]),
+                Column(children: <Widget>[
+                  IconButton(
+                    alignment: Alignment.topRight,
+                    icon: Icon(Icons.check),
+                    onPressed: () => backtoScanner(),
+                    iconSize: 50,
+                  )
+                ]),
+              ],
+            )
+          ],
+        )));
+  }
+
+  void backtoScanner() async {
+    ImageEditorOption option = ImageEditorOption();
+    option.addOption(RotateOption(rot * 90));
+
+    image =
+        await ImageEditor.editImage(image: image, imageEditorOption: option);
+    analyzeImage();
+    //Navigator.pop(context);
+    setState(() {
+      Scanner.imageloaddone = true;
+      imagechoosed = false;
+    });
   }
 
   Future analyzeImage() async {
@@ -151,95 +243,5 @@ class _ScannerState extends State<Scanner> {
             meds: medicaments,
           ),
         ));
-  }
-
-  int rot = 0;
-
-  Widget buildPreview(Uint8List rotateImg) {
-    return Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: Text('Vorschau'),
-        ),
-        body: SingleChildScrollView(
-            child: Column(
-          children: <Widget>[
-      
-            FittedBox(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height / 3 * 2,
-                child: RotatedBox(
-                  quarterTurns: rot,
-                  child: Image.memory(
-                    rotateImg,
-                    scale: 1.0,
-                    filterQuality: FilterQuality.none,
-                    alignment: Alignment.center,
-                    repeat: ImageRepeat.noRepeat,
-                  ),
-                ),
-              ),
-            ),
-    
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Column(children: <Widget>[
-                  IconButton(
-                    alignment: Alignment.topLeft,
-                    icon: Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() {
-                        imagechoosed = false;
-                      });
-                    },
-                    iconSize: 40,
-                  )
-                ]),
-                Column(children: <Widget>[
-                  IconButton(
-                    alignment: Alignment.topLeft,
-                    icon: Icon(Icons.rotate_right),
-                    onPressed: () {
-                      setState(() {
-                        if (rot == 3) {
-                          rot = 0;
-                        } else {
-                          rot += 1;
-                        }
-                        print(rot);
-                      });
-                    },
-                    iconSize: 60,
-                  )
-                ]),
-                Column(children: <Widget>[
-                  IconButton(
-                    alignment: Alignment.topRight,
-                    icon: Icon(Icons.check),
-                    onPressed: () => backtoScanner(),
-                    iconSize: 50,
-                  )
-                ]),
-              ],
-            )
-          ],
-        )));
-  }
-
-  void backtoScanner() async {
-    ImageEditorOption option = ImageEditorOption();
-    option.addOption(RotateOption(rot * 90));
-
-    image =
-        await ImageEditor.editImage(image: image, imageEditorOption: option);
-    analyzeImage();
-    //Navigator.pop(context);
-    setState(() {
-      Scanner.imageloaddone = true;
-      imagechoosed = false;
-    });
   }
 }
