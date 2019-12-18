@@ -34,9 +34,9 @@ class _ScannerState extends State<Scanner> {
   @override
   Widget build(BuildContext context) {
     if (!imagechoosed)
-      buildChooseImage();
+     return buildChooseImage();
     else
-      buildPreview(image);
+     return buildPreview(image);
   }
 
   Widget buildChooseImage() {
