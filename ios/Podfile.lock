@@ -262,7 +262,7 @@ SPEC CHECKSUMS:
   FirebaseMLVisionFaceModel: d6ba42000f263df52187aee936262bc2002b3389
   FirebaseMLVisionLabelModel: 7638a20d27219d5baa4b534a62375fc1d5bd077d
   FirebaseMLVisionTextModel: c264caa3100ca804580bf2a7c1cb9ff390d1f471
-  Flutter: 446b87ace8a3747a167979213b4aef59a0b5e5fa
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_local_notifications: 9e4738ce2471c5af910d961a6b7eadcf57c50186
   fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
   GoogleAPIClientForREST: 4acfffd77f1c3c8741b6be9eaed0e603278efbde
