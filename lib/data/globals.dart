@@ -22,6 +22,11 @@ List<Med> meds = [
       '4144658',
       'http://www.beipackzettel.de/medikament/Simvastatin%2520-%2520CT%252040mg%2520Filmtabletten/A88644',
       true),
+  Med(
+      'test',
+      '0000000',
+      '',
+      true),
 ];
 
 Map<String, ShopItem> items = {

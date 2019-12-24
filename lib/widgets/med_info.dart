@@ -25,6 +25,13 @@ class _MedInfoState extends State<MedInfo> {
   String medInfoData = '';
   List<GlobalKey> scrollKeys;
   ScrollController scrollController;
+  double titleSize = 24;
+  double linkSize = 16;
+  double subtitleSize = 16;
+  double textSize = 14;
+  double varSize = 0;
+  bool varSizeLoaded = false;
+  String keyMedInfoTextSize = 'medInfoTextSize';
 
   @override
   void initState() {
@@ -70,6 +77,10 @@ class _MedInfoState extends State<MedInfo> {
       medInfoData = '';
     }
 
+    if (medInfoData.length > 0) {
+      loadMedInfoTextSize();
+    }
+
     setState(() {
       getMedInfoDataDone = true;
     });
@@ -77,9 +88,43 @@ class _MedInfoState extends State<MedInfo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        //back to home page, skipping scanner
+        saveMedInfoTextSize();
+        Navigator.pop(context);
+        return false;
+      },
+      child: Scaffold(
         appBar: AppBar(
           title: Text(widget.med.name),
+          actions: <Widget>[
+            if (getMedInfoDataDone && medInfoData.length > 0)
+            Row(
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.zoom_in),
+                  onPressed: () {
+                    if (varSize < 6) {
+                      setState(() {
+                        varSize += 1;
+                      });
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.zoom_out),
+                  onPressed: () {
+                    if (varSize > 0) {
+                      setState(() {
+                        varSize -= 1;
+                      });
+                    }
+                  },
+                ),
+              ],
+            )
+          ],
         ),
         body: getMedInfoDataDone
             ? ((medInfoData.length > 0) ? buildHtml() : buildNotFound())
@@ -91,7 +136,9 @@ class _MedInfoState extends State<MedInfo> {
             child: Icon(Icons.arrow_upward),
             onPressed: () => scrollController.jumpTo(0),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   Widget buildNotFound() {
@@ -163,7 +210,7 @@ class _MedInfoState extends State<MedInfo> {
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: subtitleSize + varSize,
                           ),
                         )
                       ]);
@@ -182,7 +229,7 @@ class _MedInfoState extends State<MedInfo> {
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
-                      fontSize: 24,
+                      fontSize: titleSize,
                     ),
                   );
                 } else if (node.className == 'accordion') {
@@ -194,7 +241,7 @@ class _MedInfoState extends State<MedInfo> {
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: linkSize + varSize,
                       ),
                     ),
                   );
@@ -208,6 +255,15 @@ class _MedInfoState extends State<MedInfo> {
                 } else if (node.className == 'catalogue no-bullet') {
                   //links group subtopics (removing)
                   node.remove();
+                } else if (node.className == 'infobox') {
+                  //content text
+                  return DefaultTextStyle(
+                    child: Column(children: children),
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: textSize + varSize,
+                    ),
+                  );
                 }
               }
               return null;
@@ -216,5 +272,24 @@ class _MedInfoState extends State<MedInfo> {
         ],
       ),
     );
+  }
+
+  Future loadMedInfoTextSize() async {
+    String val = await Helper.readDataFromsp(keyMedInfoTextSize);
+    if (val.isNotEmpty) {
+      double size = double.tryParse(val);
+      if (size != null) {
+        setState(() {
+          varSize = size;
+        });
+        varSizeLoaded = true;
+      }
+    }
+  }
+
+  Future saveMedInfoTextSize() async {
+    if (varSizeLoaded) {
+      await Helper.writeDatatoSp(keyMedInfoTextSize, varSize.toString());
+    }
   }
 }

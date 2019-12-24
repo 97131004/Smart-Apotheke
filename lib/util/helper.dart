@@ -7,7 +7,8 @@ import 'package:http/http.dart' as http;
 
 
 class Helper {
-  static String parseMid(String source, String delim1, String delim2, [int startIndex]) {
+  static String parseMid(String source, String delim1, String delim2,
+      [int startIndex]) {
     int iDelim1 = source.indexOf(delim1, (startIndex != null) ? startIndex : 0);
     int iDelim2 = source.indexOf(delim2, iDelim1 + delim1.length);
     if (iDelim1 != -1 && iDelim2 != -1) {
@@ -15,7 +16,12 @@ class Helper {
     }
     return '';
   }
-
+static bool isNumeric(String s) {
+    if (s == null) {
+      return false;
+    }
+    return double.tryParse(s) != null;
+  }
   static bool isNumber(String pzn) {
     //dont use isNumeric(), it accepts - and + signs
     for (int i = 0; i < pzn.length; i++) {
@@ -86,11 +92,9 @@ class Helper {
     else return null;
   }
 
-  static String jsonDecode(String data){
+  static String jsonDecode(String data) {
     return jsonDecode(data);
   }
-
-}
 
   static String privacypolicy = """
 <!DOCTYPE html>
