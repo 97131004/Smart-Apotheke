@@ -1,5 +1,3 @@
-import 'dart:ui' as prefix0;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -19,7 +17,7 @@ class Calendar extends StatefulWidget {
 
 class _CalendarState extends State<Calendar> {
   Map<DateTime, List> _events = new Map<DateTime, List>();
-  List _selectedEvents;
+  List _selectedEvents = new List();
 
   CalendarController _calendarController;
 
@@ -32,7 +30,8 @@ class _CalendarState extends State<Calendar> {
   final _selectedDay = DateTime.now();
 
   var result;
-  void read() async{
+
+  void read() async {
     String events_calendar = await Helper.readDataFromsp('calendar_data');
     result = jsonDecode(events_calendar);
     List<String> one_items = [];
@@ -40,52 +39,21 @@ class _CalendarState extends State<Calendar> {
     for(var i = 1 ; i < result['days_duration'] ; i++){
       one_items.add(result['name_medical'] + "-" + result['note'] + "-" + result['dosage']);
       _events_tinhcv = {
-        _selectedDay.add(Duration(days: result['days_duration'])): one_items
+        _selectedDay.add(Duration(days: result['days_duration'] - i)): one_items
       };
-      _events.addAll(_events_tinhcv);
+      await _events.addAll(_events_tinhcv);
     }
 
-    _selectedEvents = _events[_selectedDay] ?? [];
-
-    List _selectedEvents_tinhcv;
-    final _selectedDay_tinhcv = DateTime.now();
-    _events_tinhcv = {
-      _selectedDay_tinhcv.add(Duration(days: 1)): [
-        'Event A8',
-        'Event B8',
-        'Event C8',
-        'Event D8',
-        'Event A9'
-      ],
-      _selectedDay_tinhcv.add(Duration(days: 1)):
-      Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
-      _selectedDay_tinhcv.add(Duration(days: 7)): [
-        'Event A10',
-        'Event B10',
-        'Event C10'
-      ],
-      _selectedDay_tinhcv.add(Duration(days: 11)): ['Event A11', 'Event B11'],
-      _selectedDay_tinhcv.add(Duration(days: 17)): [
-        'Event A12',
-        'Event B12',
-        'Event C12',
-        'Event D12'
-      ],
-      _selectedDay_tinhcv.add(Duration(days: 22)): ['Event A13', 'Event B13'],
-      _selectedDay_tinhcv.add(Duration(days: 26)): [
-        'Event A14',
-        'Event B14',
-        'Event C14'
-      ],
-    };
-
-    _selectedEvents_tinhcv = _events_tinhcv[_events_tinhcv] ?? [];
-    print('_events_tinhcv ----');
-    print(_events_tinhcv);
-    print(_events_tinhcv[_events_tinhcv]);
+    _selectedEvents = await cretateData(_events);
   }
 
-  void demo (){
+  Future<List> cretateData(Map<DateTime, List> _events) async {
+    var data = new List();
+    data = await _events[_selectedDay] ?? [];
+    return data;
+  }
+
+  void demo() {
     _events = {
       _selectedDay.add(Duration(days: 1)): [
         'Event A8',
@@ -95,7 +63,7 @@ class _CalendarState extends State<Calendar> {
         'Event A9'
       ],
       _selectedDay.add(Duration(days: 1)):
-      Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
+          Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
       _selectedDay.add(Duration(days: 7)): [
         'Event A10',
         'Event B10',
@@ -122,9 +90,9 @@ class _CalendarState extends State<Calendar> {
 
   @override
   void initState() {
-
-    super.initState();
     read();
+    super.initState();
+    print ('vao day');
     //demo();
 
     _calendarController = CalendarController();
@@ -142,8 +110,7 @@ class _CalendarState extends State<Calendar> {
     super.dispose();
   }
 
-  void _onDaySelected(DateTime day, List events) {
-    //print('CALLBACK: _onDaySelected');
+  _onDaySelected(DateTime day, List events) {
     setState(() {
       _selectedEvents = events;
     });
@@ -151,13 +118,10 @@ class _CalendarState extends State<Calendar> {
 
   void _onVisibleDaysChanged(
       DateTime first, DateTime last, CalendarFormat format) {
-    //print('CALLBACK: _onVisibleDaysChanged');
   }
-
 
   @override
   Widget build(BuildContext context) {
-    //final GlobalBloc _globalBloc = Provider.of<GlobalBloc>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Kalender'),
@@ -183,7 +147,7 @@ class _CalendarState extends State<Calendar> {
 
           const SizedBox(height: 8.0),
           const SizedBox(height: 8.0),
-          Expanded(child: _buildEventList()),
+          Expanded(child:  _selectedEvents.isNotEmpty ? _buildEventList() : new Container(width: 0.0, height: 0.0)),
         ],
       ),
     );
@@ -213,22 +177,24 @@ class _CalendarState extends State<Calendar> {
     );
   }
 
-  _buildEventList()  {
-    return ListView(
-      children: _selectedEvents.map((event) => Container(
-                decoration: BoxDecoration(
-                  border: Border.all(width: 0.8),
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                margin:
-                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                child: ListTile(
-                  title: Text(event.toString()),
-                  onTap: () => print('$event tapped!'),
-                ),
-              ))
-          .toList(),
-    );
+  _buildEventList() {
+    if(_selectedEvents != null){
+      return ListView(
+          children: _selectedEvents
+              .map((event) => Container(
+            decoration: BoxDecoration(
+              border: Border.all(width: 0.8),
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            margin: const EdgeInsets.symmetric(
+                horizontal: 8.0, vertical: 4.0),
+            child: ListTile(
+              title: Text(event.toString()),
+              onTap: () => print('$event tapped!'),
+            ),
+          ))
+              .toList());
+    }
   }
 
   @override
@@ -281,54 +247,35 @@ class _CalendarState extends State<Calendar> {
     );
   }
 
-  Widget _build_form_to_calendar2(){
-    return MaterialApp(
-      title: 'Flutter layout demo',
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Flutter layout demo'),
-        ),
-        body: Center(
-          child: Text('Hello World'),
-        ),
-      ),
-    );
-  }
-
-
-
   Widget _build_form_to_calendar() {
     return Scaffold(
       appBar: AppBar(
         title: Text("Create Events"),
       ),
-      body:
-      Column(
+      body: Column(
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            Text('Anfang *:'),
-          RaisedButton(
-          child: Text(
-              "Pick a date"
-          ),
-          onPressed: () {
-            showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2019),
-                lastDate: DateTime(2029)
-            ).then((date) {
-              setState(() {
-                begin_day = date;
-              });
-            });
-          }),
+            Text('Anfang *:' + begin_day.toString()),
+            RaisedButton(
+                child: Text("Pick a date"),
+                onPressed: () {
+                  showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2019),
+                          lastDate: DateTime(2029))
+                      .then((date) {
+                    setState(() {
+                      begin_day = date;
+                    });
+                  });
+                }),
             SizedBox(height: 20),
             Text('Zeit Dauern *:'),
             TextField(
-              controller:  days_duration,
+              controller: days_duration,
               decoration: InputDecoration(hintText: "zeit dauert"),
             ),
             SizedBox(height: 20),
@@ -373,23 +320,21 @@ class _CalendarState extends State<Calendar> {
   }
 
   void onPressedSaveButton() async {
-    if (begin_day == days_duration.text &&
-        days_duration.text == name_medical.text &&
-        name_medical.text == dosage.text &&
+    if (begin_day == days_duration.text ||
+        days_duration.text == name_medical.text ||
+        name_medical.text == dosage.text ||
         dosage.text == "") {
       _showDialog("Fehler", "Bitte füllen Sie alle Texte da oben");
     } else {
       String generate_id = _generatorIdUnique();
-      print(begin_day.millisecondsSinceEpoch);
-      print(DateTime.fromMicrosecondsSinceEpoch(begin_day.millisecondsSinceEpoch));
+
       CalendarData data = new CalendarData(
-        id: generate_id,
-        begin_day: begin_day.millisecondsSinceEpoch,
-        days_duration: int.parse(days_duration.text),
-        name_medical: name_medical.text,
-        dosage: dosage.text,
-        note: note.text
-      );
+          id: generate_id,
+          begin_day: begin_day.millisecondsSinceEpoch,
+          days_duration: int.parse(days_duration.text),
+          name_medical: name_medical.text,
+          dosage: dosage.text,
+          note: note.text);
       _saveInformation(data.toJson());
     }
   }
@@ -418,7 +363,7 @@ class _CalendarState extends State<Calendar> {
   }
 
   void _saveInformation(data) {
-    Helper.writeDatatoSp('calendar_data',data);
+    Helper.writeDatatoSp('calendar_data', data);
     /*if(old_string.length > 0){
       //Helper.updateStringSF('calendar_data', old_string, 'calendar_data', data);
     }else{
@@ -428,9 +373,10 @@ class _CalendarState extends State<Calendar> {
 
     // scheduleNotification(newEntryMedicine);
     Navigator.pop(context);
+    initState();
   }
 
-  String _generatorIdUnique(){
+  String _generatorIdUnique() {
     var uuid = new Uuid();
 
     String id = uuid.v4();
