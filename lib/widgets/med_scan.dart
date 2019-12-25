@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:maph_group3/widgets/scanner.dart';
 
 import '../util/no_internet_alert.dart';
 import '../util/nampr.dart';
@@ -63,12 +64,14 @@ class _MedScanState extends State<MedScan> {
     return WillPopScope(
       onWillPop: () async {
         //back to home page, skipping scanner
+        Scanner.imageloaddone = false;
         Navigator.pop(context);
         return true;
       },
       child: Scaffold(
         appBar: AppBar(
           title: Text('Gefundene Medikamente'),
+          backgroundColor: Colors.green,
         ),
         body: getMedsDone ? buildList() : LoadBar.build(),
       ),
@@ -95,11 +98,18 @@ class _MedScanState extends State<MedScan> {
           }
           if (length > 0 && index >= 1 && index <= length) {
             //med items
-            return MedList.buildItem(context, widget.meds[index - 1]);
+            return MedList.buildItem(context, index, widget.meds[index - 1]);
           }
           if (length == 0 && index == length + 1) {
             //med items
-            return Text('Keine Medikamente gefunden.');
+            return Column(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Text('Keine Medikamente gefunden.'),
+                ),
+              ],
+            );
           }
           if (length > 0 && index == length + 1 ||
               length == 0 && index == length + 2) {
@@ -108,7 +118,7 @@ class _MedScanState extends State<MedScan> {
               children: <Widget>[
                 SizedBox(height: 10),
                 ButtonTheme(
-                  buttonColor: Colors.grey[300],
+                  buttonColor: Colors.grey[200],
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
@@ -122,19 +132,13 @@ class _MedScanState extends State<MedScan> {
                             builder: (context) => MedSearch()),
                       );
                     },
-                    color: Colors.grey[200],
                     icon: Icon(Icons.edit),
-                    label: Text(
-                      "Name / PZN manuell eingeben",
-                      style: TextStyle(
-                        fontSize: 16.0,
-                      ),
-                    ),
+                    label: Text("Name / PZN manuell eingeben"),
                   ),
                 ),
                 SizedBox(height: 10),
                 ButtonTheme(
-                  buttonColor: Colors.grey[100],
+                  buttonColor: Colors.grey[200],
                   minWidth: double.infinity,
                   height: 50.0,
                   child: RaisedButton.icon(
@@ -143,7 +147,7 @@ class _MedScanState extends State<MedScan> {
                       borderRadius: new BorderRadius.circular(30.0),
                     ),
                     onPressed: () {
-                      Navigator.pop(context);
+                      onScanAgainClick();
                     },
                     label: Text("Nochmals scannen"),
                   ),
@@ -155,5 +159,10 @@ class _MedScanState extends State<MedScan> {
         },
       ),
     );
+  }
+
+  void onScanAgainClick() {
+    Scanner.imageloaddone = false;
+    Navigator.pop(context);
   }
 }
