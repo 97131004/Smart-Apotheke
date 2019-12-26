@@ -27,7 +27,7 @@ class _CalendarState extends State<Calendar> {
   TextEditingController note = new TextEditingController();
   TextEditingController dosage = new TextEditingController();
 
-  final _selectedDay = DateTime.now();
+  var _selectedDay = DateTime.now();
 
   var result;
 
@@ -36,7 +36,10 @@ class _CalendarState extends State<Calendar> {
     result = jsonDecode(events_calendar);
     List<String> one_items = [];
     Map<DateTime, List> _events_tinhcv;
-    for(var i = 1 ; i < result['days_duration'] ; i++){
+    if(result['begin_day'] > 0){
+      _selectedDay = new DateTime.fromMillisecondsSinceEpoch( result['begin_day']);
+    }
+    for(var i = 1 ; i <= result['days_duration'] ; i++){
       one_items.add(result['name_medical'] + "-" + result['note'] + "-" + result['dosage']);
       _events_tinhcv = {
         _selectedDay.add(Duration(days: result['days_duration'] - i)): one_items
@@ -53,48 +56,10 @@ class _CalendarState extends State<Calendar> {
     return data;
   }
 
-  void demo() {
-    _events = {
-      _selectedDay.add(Duration(days: 1)): [
-        'Event A8',
-        'Event B8',
-        'Event C8',
-        'Event D8',
-        'Event A9'
-      ],
-      _selectedDay.add(Duration(days: 1)):
-          Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
-      _selectedDay.add(Duration(days: 7)): [
-        'Event A10',
-        'Event B10',
-        'Event C10'
-      ],
-      _selectedDay.add(Duration(days: 11)): ['Event A11', 'Event B11'],
-      _selectedDay.add(Duration(days: 17)): [
-        'Event A12',
-        'Event B12',
-        'Event C12',
-        'Event D12'
-      ],
-      _selectedDay.add(Duration(days: 22)): ['Event A13', 'Event B13'],
-      _selectedDay.add(Duration(days: 26)): [
-        'Event A14',
-        'Event B14',
-        'Event C14'
-      ],
-    };
-
-    _selectedEvents = _events[_selectedDay] ?? [];
-    print(_selectedEvents);
-  }
-
   @override
   void initState() {
     read();
     super.initState();
-    print ('vao day');
-    //demo();
-
     _calendarController = CalendarController();
 
     begin_day = DateTime.now();
@@ -311,6 +276,7 @@ class _CalendarState extends State<Calendar> {
       minWidth: double.infinity,
       height: 40.0,
       child: RaisedButton.icon(
+        color: Colors.green,
         textColor: Colors.white,
         icon: Icon(Icons.save),
         onPressed: onPressedFunc,
