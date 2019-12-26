@@ -40,13 +40,15 @@ class _CalendarState extends State<Calendar> {
       _selectedDay = new DateTime.fromMillisecondsSinceEpoch( result['begin_day']);
     }
     for(var i = 1 ; i <= result['days_duration'] ; i++){
-      one_items.add(result['name_medical'] + "-" + result['note'] + "-" + result['dosage']);
+      if(i == 1){
+        one_items.add(result['name_medical'] + "-" + result['note'] + "-" + result['dosage']);
+      }
+
       _events_tinhcv = {
         _selectedDay.add(Duration(days: result['days_duration'] - i)): one_items
       };
       await _events.addAll(_events_tinhcv);
     }
-
     _selectedEvents = await cretateData(_events);
   }
 
