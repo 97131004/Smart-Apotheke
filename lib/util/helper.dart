@@ -96,6 +96,7 @@ static bool isNumeric(String s) {
     return jsonDecode(data);
   }
 
+
   static String privacypolicy = """
 <!DOCTYPE html>
     <html>

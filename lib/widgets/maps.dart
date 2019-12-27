@@ -7,10 +7,12 @@ import 'package:google_maps_webservice/places.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart' as LocationManager;
 import 'package:maph_group3/util/load_bar.dart';
+import 'package:maph_group3/util/maps_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Maps extends StatefulWidget {
-  Maps({Key key}) : super(key: key);
+
+  Maps({Key key,}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -19,27 +21,16 @@ class Maps extends StatefulWidget {
 }
 
 class _MapsState extends State<Maps> {
-  //static String kGoogleApiKey = "AIzaSyAP2X_vG7-hXWunjAhzOyAj7BGwYOTSbU4";
-  static String kGoogleApiKey = "AIzaSyAFYotTBY_YeedSjlrOTXsVB7EKx79zR3U";
-  GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: kGoogleApiKey);
-
-  static final CameraPosition _berlin = CameraPosition(
-    target: LatLng(52.521918, 13.413215),
-    zoom: 10.0,
-  );
 
   GoogleMapController controller;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   Map<String, PlacesSearchResult> foundPlaces = <String, PlacesSearchResult>{};
+  PlacesSearchResult tabbedPlace;
 
   var previousMarkerId;
 
   bool markerIsTabbed = false;
   bool isLoaded = false;
-  String name = "";
-  String desc = "";
-  String oh = "";
-  String photo;
 
   @override
   void initState() {
@@ -60,76 +51,12 @@ class _MapsState extends State<Maps> {
       ),
       body: Stack(
         children: <Widget>[
-          Column(
-            children: <Widget>[
-              _googleMapsContainer(context),
-              new Expanded(
-                  child: _buildApoList()
-              ),
-            ],
-          ),
+          _googleMapsContainer(context),
           _buildContainer(),
           _buildSearchInThisArea(),
         ],
       ),
     );
-  }
-
-  Widget _buildApoList() {
-    if(isLoaded) {
-      if(foundPlaces.length == 0) {
-        return new ListTile(
-          title: Text('Keine Apotheke gefunden.'),
-        );
-      }
-      return new ListView.builder(
-        itemCount: foundPlaces.length,
-        itemBuilder: (BuildContext context, int index) {
-          String key = foundPlaces.keys.elementAt(index);
-          return new Column(
-            children: <Widget>[
-              new ListTile(
-                leading: Container(
-                  padding: EdgeInsets.all(8.0),
-                  child: Image(
-                    fit: BoxFit.scaleDown,
-                    image: _apoImage(),
-                  )
-                ),
-                title: new Text("${foundPlaces[key].name}"),
-                // TODO: display address and opening hours in different text styles
-                subtitle: new Text("${foundPlaces[key].formattedAddress}\n" + getOpenString(foundPlaces[key])),/*new RichText(text: TextSpan(children: [
-                  //TextSpan(text: foundPlaces[key].formattedAddress),
-                  TextSpan(text: getOpenString(foundPlaces[key]), style: TextStyle(fontWeight: FontWeight.bold))
-                ])
-                ),*/
-                trailing: GestureDetector(
-                  child: SizedBox(
-                    child: Icon(Icons.call),
-                  ),
-                  onTap: () => launch('tel://03012345678'),
-                ),
-                onTap: () => goToLocation(foundPlaces[key]),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      return LoadBar.build();
-    }
-  }
-
-  String getOpenString(PlacesSearchResult result) {
-    if(result.openingHours != null) {
-      if(result.openingHours.openNow != null) {
-        return 'Jetzt geöffnet';
-      } else {
-        return 'Momentan geschlossen';
-      }
-    } else {
-      return '';
-    }
   }
 
   Widget _buildSearchInThisArea() {
@@ -155,15 +82,12 @@ class _MapsState extends State<Maps> {
 
   Widget _googleMapsContainer(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height/2,
+      height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
       child: GoogleMap(
-        initialCameraPosition: _berlin,
+        initialCameraPosition: MapsHelper.getInitialPosition(),
         mapType: MapType.normal,
         onMapCreated: _onMapCreated,
-        onCameraMove: (position) {
-
-        },
         markers: Set<Marker>.of(markers.values),
       ),
     );
@@ -173,9 +97,9 @@ class _MapsState extends State<Maps> {
     return Visibility(
         visible: markerIsTabbed,
         child:Align(
-          alignment: Alignment.centerLeft,
+          alignment: Alignment.bottomLeft,
           child: Container(
-            margin: EdgeInsets.symmetric(vertical: 20.0),
+            margin: EdgeInsets.symmetric(vertical: 10.0),
             height: 150.0,
             width:  300.0,
             child: Column(
@@ -183,7 +107,7 @@ class _MapsState extends State<Maps> {
                 SizedBox(width: 10.0),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: _boxes(photo),
+                  child: _boxes(),
                 ),
               ],
           ),
@@ -192,7 +116,7 @@ class _MapsState extends State<Maps> {
     );
   }
 
-  Widget _boxes(String _image) {
+  Widget _boxes() {
     return  GestureDetector(
       onTap: () {
         //_gotoLocation(lat,long);
@@ -222,7 +146,7 @@ class _MapsState extends State<Maps> {
                   Container(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(0.0, 15.0, 15.0, 5.0),
-                      child: detailsContainer(name, desc, oh),
+                      child: detailsContainer(),
                     ),
                   ),
                 ],
@@ -233,14 +157,22 @@ class _MapsState extends State<Maps> {
     );
   }
 
-  Widget detailsContainer(String nameA, String descA, String openingHours) {
+  Widget detailsContainer() {
+    String name = '';
+    String addr = '';
+    String open = '';
+    if(tabbedPlace != null) {
+      name = tabbedPlace.name != null ? tabbedPlace.name : '';
+      addr = tabbedPlace.formattedAddress != null ? tabbedPlace.formattedAddress : '';
+      open = tabbedPlace.openingHours != null ? MapsHelper.getOpenString(tabbedPlace) : '';
+    }
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Container(
-              child: Text(nameA,
+              child: Text(name,
                 style: TextStyle(
                     color: Colors.indigo,
                     fontSize: 20.0,
@@ -250,7 +182,7 @@ class _MapsState extends State<Maps> {
         SizedBox(height:5.0),
         Container(
             child: Text(
-              descA,
+              addr,
               style: TextStyle(
                 color: Colors.black54,
                 fontSize: 12.0,
@@ -259,7 +191,7 @@ class _MapsState extends State<Maps> {
         SizedBox(height:5.0),
         Container(
             child: Text(
-              openingHours,
+              open,
               style: TextStyle(
                   color: Colors.black54,
                   fontSize: 12.0,
@@ -267,11 +199,21 @@ class _MapsState extends State<Maps> {
             )),
         SizedBox(height:5.0),
         Container(
-            child: IconButton(
-              icon: Icon(Icons.call),
-              tooltip: 'Apotheke anrufen',
-              onPressed: () => launch('tel://03012345678'),
-            )),
+          child: Row(
+            children: <Widget>[
+              IconButton(
+                icon: Icon(Icons.check_circle),
+                tooltip: 'Apotheke auswählen',
+                onPressed: () => Navigator.pop(context, tabbedPlace),
+              ),
+              IconButton(
+                icon: Icon(Icons.call),
+                tooltip: 'Apotheke anrufen',
+                onPressed: () => launch('tel://03012345678'),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -290,7 +232,8 @@ class _MapsState extends State<Maps> {
   }
 
   String buildPhotoURL(String photoReference) {
-    return 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=$kGoogleApiKey';
+    String apiKey = MapsHelper.getApiKey();
+    return 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=$apiKey';
   }
 
   Future searchInSelectedArea() async {
@@ -307,7 +250,7 @@ class _MapsState extends State<Maps> {
 
     // add markers
     final loc = Location(centerOfMap.latitude, centerOfMap.longitude);
-    final result = await _places.searchByText('apotheke', location: loc, radius: 200);
+    final result = await MapsHelper.getGoogleMapsPlaces().searchByText('apotheke', location: loc, radius: 200);
 
     setState(() {
       print(result.status);
@@ -328,7 +271,7 @@ class _MapsState extends State<Maps> {
     controller = mapsController;
 
     // move to current location
-    var location = await getCurrentLocation();
+    var location = await MapsHelper.getCurrentLocation();
     controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
       target: LatLng(location.latitude, location.longitude),
       zoom: 14.0,
@@ -337,15 +280,16 @@ class _MapsState extends State<Maps> {
 
     // add markers
     final loc = Location(location.latitude, location.longitude);
-    final result = await _places.searchByText('apotheke', location: loc, radius: 200);
+    final result = await MapsHelper.getGoogleMapsPlaces().searchByText('apotheke', location: loc, radius: 200);
 
+    print(result.toString());
     setState(() {
       if (result.status == 'OK') {
         result.results.forEach((f){
           if(!foundPlaces.containsKey(f.id)) {
             foundPlaces[f.id] = f;
           }
-          print(f.name);
+          print("###" + f.name);
           addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
         });
       } else {
@@ -360,19 +304,10 @@ class _MapsState extends State<Maps> {
       }
       isLoaded = true;
     });
+    print("state set");
   }
 
-  Future<LatLng> getCurrentLocation() async {
-    final location = LocationManager.Location();
-    try {
-      var currentloc = await location.getLocation();
-      final lat = currentloc.latitude;
-      final lng = currentloc.longitude;
-      return LatLng(lat, lng);
-    } catch (e) {
-      return _berlin.target;
-    }
-  }
+
 
   Future<LatLng> getCenterOfMap() async {
     final devicePixelRatio = Platform.isAndroid
@@ -398,9 +333,8 @@ class _MapsState extends State<Maps> {
           infoWindow: InfoWindow(title: id, snippet: '')
       );
     } else {
-      if(place.openingHours != null) {
-        oh = place.openingHours.openNow ? 'Jetzt geöffnet' : 'Momentan geschlossen';
-      }
+      String oh = MapsHelper.getOpenString(place);
+
       if(colorDescriptor == null) {
         colorDescriptor = BitmapDescriptor.hueAzure;
       }
@@ -426,17 +360,9 @@ class _MapsState extends State<Maps> {
   }
 
   Future _onMarkerTapped(id) async {
-    print(markerIsTabbed);
     setState(() {
       markerIsTabbed = true;
-      if(foundPlaces[id].photos.length != 0) {
-        try{
-          photo = foundPlaces[id].photos.first.photoReference;
-          print(photo);
-        } catch (Exception) { }
-      }
-      name = foundPlaces[id].name;
-      desc = foundPlaces[id].formattedAddress;
+      tabbedPlace = foundPlaces[id];
     });
   }
 

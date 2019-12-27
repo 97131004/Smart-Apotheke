@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:maph_group3/util/nampr.dart';
 import 'package:maph_group3/util/shop_items.dart';
 import 'package:maph_group3/widgets/order_summary.dart';
+
 import '../data/globals.dart' as globals;
 
 class ProductDetails extends StatefulWidget {
@@ -16,7 +17,7 @@ class ProductDetails extends StatefulWidget {
 }
 
 class _ProductDetailsState extends State<ProductDetails> {
-
+  // search key and shop item
   String medSearchKey;
   ShopItem localShopItem;
 
@@ -48,7 +49,7 @@ class _ProductDetailsState extends State<ProductDetails> {
         child: Column(
           children: <Widget>[
             buildImageContainer(),
-            buildScrollView(),
+            buildMainView(),
             buildOrderCompleteContainer(),
           ],
         ),
@@ -71,8 +72,9 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
-  Widget buildScrollView() {
+  Widget buildMainView() {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Container(
           padding: EdgeInsets.all(10),
@@ -81,8 +83,61 @@ class _ProductDetailsState extends State<ProductDetails> {
         Container(
           child: Column(
             children: <Widget>[
-              Text("Beschreibung", textAlign: TextAlign.right, style: TextStyle(fontSize: 15),),
-              Text(localShopItem.desc),
+              Divider(),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                alignment: Alignment.centerLeft,
+                child: Text("Beschreibung", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
+              ),
+              Container(
+                padding: EdgeInsets.all(10),
+                child: Text(localShopItem.desc),
+              ),
+              Divider(),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                alignment: Alignment.centerLeft,
+                child: Text("Details", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
+              ),
+              Container(
+                padding: EdgeInsets.all(10),
+                child: Table(
+                    columnWidths: {
+                      0: FixedColumnWidth(MediaQuery.of(context).size.width*0.3),
+                      1: FixedColumnWidth(MediaQuery.of(context).size.width*0.7),
+                    },
+                    children: [
+                      TableRow(
+                        children: [
+                          Text("Hersteller", style: TextStyle(fontWeight: FontWeight.bold),),
+                          Text(localShopItem.brand),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          Text("\nDosierung", style: TextStyle(fontWeight: FontWeight.bold),),
+                          Text("\n" + localShopItem.dosage),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          Text("\nPZN", style: TextStyle(fontWeight: FontWeight.bold),),
+                          Text("\n" + localShopItem.pzn),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          Text("\nRezeptfrei", style: TextStyle(fontWeight: FontWeight.bold),),
+                          Container(
+                            alignment: Alignment.bottomLeft,
+                            child: localShopItem.onlyAvailableOnPrescription? Icon(Icons.block, color: Colors.red,) : Icon(Icons.check_circle_outline, color: Colors.green,),
+                          ),
+                        ],
+                      ),
+                    ]
+                ),
+              ),
+              Divider(),
             ],
           ),
         ),
@@ -118,7 +173,7 @@ class _ProductDetailsState extends State<ProductDetails> {
         new Flexible(
           child: RaisedButton(
             onPressed: validateInputAndProceed,
-            child: Text("Jetzt kaufen", style: TextStyle(color: Colors.green),),
+            child: Text("Jetzt bestellen", style: TextStyle(color: Colors.green),),
           ),
         ),
         Padding(padding: EdgeInsets.all(20),),

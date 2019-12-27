@@ -166,7 +166,7 @@ class ShopListParser {
     return Future<List<ShopItem>>.value(resultList);
   }
 
-  static Future<List<ShopItem>> mergeLists(List<ShopItem> listA, List<ShopItem> listB) async {
+  static List<ShopItem> mergeLists(List<ShopItem> listA, List<ShopItem> listB) {
     if(listA == null || listA.length == 0) {
       return listB;
     }
@@ -180,6 +180,7 @@ class ShopListParser {
         tempList.add(listA.elementAt(i));
         tempList.add(listB.elementAt(i));
     }
-    return Future<List<ShopItem>>.value(tempList);
+    //return Future<List<ShopItem>>.value(tempList);
+    return tempList;
   }
 }

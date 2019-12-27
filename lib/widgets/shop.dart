@@ -60,13 +60,15 @@ class _ShopState extends State<Shop> {
       ),
       body: Column(
         children: <Widget>[
-          buildLocalSearchButton(),
+          //buildLocalSearchButton(),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Text('Ergebnisliste'),
-              Padding( padding: EdgeInsets.symmetric(horizontal: 16.0),),
-              buildDropDownMenu(),
+              Padding(padding: EdgeInsets.all(10),),
+              Flexible(child: Text('Ergebnisliste für ' + localShopItem.searchKey),),
+              Spacer(),
+              _buildDropDownMenu(),
+              Padding(padding: EdgeInsets.all(10),),
             ],
           ),
           Visibility(
@@ -87,18 +89,18 @@ class _ShopState extends State<Shop> {
     );
   }
 
-  Widget buildDropDownMenu() {
+  Widget _buildDropDownMenu() {
     return DropdownButton<String>(
       value: sorting,
       icon: Icon(Icons.sort),
       iconSize: 18,
       elevation: 16,
       style: TextStyle(
-          color: Colors.blue
+          color: Colors.green
       ),
       underline: Container(
         height: 2,
-        color: Colors.blue,
+        color: Colors.green,
       ),
       onChanged: (String newValue) {
         setState(() {
@@ -126,7 +128,7 @@ class _ShopState extends State<Shop> {
             gradient: LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: [Colors.blue, Colors.white]
+              colors: [Colors.green, Colors.white]
             ),
           ),
           child: buildListTileOwnProd()
@@ -146,7 +148,7 @@ class _ShopState extends State<Shop> {
       subtitle: Text(localShopItem.dosage + '\n' + localShopItem.brand + '\n\n' + localShopItem.merchant, style: TextStyle(fontSize: 12)),
       trailing: Column(
         children: <Widget>[
-          Text('In-App bestellen!', style: TextStyle(color: Colors.red),),
+          Flexible(child: Text('In-App bestellen!', style: TextStyle(color: Colors.red),),),
           Column(
             children: <Widget>[
               Text(localShopItem.price, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
@@ -182,17 +184,7 @@ class _ShopState extends State<Shop> {
             Card(
               child: ListTile(
                 onTap: () async {
-                  String url;
-                  if(item.merchant == 'Medpex') {
-                    url = 'https://www.medpex.de/' + item.link;
-                  } else if (item.merchant == 'DocMorris') {
-                    url = 'https://www.docmorris.de/' + item.link;
-                  }
-                  if (await canLaunch(url)) {
-                    await launch(url, forceWebView: true, enableJavaScript: true);
-                  } else {
-                    throw 'Could not launch $url';
-                  }
+                  await launchUrl(item);
                 },
                 leading: Image.network(item.image),
                 title: Text(item.name),
@@ -246,17 +238,39 @@ class _ShopState extends State<Shop> {
   }
 
   Future<List<ShopItem>> getShopData(String name) async {
-    String urlMedpex = 'https://www.medpex.de/search.do?q=' + name;
-    String htmlMedpex = await Helper.fetchHTML(urlMedpex);
-    var listMedPex = await ShopListParser.parseHtmlToShopListItemMedpex(htmlMedpex);
+    //var listMedPex = getMedPexList(name);
+    var listDocMor = getDocMorrisList(name);
 
+    //var result = await ShopListParser.mergeLists(listMedPex, listDocMor);
+
+    return listDocMor;
+  }
+
+  Future<List<ShopItem>> getDocMorrisList(String name) async {
     String urlDocMorris = 'https://www.docmorris.de/search?query=' + name;
     String htmlDocMorris = await Helper.fetchHTML(urlDocMorris);
     var listDocMorris = await ShopListParser.parseHtmlToShopListItemDocMorris(htmlDocMorris);
+    return listDocMorris;
+  }
 
-    var result = await ShopListParser.mergeLists(listMedPex, listDocMorris);
+  Future<List<ShopItem>> getMedPexList(String name) async {
+    String urlMedpex = 'https://www.medpex.de/search.do?q=' + name;
+    String htmlMedpex = await Helper.fetchHTML(urlMedpex);
+    var listMedPex = await ShopListParser.parseHtmlToShopListItemMedpex(htmlMedpex);
+    return listMedPex;
+  }
 
-    //return listDocMorris;
-    return result;
+  Future launchUrl(ShopItem item) async {
+    String url;
+    if(item.merchant == 'Medpex') {
+      url = 'https://www.medpex.de/' + item.link;
+    } else if (item.merchant == 'DocMorris') {
+      url = 'https://www.docmorris.de/' + item.link;
+    }
+    if (await canLaunch(url)) {
+      await launch(url, forceWebView: true, enableJavaScript: true);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }

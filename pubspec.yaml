@@ -36,6 +36,8 @@ dependencies:
   connectivity: ^0.4.2
   carousel_pro: ^1.0.0
   table_calendar: ^2.2.1
+  image_editor: ^0.1.4
+  grouped_buttons: ^1.0.4
 # tinhcv2
   flutter_local_notifications: ^0.8.4+3
   rxdart: ^0.22.6
