@@ -4,7 +4,12 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:maph_group3/util/calendar_data.dart';
 import 'package:uuid/uuid.dart';
 import '../util/helper.dart';
+import 'dart:math';
 import 'dart:convert';
+
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Calendar extends StatefulWidget {
   Calendar({Key key}) : super(key: key);
@@ -16,6 +21,8 @@ class Calendar extends StatefulWidget {
 }
 
 class _CalendarState extends State<Calendar> {
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
   Map<DateTime, List> _events = new Map<DateTime, List>();
   List _selectedEvents = new List();
 
@@ -32,22 +39,28 @@ class _CalendarState extends State<Calendar> {
   var result;
 
   void read() async {
-    String events_calendar = await Helper.readDataFromsp('calendar_data');
-    result = jsonDecode(events_calendar);
-    List<String> one_items = [];
-    Map<DateTime, List> _events_tinhcv;
-    if(result['begin_day'] > 0){
-      _selectedDay = new DateTime.fromMillisecondsSinceEpoch( result['begin_day']);
-    }
-    for(var i = 1 ; i <= result['days_duration'] ; i++){
-      if(i == 1){
-        one_items.add(result['name_medical'] + "-" + result['note'] + "-" + result['dosage']);
-      }
+    SharedPreferences shared = await SharedPreferences.getInstance();
+    List<String> events_calendar = shared.getStringList('calendar_data');
+    //print(events_calendar);
+    for(var i = 0; i< events_calendar.length ; i++){
+      result = jsonDecode(events_calendar[i]);
+      List<String> one_items = [];
+      Map<DateTime, List> _events_tinhcv;
+      if(result['days_duration'] > 0){
+        for( var j = 0; j<result['days_duration'] ; j++){
+          if(result['begin_day'] > 0){
+            _selectedDay = new DateTime.fromMillisecondsSinceEpoch( result['begin_day']);
+          }
+          if(j == 0){
+            one_items.add(result['name_medical'] + "-" +  result['dosage'] +  "-" + result['note'] );
+          }
 
-      _events_tinhcv = {
-        _selectedDay.add(Duration(days: result['days_duration'] - i)): one_items
-      };
-      await _events.addAll(_events_tinhcv);
+          _events_tinhcv = {
+            _selectedDay.add(Duration(days: result['days_duration'] - j)): one_items
+          };
+          await _events.addAll(_events_tinhcv);
+        }
+      }
     }
     _selectedEvents = await cretateData(_events);
   }
@@ -69,6 +82,51 @@ class _CalendarState extends State<Calendar> {
     name_medical = TextEditingController();
     note = TextEditingController();
     dosage = TextEditingController();
+
+    var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
+    var initializationSettingsIOS = new IOSInitializationSettings();
+    var initializationSettings = new InitializationSettings(
+        initializationSettingsAndroid, initializationSettingsIOS);
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    flutterLocalNotificationsPlugin.initialize(initializationSettings, onSelectNotification: onSelectNotification);
+  }
+
+  Future onSelectNotification(String payload) async {
+    if (payload != null) {
+      debugPrint('notification payload: ' + payload);
+    }
+    await Navigator.push(
+      context,
+      new MaterialPageRoute(builder: (context) => Calendar()),
+    );
+  }
+
+  Future<void> scheduleNotification(CalendarData medicine) async {
+
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'repeatDailyAtTime channel id',
+      'repeatDailyAtTime channel name',
+      'repeatDailyAtTime description',
+      importance: Importance.Max,
+      sound: 'sound',
+      ledColor: Color(0xFF3EB16F),
+      ledOffMs: 1000,
+      ledOnMs: 1000,
+      enableLights: true,
+    );
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+
+    // for (int i = 0; i < 5; i++) {
+      await flutterLocalNotificationsPlugin.showDailyAtTime(
+          medicine.id,
+          'Mediminder: ${medicine.name_medical}',
+          'Es ist an der Zeit, Ihre Medikamente gemäß Zeitplan einzunehmen',
+          Time(0, 23, 0),
+          platformChannelSpecifics);
+    //}
+    //await flutterLocalNotificationsPlugin.cancelAll();
   }
 
   @override
@@ -294,8 +352,7 @@ class _CalendarState extends State<Calendar> {
         dosage.text == "") {
       _showDialog("Fehler", "Bitte füllen Sie alle Texte da oben");
     } else {
-      String generate_id = _generatorIdUnique();
-
+      int generate_id = _generatorIdUnique();
       CalendarData data = new CalendarData(
           id: generate_id,
           begin_day: begin_day.millisecondsSinceEpoch,
@@ -303,6 +360,7 @@ class _CalendarState extends State<Calendar> {
           name_medical: name_medical.text,
           dosage: dosage.text,
           note: note.text);
+      scheduleNotification(data);
       _saveInformation(data.toJson());
     }
   }
@@ -330,24 +388,25 @@ class _CalendarState extends State<Calendar> {
     );
   }
 
-  void _saveInformation(data) {
-    Helper.writeDatatoSp('calendar_data', data);
-    /*if(old_string.length > 0){
-      //Helper.updateStringSF('calendar_data', old_string, 'calendar_data', data);
-    }else{
-      print('add');
-      //Helper.addStringToSF('calendar_data', data);
-    }*/
+  void _saveInformation(data) async{
+    SharedPreferences sharedUser = await SharedPreferences.getInstance();
+    List<String> medicineJsonList = [];
+    if (sharedUser.getStringList('calendar_data') == null) {
+      medicineJsonList.add(data);
+    } else {
+      medicineJsonList = sharedUser.getStringList('calendar_data');
+      medicineJsonList.add(data);
+    }
 
-    // scheduleNotification(newEntryMedicine);
+    medicineJsonList.add(data);
+    sharedUser.setStringList('calendar_data', medicineJsonList);
     Navigator.pop(context);
     initState();
   }
 
-  String _generatorIdUnique() {
-    var uuid = new Uuid();
-
-    String id = uuid.v4();
-    return id;
+  int _generatorIdUnique() {
+    Random random = new Random();
+    int randomNumber = random.nextInt(1000);
+    return randomNumber;
   }
 }

@@ -13,12 +13,14 @@ class Helper {
     }
     return '';
   }
-static bool isNumeric(String s) {
+
+  static bool isNumeric(String s) {
     if (s == null) {
       return false;
     }
     return double.tryParse(s) != null;
   }
+
   static bool isNumber(String pzn) {
     //dont use isNumeric(), it accepts - and + signs
     for (int i = 0; i < pzn.length; i++) {
