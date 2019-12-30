@@ -21,6 +21,8 @@ class _ProductDetailsState extends State<ProductDetails> {
   String medSearchKey;
   ShopItem localShopItem;
 
+  int quantity = 1;
+
   final textEditController = TextEditingController();
 
   @override
@@ -149,9 +151,39 @@ class _ProductDetailsState extends State<ProductDetails> {
   }
 
   Widget buildOrderCompleteContainer() {
+    double price = ((localShopItem.priceInt * quantity) / 100);
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        Padding(padding: EdgeInsets.all(20),),
+        new Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('Gesamtpreis:', style: TextStyle(fontWeight: FontWeight.bold),),
+                  Text(price.toString() + ' €', style: TextStyle(fontWeight: FontWeight.bold),)
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('Stückpreis:'),
+                  Text(localShopItem.price)
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('UVP*:'),
+                  Text(localShopItem.crossedOutPrice, style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough,),)
+                ],
+              ),
+            ],
+          ),
+        ),
+        //Padding(padding: EdgeInsets.all(20),),
         new Flexible(
           child: Container(
             padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
@@ -166,17 +198,21 @@ class _ProductDetailsState extends State<ProductDetails> {
                       borderSide: BorderSide(color: Colors.green, width: 2)
                   )
               ),
+              onChanged: (String value) => {
+                setState(() => {
+                  quantity = int.parse(value)
+                }),
+              },
             ),
           ),
         ),
-        Padding(padding: EdgeInsets.all(10),),
+        //Padding(padding: EdgeInsets.all(10),),
         new Flexible(
           child: RaisedButton(
             onPressed: validateInputAndProceed,
             child: Text("Jetzt bestellen", style: TextStyle(color: Colors.green),),
           ),
         ),
-        Padding(padding: EdgeInsets.all(20),),
       ],
     );
   }

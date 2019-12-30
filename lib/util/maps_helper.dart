@@ -1,8 +1,6 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:location/location.dart' as LocationManager;
 
@@ -58,6 +56,15 @@ class MapsHelper {
       return LatLng(lat, lng);
     } catch (e) {
       return _berlin.target;
+    }
+  }
+
+  static Future<void> openMap(double latitude, double longitude) async {
+    String googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    if (await canLaunch(googleUrl)) {
+      await launch(googleUrl);
+    } else {
+      throw 'Could not open the map.';
     }
   }
 
