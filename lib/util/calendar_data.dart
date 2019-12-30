@@ -1,12 +1,15 @@
 import 'dart:convert';
+import '../util/helper.dart';
 
 class CalendarData {
-  final String id;
+  final int id;
   final int begin_day;
   final int days_duration;
   final String name_medical;
   final String note;
   final String dosage;
+  int interval;
+  List<String> calendar_list = new List<String>();
 
   CalendarData({
     this.id,
@@ -14,10 +17,11 @@ class CalendarData {
     this.days_duration,
     this.name_medical,
     this.note,
-    this.dosage
+    this.dosage,
+    this.interval
   });
 
-  String get getID => id;
+  int get getID => id;
   int get getBeginDay => begin_day;
   int get getDayDuration => days_duration;
   String get getNameMedical => name_medical;
@@ -35,20 +39,6 @@ class CalendarData {
     };
     return jsonEncode(values);
   }
-
-
-
-//  factory CalendarData.fromJson(Map<String, dynamic> parsedJson) {
-//    return CalendarData(
-//      id: parsedJson['id'],
-//      begin_day: parsedJson['beginday'],
-//      days_duration: parsedJson['days_duration'],
-//      name_medical: parsedJson['name_medical'],
-//      note: parsedJson['note'],
-//      dosage: parsedJson['dosage'],
-//    );
-//  }
-
 
 }
 
