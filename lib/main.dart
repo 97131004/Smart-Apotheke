@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'data/med.dart';
 import 'widgets/home.dart';
 
-
 void main() {
   List<Med> medicaments = [
     Med('', '10019621'),
@@ -29,6 +28,6 @@ void main() {
     //home: MedSearch(),
     //home: MedScan(meds: medicaments),
     //home: Personal(),
+    //home: Shop(med: globals.meds[0]),
   ));
 }
-
