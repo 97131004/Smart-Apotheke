@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:maph_group3/widgets/med_scan.dart';
-import 'package:maph_group3/widgets/personal.dart';
-import 'data/globals.dart' as globals;
 
 import 'data/med.dart';
 import 'widgets/home.dart';

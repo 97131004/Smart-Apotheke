@@ -5,7 +5,6 @@ import 'package:connectivity/connectivity.dart';
 
 import 'package:http/http.dart' as http;
 
-
 class Helper {
   static String parseMid(String source, String delim1, String delim2,
       [int startIndex]) {
@@ -97,7 +96,6 @@ class Helper {
   static String jsonDecode(String data) {
     return jsonDecode(data);
   }
-
 
   static String privacypolicy = """
 <!DOCTYPE html>
