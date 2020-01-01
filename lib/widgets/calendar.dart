@@ -278,10 +278,11 @@ class _CalendarState extends State<Calendar> {
                       _selected_Date(context);
                     }),
                 SizedBox(height: 20),
-                Text('Zeit Dauern *:'),
+                Text('Tag aktiv *:'),
                 TextField(
                   controller: days_duration,
-                  decoration: InputDecoration(hintText: "Zeit dauert"),
+                  decoration: InputDecoration(hintText: "Tag aktiv"),
+                  keyboardType: TextInputType.number,
                 ),
                 SizedBox(height: 20),
                 Text('Medikament *:'),
@@ -365,6 +366,7 @@ class _CalendarState extends State<Calendar> {
       new MaterialPageRoute(builder: (context) => Calendar()),
     );
   }
+
 
   Widget buildSaveButton(Function onPressedFunc) {
     return ButtonTheme(
