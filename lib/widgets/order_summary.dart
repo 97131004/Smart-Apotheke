@@ -3,15 +3,12 @@ import 'package:flutter/scheduler.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
-import 'package:maph_group3/util/maps_helper.dart';
 import 'package:maph_group3/util/nampr.dart';
 import 'package:maph_group3/util/personal_data.dart';
 import 'package:maph_group3/util/shop_items.dart';
 import 'package:maph_group3/widgets/maps.dart';
 import 'package:maph_group3/widgets/personal.dart';
 import 'package:intl/intl.dart';
-
-import 'package:location/location.dart' as LocationManager;
 
 class OrderSummary extends StatefulWidget {
   final ShopItem item;
@@ -25,9 +22,6 @@ class OrderSummary extends StatefulWidget {
 }
 
 class _OrderSummaryState extends State<OrderSummary> {
-  // google places api credentials
-  //static String kGoogleApiKey = "AIzaSyAFYotTBY_YeedSjlrOTXsVB7EKx79zR3U";
-  //GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: kGoogleApiKey);
 
   // google maps controller and markers
   GoogleMapController controller;
@@ -42,9 +36,6 @@ class _OrderSummaryState extends State<OrderSummary> {
   bool markerIsTabbed = false;
   PlacesSearchResult currentMarker;
   bool isLoaded = false;
-  String oh = '';
-  String name = '';
-  String formattedAddress = '';
   String shippingAddress = '';
 
   String _pickedDelivered = 'Nach Hause liefern lassen ( + 2.99 € )';
@@ -518,6 +509,7 @@ class _OrderSummaryState extends State<OrderSummary> {
           position: latlng,
           infoWindow: InfoWindow(title: id, snippet: ''));
     } else {
+      String oh = '';
       if (place.openingHours != null && place.openingHours.openNow != null) {
         oh = place.openingHours.openNow
             ? 'Jetzt geöffnet'

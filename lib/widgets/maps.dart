@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 
 import 'package:google_maps_webservice/places.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart' as LocationManager;
-import 'package:maph_group3/util/load_bar.dart';
 import 'package:maph_group3/util/maps_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -366,7 +364,7 @@ class _MapsState extends State<Maps> {
     });
   }
 
-  goToLocation(PlacesSearchResult foundPlace) async {
+  /*goToLocation(PlacesSearchResult foundPlace) async {
     controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
       target: LatLng(foundPlace.geometry.location.lat, foundPlace.geometry.location.lng),
       zoom: 14.0,
@@ -397,5 +395,5 @@ class _MapsState extends State<Maps> {
       addMarker(foundPlace.id, LatLng(foundPlace.geometry.location.lat, foundPlace.geometry.location.lng), place: foundPlace, colorDescriptor: BitmapDescriptor.hueGreen);
       previousMarkerId = foundPlace.id;
     });
-  }
+  }*/
 }

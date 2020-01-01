@@ -31,7 +31,7 @@ class _ShopState extends State<Shop> {
   bool shoppingInfoLoaded = false;
   String sorting = cPriceSort;
 
-  String medSearchKey;
+  String medSearchKey = '';
   ShopItem localShopItem;
 
   Future<List<ShopItem>> itemList;
@@ -44,9 +44,11 @@ class _ShopState extends State<Shop> {
       }
     });
 
-    medSearchKey = widget.med.pzn;
-    if(globals.items.containsKey(medSearchKey)) {
-      localShopItem = globals.items[medSearchKey];
+    if(widget.med != null) {
+      medSearchKey = widget.med.pzn;
+      if(globals.items.containsKey(medSearchKey)) {
+        localShopItem = globals.items[medSearchKey];
+      }
     }
 
     super.initState();
@@ -65,7 +67,7 @@ class _ShopState extends State<Shop> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               Padding(padding: EdgeInsets.all(10),),
-              Flexible(child: Text('Ergebnisliste für ' + localShopItem.searchKey),),
+              Flexible(child: Text('Ergebnisliste für ' + medSearchKey),),
               Spacer(),
               _buildDropDownMenu(),
               Padding(padding: EdgeInsets.all(10),),
@@ -81,7 +83,7 @@ class _ShopState extends State<Shop> {
           Expanded(
             child: Padding(
               padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-              child: buildListView(localShopItem.name),
+              child: buildListView(medSearchKey),
             )
           ),
         ],

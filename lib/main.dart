@@ -5,8 +5,6 @@ import 'data/globals.dart' as globals;
 
 import 'data/med.dart';
 import 'widgets/home.dart';
-import 'widgets/shop.dart';
-
 
 void main() {
   List<Med> medicaments = [
@@ -29,10 +27,10 @@ void main() {
       scaffoldBackgroundColor: Colors.white,
       primaryTextTheme: TextTheme(title: TextStyle(color: Colors.white)),
     ),
-    //home: Home(),
+    home: Home(),
     //home: MedSearch(),
     //home: MedScan(meds: medicaments),
     //home: Personal(),
-    home: Shop(med: globals.meds[0]),
+    //home: Shop(med: globals.meds[0]),
   ));
 }
