@@ -19,13 +19,14 @@ class Calendar extends StatefulWidget {
 }
 
 class _CalendarState extends State<Calendar> {
+  //for notifications
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   Map<DateTime, List> _events = new Map<DateTime, List>();
   List _selectedEvents = new List();
-
+  //for calendar
   CalendarController _calendarController;
-
+  // variables are in the calendar form
   DateTime begin_day;
   TextEditingController days_duration = new TextEditingController();
   TextEditingController name_medical = new TextEditingController();
@@ -88,52 +89,16 @@ class _CalendarState extends State<Calendar> {
     name_medical = TextEditingController();
     note = TextEditingController();
     dosage = TextEditingController();
-
+    //for notifications
     var initializationSettingsAndroid =
-        new AndroidInitializationSettings('app_icon');
+        new AndroidInitializationSettings('app_icon');//image app icon
     var initializationSettingsIOS = new IOSInitializationSettings();
     var initializationSettings = new InitializationSettings(
         initializationSettingsAndroid, initializationSettingsIOS);
     flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
-  }
-
-  Future onSelectNotification(String payload) async {
-    if (payload != null) {
-      debugPrint('notification payload: ' + payload);
-    }
-    await Navigator.push(
-      context,
-      new MaterialPageRoute(builder: (context) => Calendar()),
-    );
-  }
-
-  Future<void> scheduleNotification(CalendarData medicine) async {
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'repeatDailyAtTime channel id',
-      'repeatDailyAtTime channel name',
-      'repeatDailyAtTime description',
-      importance: Importance.Max,
-      sound: 'sound',
-      ledColor: Color(0xFF3EB16F),
-      ledOffMs: 1000,
-      ledOnMs: 1000,
-      enableLights: true,
-    );
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
-    var platformChannelSpecifics = NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-
-    // for (int i = 0; i < 5; i++) {
-    await flutterLocalNotificationsPlugin.showDailyAtTime(
-        medicine.id,
-        'Mediminder: ${medicine.name_medical}',
-        'Es ist an der Zeit, Ihre Medikamente gemäß Zeitplan einzunehmen',
-        Time(15, 50, 0),
-        platformChannelSpecifics);
-    //}
-    //await flutterLocalNotificationsPlugin.cancelAll();
+    //for notifications
   }
 
   @override
@@ -346,6 +311,61 @@ class _CalendarState extends State<Calendar> {
     );
   }
 
+  Future<void> _scheduleNotification(CalendarData data) async {
+    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+        'repeatDailyAtTime channel id',
+        'repeatDailyAtTime channel name',
+        'repeatDailyAtTime description',
+        importance: Importance.Max,
+        sound: 'sound',
+        priority: Priority.High,
+        ledColor: Color(0xFF3EB16F),
+        ledOffMs: 1000,
+        ledOnMs: 1000,
+        enableLights: true
+    );
+
+    var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
+    var platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    for( var i = 1; i <= 3 ; i ++){
+      if(i == 1){
+        await flutterLocalNotificationsPlugin.showDailyAtTime(
+            data.id,
+            'Medikamentenerinnerungen: ${data.name_medical + data.dosage + data.note}',
+            "Es ist an der Zeit, Ihre Medikamente gemäß Zeitplan einzunehmen",
+            Time(9, 0, 0),
+            platformChannelSpecifics);
+      }
+      if(i == 2){
+        await flutterLocalNotificationsPlugin.showDailyAtTime(
+            data.id,
+            'Medikamentenerinnerungen: ${data.name_medical + data.dosage + data.note}',
+            "Es ist an der Zeit, Ihre Medikamente gemäß Zeitplan einzunehmen",
+            Time(12, 0, 0),
+            platformChannelSpecifics);
+      }
+      if(i == 3){
+        await flutterLocalNotificationsPlugin.showDailyAtTime(
+            data.id,
+            'Medikamentenerinnerungen: ${data.name_medical + data.dosage + data.note}',
+            "Es ist an der Zeit, Ihre Medikamente gemäß Zeitplan einzunehmen",
+            Time(18, 0, 0),
+            platformChannelSpecifics);
+      }
+    }
+  }
+
+  Future onSelectNotification(String payload) async {
+    if (payload != null) {
+      debugPrint('notification payload: ' + payload);
+    }
+    await Navigator.push(
+      context,
+      new MaterialPageRoute(builder: (context) => Calendar()),
+    );
+  }
+
   Widget buildSaveButton(Function onPressedFunc) {
     return ButtonTheme(
       buttonColor: Theme.of(context).accentColor,
@@ -376,7 +396,7 @@ class _CalendarState extends State<Calendar> {
           name_medical: name_medical.text,
           dosage: dosage.text,
           note: note.text);
-      scheduleNotification(data);
+      _scheduleNotification (data);
       _saveInformation(data.toJson());
     }
   }
