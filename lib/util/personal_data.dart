@@ -9,8 +9,10 @@ class PersonalData {
   static String keyadresse = 'adresse';
   static var hasher = HashCrypt("SHA-3/512");
 
-  static bool isUserDataComplete() {
-    return keyPassword != 'passwiord' && keyIban != 'iban' && keyadresse != 'adresse';
+  static Future<bool> isUserDataComplete() async {
+    final addr = await Helper.readDataFromsp(keyadresse);
+    final iban = await Helper.readDataFromsp(keyIban);
+    return addr != '' && iban != '';
   }
 
   static Future<bool> isPasswordExists() async {

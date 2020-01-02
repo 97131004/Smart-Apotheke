@@ -251,13 +251,11 @@ class _MapsState extends State<Maps> {
     final result = await MapsHelper.getGoogleMapsPlaces().searchByText('apotheke', location: loc, radius: 200);
 
     setState(() {
-      print(result.status);
       if (result.status == 'OK') {
         result.results.forEach((f){
           if(!foundPlaces.containsKey(f.id)) {
             foundPlaces[f.id] = f;
           }
-          print(f.name);
           addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
         });
       }
@@ -280,14 +278,12 @@ class _MapsState extends State<Maps> {
     final loc = Location(location.latitude, location.longitude);
     final result = await MapsHelper.getGoogleMapsPlaces().searchByText('apotheke', location: loc, radius: 200);
 
-    print(result.toString());
     setState(() {
       if (result.status == 'OK') {
         result.results.forEach((f){
           if(!foundPlaces.containsKey(f.id)) {
             foundPlaces[f.id] = f;
           }
-          print("###" + f.name);
           addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
         });
       } else {
@@ -302,7 +298,6 @@ class _MapsState extends State<Maps> {
       }
       isLoaded = true;
     });
-    print("state set");
   }
 
 

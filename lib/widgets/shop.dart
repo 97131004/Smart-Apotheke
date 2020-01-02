@@ -48,6 +48,8 @@ class _ShopState extends State<Shop> {
       medSearchKey = widget.med.pzn;
       if(globals.items.containsKey(medSearchKey)) {
         localShopItem = globals.items[medSearchKey];
+      } else {
+        medSearchKey = widget.med.name;
       }
     }
 
@@ -119,23 +121,28 @@ class _ShopState extends State<Shop> {
   }
 
   Widget buildCard() {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      child: Container(
-          decoration: new BoxDecoration (
-            borderRadius: new BorderRadius.circular(5),
-            border: Border.all(color: Colors.black54),
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [Colors.green, Colors.white]
+    if(localShopItem != null) {
+      return Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        child: Container(
+            decoration: new BoxDecoration (
+              borderRadius: new BorderRadius.circular(5),
+              border: Border.all(color: Colors.black54),
+              gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [Colors.green, Colors.white]
+              ),
             ),
-          ),
-          child: buildListTileOwnProd()
-      ),
-    );
+            child: buildListTileOwnProd()
+        ),
+      );
+    } else {
+      return Container();
+    }
+
   }
 
   ListTile buildListTileOwnProd() {
@@ -164,8 +171,9 @@ class _ShopState extends State<Shop> {
   }
 
   Widget buildListView(String searchKey) {
+    var localSearchKey = localShopItem != null ? localShopItem.searchKey : searchKey;
     return FutureBuilder<List<ShopItem>>(
-      future: getShopData(localShopItem.searchKey),
+      future: getShopData(localSearchKey),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(child: LoadBar.build());
