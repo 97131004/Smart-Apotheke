@@ -32,6 +32,7 @@ class _CalendarState extends State<Calendar> {
   TextEditingController name_medical = new TextEditingController();
   TextEditingController note = new TextEditingController();
   TextEditingController dosage = new TextEditingController();
+  TextEditingController text_show_date = new TextEditingController();//for the show of date ui picker
 
   var _selectedDay = DateTime.now();
 
@@ -246,20 +247,6 @@ class _CalendarState extends State<Calendar> {
     );
   }
 
-  Future<Null> _selected_Date(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2020),
-        lastDate: DateTime(2029)
-    );
-    if(picked != null && picked != DateTime.now()){
-      setState(() {
-        begin_day = picked;
-      });
-    }
-  }
-
   Widget _build_form_to_calendar (BuildContext context){
     return Scaffold(
       appBar: AppBar(
@@ -271,12 +258,27 @@ class _CalendarState extends State<Calendar> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Text('Anfang *: ${begin_day.toString()}'),
+                TextField(
+                  controller: text_show_date,
+                  decoration: InputDecoration(hintText: 'Anfang *: '),
+                  enabled: false,
+                ),
                 RaisedButton(
-                    child: Text("Wählen sie ein Datum !"),
-                    onPressed: () {
-                      _selected_Date(context);
-                    }),
+                  child: Text('Pick a date'),
+                  onPressed: () {
+                    showDatePicker(
+                        context: context,
+                        initialDate: begin_day == null ? DateTime.now() : begin_day,
+                        firstDate: DateTime(2019),
+                        lastDate: DateTime(2022)
+                    ).then((date) {
+                      setState(() {
+                        begin_day = date;
+                        text_show_date.text = begin_day != null ? begin_day.toString(): 'Anfang *: ';
+                      });
+                    });
+                  },
+                ),
                 SizedBox(height: 20),
                 Text('Tag aktiv *:'),
                 TextField(
@@ -399,7 +401,7 @@ class _CalendarState extends State<Calendar> {
           dosage: dosage.text,
           note: note.text);
       _scheduleNotification (data);
-      _saveInformation(data.toJson());
+     // _saveInformation(data.toJson());
     }
   }
 
