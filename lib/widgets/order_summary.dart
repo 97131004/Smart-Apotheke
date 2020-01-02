@@ -7,6 +7,7 @@ import 'package:maph_group3/util/nampr.dart';
 import 'package:maph_group3/util/personal_data.dart';
 import 'package:maph_group3/util/shop_items.dart';
 import 'package:maph_group3/widgets/maps.dart';
+import 'package:maph_group3/widgets/order_confirmation.dart';
 import 'package:maph_group3/widgets/personal.dart';
 import 'package:intl/intl.dart';
 
@@ -47,6 +48,7 @@ class _OrderSummaryState extends State<OrderSummary> {
   initState() {
     super.initState();
     _checkData();
+    getShippingAddress();
   }
 
   @override
@@ -442,8 +444,8 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
-  _checkData() {
-    if (!PersonalData.isUserDataComplete()) {
+  _checkData() async {
+    if (!(await PersonalData.isUserDataComplete())) {
       SchedulerBinding.instance.addPostFrameCallback((_) async {
         await _buildAlertDialog(context, 'Daten unvollständig',
             'Ihre persönlichen Daten sind nicht vollständig. Bitte überprüfen und ergänzen.');
@@ -453,7 +455,6 @@ class _OrderSummaryState extends State<OrderSummary> {
         );
       });
     }
-    // TODO
     dataIsComplete = true;
   }
 
@@ -549,7 +550,7 @@ class _OrderSummaryState extends State<OrderSummary> {
   void goToOrderConfirmed() {
     if (agbIsChecked) {
       // go to confirmed page
-      print("confirmed");
+      Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => OrderConfirmation()));
     } else {
       // agb not checked
       _buildAlertDialog(
