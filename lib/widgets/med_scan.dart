@@ -102,7 +102,14 @@ class _MedScanState extends State<MedScan> {
           }
           if (length == 0 && index == length + 1) {
             //med items
-            return Text('Keine Medikamente gefunden.');
+            return Column(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Text('Keine Medikamente gefunden.'),
+                ),
+              ],
+            );
           }
           if (length > 0 && index == length + 1 ||
               length == 0 && index == length + 2) {
@@ -139,7 +146,7 @@ class _MedScanState extends State<MedScan> {
                     shape: new RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(30.0),
                     ),
-                    onPressed: () {onScanAgainClick();},
+                    onPressed: onScanAgainClick,
                     label: Text("Nochmals scannen"),
                   ),
                 ),

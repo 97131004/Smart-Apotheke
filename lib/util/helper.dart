@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 
+import 'package:http/http.dart' as http;
+
 class Helper {
   static String parseMid(String source, String delim1, String delim2,
       [int startIndex]) {
@@ -12,6 +14,13 @@ class Helper {
       return source.substring(iDelim1 + delim1.length, iDelim2);
     }
     return '';
+  }
+
+  static bool isNumeric(String s) {
+    if (s == null) {
+      return false;
+    }
+    return double.tryParse(s) != null;
   }
 
   static bool isNumber(String pzn) {
@@ -38,6 +47,7 @@ class Helper {
     try {
       final file = await localFile(filename);
       String body = await file.readAsString();
+      print(body);
       return body;
     } catch (e) {
       await writeDatafromFile(filename, '');
@@ -74,6 +84,19 @@ class Helper {
     }
     return false;
   }
+
+  static Future<String> fetchHTML(String url) async {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200)
+      return response.body;
+    else return null;
+  }
+
+  static String jsonDecode(String data) {
+    return jsonDecode(data);
+  }
+
   static String privacypolicy = """
 <!DOCTYPE html>
     <html>

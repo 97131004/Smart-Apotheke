@@ -9,6 +9,12 @@ class PersonalData {
   static String keyadresse = 'adresse';
   static var hasher = HashCrypt("SHA-3/512");
 
+  static Future<bool> isUserDataComplete() async {
+    final addr = await Helper.readDataFromsp(keyadresse);
+    final iban = await Helper.readDataFromsp(keyIban);
+    return addr != '' && iban != '';
+  }
+
   static Future<bool> isPasswordExists() async {
     final value = await Helper.readDataFromsp(keyPassword);
     //print('read: $value');

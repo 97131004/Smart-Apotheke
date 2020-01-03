@@ -4,7 +4,6 @@ import 'package:maph_group3/widgets/datenschutzerklaerung.dart';
 import 'data/med.dart';
 import 'widgets/home.dart';
 
-
 void main() {
   List<Med> medicaments = [
     Med('', '10019621'),
@@ -26,8 +25,10 @@ void main() {
       scaffoldBackgroundColor: Colors.white,
       primaryTextTheme: TextTheme(title: TextStyle(color: Colors.white)),
     ),
-    home: Home()
-    
+    home: Home(),
+    //home: MedSearch(),
+    //home: MedScan(meds: medicaments),
+    //home: Personal(),
+    //home: Shop(med: globals.meds[0]),
   ));
 }
-

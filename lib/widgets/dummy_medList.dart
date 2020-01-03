@@ -6,8 +6,6 @@ import '../util/nampr.dart';
 import 'scanner.dart';
 
 class DummyMedList extends StatefulWidget {
-  
-
   @override
   State<StatefulWidget> createState() {
     return _DummyMedListState();
@@ -15,27 +13,21 @@ class DummyMedList extends StatefulWidget {
 }
 
 class _DummyMedListState extends State<DummyMedList> {
-
-  
-   _DummyMedListState();
+  _DummyMedListState();
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text('Medikamente Liste'),
-        backgroundColor: Colors.green,),
-    
-  
-      
-       
-         
-        body: (globals.meds.length > 0)
+        backgroundColor: Colors.green,
+      ),
+      body: (globals.meds.length > 0)
           ? MedList.build(
               context,
               globals.meds,
               true,
-              medItemOnLongPress,
               medItemOnSwipe,
+              medItemOnButtonDelete,
             )
           : Center(
               child: Padding(
@@ -60,32 +52,49 @@ class _DummyMedListState extends State<DummyMedList> {
     );
   }
 
-  void medItemOnLongPress(Med med, Offset tapPosition) {
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject();
-    showMenu(
-      items: <PopupMenuEntry>[
-        PopupMenuItem(
-          value: 'delete',
-          child: Row(
-            children: <Widget>[
-              Icon(Icons.delete),
-              Text("Delete"),
-            ],
-          ),
-        )
-      ],
-      context: context,
-      position: RelativeRect.fromRect(
-          tapPosition & Size.zero, Offset.zero & overlay.size),
-    ).then((value) {
-      if (value == 'delete') {
-        medItemDelete(med);
-      }
-    });
-  }
-
   void medItemOnSwipe(Med med) {
     medItemDelete(med);
+  }
+
+  void medItemOnButtonDelete(Med med) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Löschen"),
+          content: RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontSize: 16.0,
+                color: Colors.black,
+              ),
+              children: <TextSpan>[
+                TextSpan(text: 'Wollen Sie den Eintrag '),
+                TextSpan(
+                    text: med.name,
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: ' wirklich löschen?'),
+              ],
+            ),
+          ),
+          actions: [
+            FlatButton(
+              child: Text("Nein"),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            FlatButton(
+              child: Text("Ja"),
+              onPressed: () {
+                medItemDelete(med);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void medItemDelete(Med med) {
@@ -94,7 +103,3 @@ class _DummyMedListState extends State<DummyMedList> {
     });
   }
 }
-     
-    
-   
-  
