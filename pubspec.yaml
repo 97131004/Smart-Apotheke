@@ -36,6 +36,7 @@ dependencies:
   connectivity: ^0.4.2
   carousel_pro: ^1.0.0
   table_calendar: ^2.2.1
+  webview_flutter: ^0.3.4
   image_editor: ^0.1.4
   grouped_buttons: ^1.0.4
 # tinhcv2
@@ -76,6 +77,7 @@ flutter:
     - assets/userguide2.PNG
     - assets/userguide3.PNG
     - assets/userguide4.PNG
+    - assets/files/privacy_policy.html 
     - assets/dummy_med.png
 
   # An image asset can refer to one or more resolution-specific "variants", see

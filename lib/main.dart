@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:maph_group3/widgets/datenschutzerklaerung.dart';
 
 import 'data/med.dart';
 import 'widgets/home.dart';
