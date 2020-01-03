@@ -23,6 +23,7 @@ class _CalendarState extends State<Calendar> {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   Map<DateTime, List> _events = new Map<DateTime, List>();
+  Map<DateTime, List> map_temporary = new Map<DateTime, List>();
   List _selectedEvents = new List();
   //for calendar
   CalendarController _calendarController;
@@ -35,40 +36,96 @@ class _CalendarState extends State<Calendar> {
   TextEditingController text_show_date = new TextEditingController();//for the show of date ui picker
 
   var _selectedDay = DateTime.now();
+  var _selectedDay1 = DateTime.now();
+  var _selectedDay2 = DateTime.now();
 
   var result;
+  var result2;
 
   void read() async {
     SharedPreferences shared = await SharedPreferences.getInstance();
     List<String> events_calendar = shared.getStringList('calendar_data');
-    //print(events_calendar);
+    //await shared.clear(); //to remove all data
+   //print(events_calendar);
+    List<String> one_items = [];
+    List<String> all_key_day = [];
+    Map<DateTime, List> _events_tinhcv;
+
     if (events_calendar != null) {
       for (var i = 0; i < events_calendar.length; i++) {
         result = jsonDecode(events_calendar[i]);
-        List<String> one_items = [];
-        Map<DateTime, List> _events_tinhcv;
+
         if (result['days_duration'] > 0) {
           for (var j = 0; j <= result['days_duration']; j++) {
-            if (j == 0) {
-              one_items.add(result['name_medical'] +
-                  "-" +
-                  result['dosage'] +
-                  "-" +
-                  result['note']);
-            }
+            _selectedDay1 = new DateTime.fromMillisecondsSinceEpoch(result['begin_day']);
 
-            if (result['begin_day'] > 0) {
-              _selectedDay =
-                  new DateTime.fromMillisecondsSinceEpoch(result['begin_day']);
-            }
-            _events_tinhcv = {
-              _selectedDay.add(Duration(days: result['days_duration'] - j)):
-                  one_items
-            };
-            await _events.addAll(_events_tinhcv);
+            all_key_day.add(_selectedDay1.add(Duration(days: result['days_duration'] - j)).toString());
+
+          }
+        }
+          //one_items.add(result['name_medical'] + "-" + result['dosage'] + "-" + result['note']);
+      }
+    }
+
+    List<String> same_key_day = [];
+    for (var i = 0; i < all_key_day.length; i++)
+    {
+      for (var j = i + 1; j < all_key_day.length; j++)
+      {
+        if (all_key_day[i] == all_key_day[j])
+        {
+          same_key_day.add(all_key_day[i]);
+          break;
+        }
+      }
+    }
+
+    if (events_calendar != null) {
+      for (var i = 0; i < events_calendar.length; i++) {
+        result = jsonDecode(events_calendar[i]);
+        for (var j = 0; j <= result['days_duration']; j++) {
+          _selectedDay1 = new DateTime.fromMillisecondsSinceEpoch(result['begin_day']);
+
+          if(same_key_day.contains( _selectedDay1.add(Duration(days: result['days_duration'] - j)).toString())){
+            one_items.add(result['name_medical'] + "-" + result['dosage'] + "-" + result['note']);
           }
         }
       }
+    }
+    print(same_key_day);
+    final list = one_items;
+    final seen = Set<String>();
+    final common = list.where((str) => seen.add(str)).toList();
+    //print(common);
+
+    if (events_calendar != null) {
+      List<String> item_local = [];
+      for (var i = 0; i < events_calendar.length; i++) {
+        result = jsonDecode(events_calendar[i]);
+        print (result);
+        if (result['days_duration'] > 0) {
+          for (var j = 0; j <= result['days_duration']; j++) {
+            if (result['begin_day'] > 0) {
+              _selectedDay = new DateTime.fromMillisecondsSinceEpoch(result['begin_day']);
+            }
+
+              if(same_key_day.contains(_selectedDay.add(Duration(days: result['days_duration'] - j)).toString())){
+                _events_tinhcv = {
+                  _selectedDay.add(Duration(days: result['days_duration'] - j)): common
+                };
+              }else{
+                  item_local = [(result['name_medical'] + "-" + result['dosage'] + "-" + result['note'])];
+                  _events_tinhcv = {
+                    _selectedDay.add(Duration(days: result['days_duration'] - j)): item_local
+                  };
+              }
+
+            await _events.addAll(_events_tinhcv);
+          }
+
+        }
+      }
+
       _selectedEvents = await cretateData(_events);
     }
   }
@@ -149,7 +206,7 @@ class _CalendarState extends State<Calendar> {
                   ? _buildEventList()
                   : new Container(width: 0.0, height: 0.0)),
         ],
-      ),
+      )
     );
   }
 
@@ -401,7 +458,8 @@ class _CalendarState extends State<Calendar> {
           dosage: dosage.text,
           note: note.text);
       _scheduleNotification (data);
-     // _saveInformation(data.toJson());
+
+      _saveInformation(data.toJson());
     }
   }
 
@@ -432,16 +490,16 @@ class _CalendarState extends State<Calendar> {
     SharedPreferences sharedUser = await SharedPreferences.getInstance();
     List<String> medicineJsonList = [];
     if (sharedUser.getStringList('calendar_data') == null) {
-      medicineJsonList.add(data);
+        medicineJsonList.add(data);
     } else {
       medicineJsonList = sharedUser.getStringList('calendar_data');
       medicineJsonList.add(data);
     }
 
-    medicineJsonList.add(data);
     sharedUser.setStringList('calendar_data', medicineJsonList);
     Navigator.pop(context);
     initState();
+
   }
 
   int _generatorIdUnique() {
