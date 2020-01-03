@@ -1,7 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 //import 'package:maph_group3/widgets/shop.dart';
 import 'package:maph_group3/data/med.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../util/nampr.dart';
 import '../data/globals.dart' as globals;
 import '../widgets/personal.dart';
@@ -17,7 +19,7 @@ import 'package:maph_group3/util/personal_data.dart';
 
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
-
+ 
   @override
   State<StatefulWidget> createState() {
     return _HomeState();
@@ -29,76 +31,108 @@ class _HomeState extends State<Home> {
   TextEditingController ePass = new TextEditingController();
   String hash;
   Alert alert;
-
+  final load='premiere';
   @override
   void initState() {
     super.initState();
-     passwordenter(context);
+    passwordenter(context);
+    
+     
   }
 
   void passwordenter(BuildContext context) async {
-    if (!(await PersonalData.isPasswordExists())) {
-      alert = createAlert(context);
-      alert.show();
+      if (!(await PersonalData.isPasswordExists())) {
+        alert = createAlert(context);
+        alert.show();
+      }
     }
-  }
-
   Alert createAlert(BuildContext context) {
-    var alert = Alert(
-        context: context,
-        title: "SET YOUR PASSWORD",
-        content: Column(
-          children: <Widget>[
-            TextField(
-              controller: pass,
-              obscureText: true,
-              decoration: InputDecoration(
-                icon: Icon(Icons.lock),
-                labelText: 'Password',
+      var alert = Alert(
+          context: context,
+          title: "SET YOUR PASSWORD",
+          content: Column(
+            children: <Widget>[
+              TextField(
+                controller: pass,
+                obscureText: true,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.lock),
+                  labelText: 'Password',
+                ),
               ),
-            ),
-            TextField(
-              controller: ePass,
-              obscureText: true,
-              decoration: InputDecoration(
-                icon: Icon(Icons.lock),
-                labelText: 'Re-entered Password',
+              TextField(
+                controller: ePass,
+                obscureText: true,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.lock),
+                  labelText: 'Re-entered Password',
+                ),
               ),
-            ),
-          ],
-        ),
-        buttons: [
-          DialogButton(
-            color: Colors.green,
-            onPressed: () => _submitpasswort(),
-            child: Text(
-              "SUBMIT",
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-          )
-        ]);
-    return alert;
-  }
+            ],
+          ),
+          buttons: [
+            DialogButton(
+              color: Colors.green,
+              onPressed: () => _submitpasswort(),
+              child: Text(
+                "SUBMIT",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            )
+          ]);
+      return alert;
+    } 
+    Future _submitpasswort() async {
+      //bool isdone = false;
+      if (pass.text == ePass.text && pass.text.isNotEmpty) {
+        await PersonalData.setpassword(pass.text);
+        Navigator.pop(context);
+      } else {
+        setState(() {
+          pass.text = '';
+          ePass.text = '';
+        });
+      }
+    }  
 
-  Future _submitpasswort() async {
-    //bool isdone = false;
-    if (pass.text == ePass.text && pass.text.isNotEmpty) {
-      await PersonalData.setpassword(pass.text);
-      Navigator.pop(context);
-    } else {
-      setState(() {
-        pass.text = '';
-        ePass.text = '';
-      });
+    showAlert(BuildContext context) async{
+     SharedPreferences prefs =await SharedPreferences.getInstance();
+     bool isfirstLoaded = prefs.getBool(load);
+      // flutter defined functionc
+    if ( isfirstLoaded==null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          // return object of type Dialog
+          return AlertDialog(
+            title: new Text("Hinweis zum Datenschutz"),
+            content: new Text("Bitte die Datenshutzerlärung lesen und bestätigen"),
+            actions: <Widget>[
+              // usually buttons at the bottom of the dialog
+              new FlatButton(
+                child: new Text("Lesen"),
+                onPressed: () {
+                          
+                  Navigator.push(
+                                context,
+                                NoAnimationMaterialPageRoute(builder: (context) =>Datenschutz()));
+                                prefs.setBool(load, false);     
+                },
+              ),
+            ],
+          );
+        },
+      );
     }
-  }
+    }
+  
+
 
   @override
   Widget build(BuildContext context) {
-    // Future.delayed(Duration.zero, () => passwordenter(context));
-    //passwordenter();
-    
-    return Scaffold(
+  Future.delayed(Duration.zero, ()=> showAlert(context) );
+    return SafeArea(child: 
+    Scaffold(
       drawer: Drawer(
         child: ListView(
           // Important: Remove any padding from the ListView.
@@ -136,17 +170,7 @@ class _HomeState extends State<Home> {
                 );
               },
             ),
-            ListTile(
-              title: Text('Datenschutzerkärung'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  NoAnimationMaterialPageRoute(
-                      builder: (context) => Datenschutz()),
-                );
-              },
-            ),
+        
             ListTile(
               title: Text('Über uns'),
               onTap: () {
@@ -213,21 +237,6 @@ class _HomeState extends State<Home> {
               ),
           child:Text(' Ihre Medikamente Liste steht jederzeit zur Verfügung!',style: TextStyle(fontWeight:FontWeight.bold),),
           ),
-         /*  Container(
-          width: double.infinity,
-          padding: EdgeInsets.only(left: 50.0,right: 50.0, top: 180.0 , bottom: 50.0),
-          child: RaisedButton(
-            elevation: 50,
-            color: Colors.green,
-            shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(10.0)),
-            onPressed: (){
-              Navigator.push(
-                context,
-                NoAnimationMaterialPageRoute(builder: (context) =>MedSearch()),
-              );},
-              child: Text('Shops'),
-          ),
-          ),*/
           Container(
           width: double.infinity,
           padding: EdgeInsets.only(left: 50.0,right: 50.0, top: 220.0 , bottom: 20.0),
@@ -261,6 +270,7 @@ class _HomeState extends State<Home> {
          
         ],
       ),
+    ),
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:maph_group3/widgets/datenschutzerklaerung.dart';
 
 import 'data/med.dart';
 import 'widgets/home.dart';
@@ -25,10 +26,8 @@ void main() {
       scaffoldBackgroundColor: Colors.white,
       primaryTextTheme: TextTheme(title: TextStyle(color: Colors.white)),
     ),
-    home: Home(),
-    //home: MedSearch(),
-    //home: MedScan(meds: medicaments),
-    //home: Personal(),
+    home: Home()
+    
   ));
 }
 
