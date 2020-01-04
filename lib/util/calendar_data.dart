@@ -40,5 +40,32 @@ class CalendarData {
     return jsonEncode(values);
   }
 
+
+/*
+  static Map<String, dynamic> toJson(DateTime begin_day, List infor) {
+    return {
+      "beginday": begin_day,
+      "infor": infor
+    };
+  }
+
+ */
+
+/*
+  factory CalendarData.fromJson(Map<String, dynamic> parsedJson) {
+    return Medicine(
+      notificationIDs: parsedJson['ids'],
+      medicineName: parsedJson['name'],
+      dosage: parsedJson['dosage'],
+      medicineType: parsedJson['type'],
+      interval: parsedJson['interval'],
+      startTime: parsedJson['start'],
+      startDay: parsedJson['startday'],
+      endDay: parsedJson['endday'],
+    );
+  }
+
+ */
+
 }
 
