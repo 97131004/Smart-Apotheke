@@ -44,7 +44,7 @@ packages:
     source: hosted
     version: "1.0.0"
   charcode:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: charcode
       url: "https://pub.dartlang.org"
@@ -118,6 +118,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.8.4+3"
+  flutter_multiselect:
+    dependency: "direct main"
+    description:
+      name: flutter_multiselect
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1"
   flutter_pagewise:
     dependency: "direct main"
     description:
