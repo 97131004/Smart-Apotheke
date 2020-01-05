@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:async';
+import 'package:flutter_multiselect/flutter_multiselect.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Calendar extends StatefulWidget {
@@ -19,9 +20,8 @@ class Calendar extends StatefulWidget {
 }
 
 class _CalendarState extends State<Calendar> {
-  final _formKey = GlobalKey<FormState>();//for validate input
-
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  final _formKey = GlobalKey<FormState>(); //for validate input
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
 
   CalendarController _controller;
   Map<DateTime, List<dynamic>> _events;
@@ -33,7 +33,7 @@ class _CalendarState extends State<Calendar> {
   TextEditingController name_medical = new TextEditingController();
   TextEditingController dosage = new TextEditingController();
   TextEditingController note = new TextEditingController();
-  TextEditingController interval = new TextEditingController();
+  List _myclock;//for multiple select o' clock
 
   @override
   void initState() {
@@ -47,7 +47,78 @@ class _CalendarState extends State<Calendar> {
     name_medical = TextEditingController();
     note = TextEditingController();
     dosage = TextEditingController();
-    interval = TextEditingController();
+    _myclock = [];
+
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  }
+
+  initializeNotifications() async {
+    var initializationSettingsAndroid =
+    AndroidInitializationSettings('@mipmap/launcher_icon');
+    var initializationSettingsIOS = IOSInitializationSettings();
+    var initializationSettings = InitializationSettings(
+        initializationSettingsAndroid, initializationSettingsIOS);
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: onSelectNotification);
+  }
+
+  Future onSelectNotification(String payload) async {
+    if (payload != null) {
+      debugPrint('notification payload: ' + payload);
+    }
+    await Navigator.push(
+      context,
+      new MaterialPageRoute(builder: (context) => Calendar()),
+    );
+  }
+
+  static int generate_id_from_text(String s){
+    int id = 0;
+    for(int i=0; i<s.length; i++) {
+      var char = s[i];
+      print(char);
+
+    }
+
+    return id;
+  }
+
+  void removeNotification(int id) async {
+     await flutterLocalNotificationsPlugin.cancel(id);
+  }
+
+  void removeAllNotification(int id) async {
+     await flutterLocalNotificationsPlugin.cancelAll();
+  }
+
+  Future<void> scheduleNotification(int id, List time, String text) async {
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'repeatDailyAtTime channel id',
+      'repeatDailyAtTime channel name',
+      'repeatDailyAtTime description',
+      importance: Importance.Max,
+      sound: 'sound',
+      ledColor: Color(0xFF3EB16F),
+      ledOffMs: 1000,
+      ledOnMs: 1000,
+      enableLights: true,
+    );
+
+    if(time.length > 0){
+      for (int i = 0; i < time.length ; i++){
+        int hour = time[i];
+        var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+        var platformChannelSpecifics = NotificationDetails(
+            androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+        await flutterLocalNotificationsPlugin.showDailyAtTime(
+            id,
+            'Mediminder: $text',
+            'It is time to take your medicine, according to schedule',
+            Time(hour, 0, 0),
+            platformChannelSpecifics);
+      }
+    }
   }
 
   initPrefs() async {
@@ -84,14 +155,6 @@ class _CalendarState extends State<Calendar> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Kalender'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.clear),
-            onPressed: () {
-              _removeEvent;
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -103,7 +166,7 @@ class _CalendarState extends State<Calendar> {
               calendarStyle: CalendarStyle(
                   canEventMarkersOverflow: true,
                   todayColor: Colors.teal,
-                  selectedColor: Theme.of (context).primaryColor,
+                  selectedColor: Theme.of(context).primaryColor,
                   todayStyle: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18.0,
@@ -155,10 +218,11 @@ class _CalendarState extends State<Calendar> {
                   border: Border.all(width: 0.8),
                   borderRadius: BorderRadius.circular(12.0),
                 ),
-                margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                 child: ListView.builder(
                     itemCount: 1,
-                    itemBuilder: (context, index){
+                    itemBuilder: (context, index) {
                       final item = event;
 
                       return Dismissible(
@@ -171,18 +235,18 @@ class _CalendarState extends State<Calendar> {
                           // Remove the item from the data source.
                           setState(() {
                             _selectedEvents.removeAt(index);
-                            prefs.setString("events", json.encode(encodeMap(_events)));
+                            prefs.setString(
+                                "events", json.encode(encodeMap(_events)));
                           });
                           // Then show a snackbar.
-                          Scaffold.of(context)
-                              .showSnackBar(SnackBar(content: Text("$item dismissed")));
+                          Scaffold.of(context).showSnackBar(
+                              SnackBar(content: Text("$item dismissed")));
                         },
                         // Show a red background as the item is swiped away.
                         background: Container(color: Colors.red),
                         child: ListTile(title: Text('$item')),
                       );
-                    }
-                ),
+                    }),
               ),
             ),
           ],
@@ -195,7 +259,8 @@ class _CalendarState extends State<Calendar> {
     );
   }
 
-  void _onVisibleDaysChanged(DateTime first, DateTime last, CalendarFormat format) {
+  void _onVisibleDaysChanged(
+      DateTime first, DateTime last, CalendarFormat format) {
     print('CALLBACK: _onVisibleDaysChanged');
   }
 
@@ -203,22 +268,11 @@ class _CalendarState extends State<Calendar> {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-              content: Form(
+            content: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                  TextFormField(
-                  validator: (value) {
-                      if (value.isEmpty) {
-                        return 'Please enter some text';
-                      }
-                        return null;
-                      },
-                    decoration: InputDecoration(labelText: 'Medikament Name'),
-                    controller: name_medical,
-                ),
-                  SizedBox(height: 20),
                     TextFormField(
                       validator: (value) {
                         if (value.isEmpty) {
@@ -226,63 +280,121 @@ class _CalendarState extends State<Calendar> {
                         }
                         return null;
                       },
-                    decoration: InputDecoration(labelText: 'Dosage'),
-                    controller: dosage,
-                  ),
-                  SizedBox(height: 20),
+                      decoration:
+                          InputDecoration(labelText: 'Medikament Name *'),
+                      controller: name_medical,
+                    ),
+                    SizedBox(height: 20),
                     TextFormField(
-                    decoration: InputDecoration(labelText: 'Note'),
-                    controller: note,
-                  ),
-                  Container(
-                    margin: EdgeInsets.all(70),
-                    child:FlatButton(
-                      color: Colors.teal,
-                      child: Text("Save",
-                        style: TextStyle(
-                            color: Colors.white
-                        ),),
-                      onPressed: () {
-                        if(_formKey.currentState.validate()){
-                          if(note.text != null){
-                            _eventController.text = name_medical.text + "-- " + dosage.text + "--" + note.text;
-                          }else{
-                            _eventController.text = name_medical.text + "--" + dosage.text;
-                          }
-
-                          if(_eventController.text != null && _eventController.text != ""){
-                            setState(() {
-                              if (_events[_controller.selectedDay] != null) {
-                                _events[_controller.selectedDay].add(_eventController.text);
-                              } else {
-                                _events[_controller.selectedDay] = [
-                                  _eventController.text
-                                ];
-                              }
-                              prefs.setString("events", json.encode(encodeMap(_events)));
-                              _eventController.clear();
-                              Navigator.pop(context);
-                            });
-                            name_medical.clear();
-                            dosage.clear();
-                            note.clear();
-                          }
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter some text';
                         }
-
+                        return null;
                       },
-                    )
-                  ),
-                ],
-              )
-              ))
-    );
-  }
+                      decoration: InputDecoration(labelText: 'Dosage *'),
+                      controller: dosage,
+                    ),
+                    SizedBox(height: 20),
+                    TextFormField(
+                      decoration: InputDecoration(labelText: 'Note'),
+                      controller: note,
+                    ),
+                    Container(
+                      margin: new EdgeInsets.only(
+                          left: 0, top: 15.0, right: 0, bottom: 15.0),
+                      child: MultiSelect(
+                          autovalidate: false,
+                          titleText: "Select",
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Please select one or more option(s)';
+                            }
+                          },
+                          errorText: 'Please select one or more option(s)',
+                          dataSource: [
+                            {
+                              "display": "9 Uhr",
+                              "value": 9,
+                            },
+                            {
+                              "display": "12 Uhr",
+                              "value": 12,
+                            },
+                            {
+                              "display": "18 Uhr",
+                              "value": 18,
+                            },
+                            {
+                              "display": "21 Uhr",
+                              "value": 21,
+                            }
+                          ],
+                          textField: 'display',
+                          valueField: 'value',
+                          filterable: true,
+                          required: true,
+                          value: _myclock,
+                          onSaved: (value) {
+                              setState(() {
+                                _myclock = value;
+                              });
+                          }),
+                    ),
+                    Container(
+                        margin: new EdgeInsets.symmetric(horizontal: 80.0),
+                        child: FlatButton(
+                          color: Colors.teal,
+                          child: Text(
+                            "Save",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          onPressed: () {
+                            if (_formKey.currentState.validate()) {
+                              _formKey.currentState.save();
 
-  /*
-  Function to remove a event in a day
-   */
-  _removeEvent(){
+                              if (note.text != null) {
+                                _eventController.text = name_medical.text +
+                                    "-- " +
+                                    dosage.text +
+                                    "--" +
+                                    note.text;
+                              } else {
+                                _eventController.text =
+                                    name_medical.text + "--" + dosage.text;
+                              }
+                              if (_eventController.text != null &&
+                                  _eventController.text != "") {
+                                setState(() {
+                                  if (_events[_controller.selectedDay] !=
+                                      null) {
+                                    _events[_controller.selectedDay]
+                                        .add(_eventController.text);
+                                  } else {
+                                    _events[_controller.selectedDay] = [
+                                      _eventController.text
+                                    ];
+                                  }
+                                  prefs.setString("events",
+                                      json.encode(encodeMap(_events)));
+                                  print(_events[_controller.selectedDay]);
+                                  print(_eventController.text);
+                                  int id = _events[_controller.selectedDay].indexOf(_eventController.text);
 
-    print(_controller.selectedDay);
+                                  scheduleNotification(id, _myclock, _eventController.toString());
+
+                                  _eventController.clear();
+
+                                  Navigator.pop(context);
+                                });
+                                name_medical.clear();
+                                dosage.clear();
+                                note.clear();
+                              }
+                            }
+                          },
+                        )),
+                  ],
+                ))));
   }
 }
