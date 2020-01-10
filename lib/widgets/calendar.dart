@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:maph_group3/util/helper.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:maph_group3/util/calendar_data.dart';
-import 'dart:math';
 import 'dart:convert';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -66,6 +64,30 @@ class _CalendarState extends State<Calendar> {
         onSelectNotification: onSelectNotification);
   }
 
+  initPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _events = Map<DateTime, List<dynamic>>.from(
+          decodeMap(json.decode(prefs.getString("events") ?? "{}")));
+    });
+  }
+
+  Map<String, dynamic> encodeMap(Map<DateTime, dynamic> map) {
+    Map<String, dynamic> newMap = {};
+    map.forEach((key, value) {
+      newMap[key.toString()] = map[key];
+    });
+    return newMap;
+  }
+
+  Map<DateTime, dynamic> decodeMap(Map<String, dynamic> map) {
+    Map<DateTime, dynamic> newMap = {};
+    map.forEach((key, value) {
+      newMap[DateTime.parse(key)] = map[key];
+    });
+    return newMap;
+  }
+
   Future onSelectNotification(String payload) async {
     if (payload != null) {
       debugPrint('notification payload: ' + payload);
@@ -76,10 +98,12 @@ class _CalendarState extends State<Calendar> {
     );
   }
 
-  void removeNotification(List list) async {
-    for(int i = 0; i < list.length ; i++){
-     //nt id = generator_id_notification (int year, int month, int day, int event_index, int hour)
-      await flutterLocalNotificationsPlugin.cancel(i);
+  void removeNotification(int year, int month, int day,int event_index, List list_hours) async {
+    //e.g list_hours = [9,12,18,21]
+    for(int i = 0; i < list_hours.length ; i++){
+      int id = generator_id_notification ( year, month, day, event_index, list_hours[i]);
+      print(id);
+      await flutterLocalNotificationsPlugin.cancel(id);
     }
   }
 
@@ -133,33 +157,9 @@ class _CalendarState extends State<Calendar> {
     }
   }
 
-  initPrefs() async {
-    prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _events = Map<DateTime, List<dynamic>>.from(
-          decodeMap(json.decode(prefs.getString("events") ?? "{}")));
-    });
-  }
-
   @override
   void dispose() {
     super.dispose();
-  }
-
-  Map<String, dynamic> encodeMap(Map<DateTime, dynamic> map) {
-    Map<String, dynamic> newMap = {};
-    map.forEach((key, value) {
-      newMap[key.toString()] = map[key];
-    });
-    return newMap;
-  }
-
-  Map<DateTime, dynamic> decodeMap(Map<String, dynamic> map) {
-    Map<DateTime, dynamic> newMap = {};
-    map.forEach((key, value) {
-      newMap[DateTime.parse(key)] = map[key];
-    });
-    return newMap;
   }
 
   @override
@@ -250,12 +250,11 @@ class _CalendarState extends State<Calendar> {
                           int day = _controller.selectedDay.day;
                           String event_index_inner = (int.parse(year.toString() + month.toString() + day.toString() + index.toString())).toString();
                           String events_calendar = await Helper.readDataFromsp(event_index_inner);
-                          removeNotification(jsonDecode(events_calendar));
+                          removeNotification(year, month, day, index, jsonDecode(events_calendar));
                           //setup again events
                           setState(() {
                             _selectedEvents.removeAt(index);
-                            prefs.setString(
-                                "events", json.encode(encodeMap(_events)));
+                            prefs.setString("events", json.encode(encodeMap(_events)));
                           });
                           // Then show a snackbar.
                           Scaffold.of(context).showSnackBar(
@@ -336,7 +335,7 @@ class _CalendarState extends State<Calendar> {
                           left: 0, top: 15.0, right: 0, bottom: 15.0),
                       child: MultiSelect(
                           autovalidate: false,
-                          titleText: "Wählen Sie die Datum",
+                          titleText: "Wählen Sie die Uhrzeit",
                           validator: (value) {
                             if (value == null) {
                               return 'Please select one or more option(s)';
@@ -345,21 +344,66 @@ class _CalendarState extends State<Calendar> {
                           errorText: 'Please select one or more option(s)',
                           dataSource: [
                             {
-                              "display": "9 Uhr",
+                              "display": "9 UHR",
                               "value": 9,
                             },
                             {
-                              "display": "12 Uhr",
+                              "display": "12 UHR",
                               "value": 12,
                             },
                             {
-                              "display": "18 Uhr",
+                              "display": "18 UHR",
                               "value": 18,
                             },
                             {
-                              "display": "21 Uhr",
+                              "display": "21 UHR",
                               "value": 21,
+                            },
+                            {
+                              "display": "10 Uhr",
+                              "value": 10
+                            },
+                            {
+                              "display": "11 Uhr",
+                              "value": 11
+                            },
+                            {
+                              "display": "12 Uhr",
+                              "value": 12
+                            },
+                            {
+                              "display": "13 Uhr",
+                              "value": 13
+                            },
+                            {
+                              "display": "14 Uhr",
+                              "value": 14
+                            },
+                            {
+                              "display": "15 Uhr",
+                              "value": 15
+                            },
+                            {
+                              "display": "16 Uhr",
+                              "value": 16
+                            },
+                            {
+                              "display": "17 Uhr",
+                              "value": 17
+                            },
+                            {
+                              "display": "18 Uhr",
+                              "value": 18
+                            },
+                            {
+                              "display": "19 Uhr",
+                              "value": 19
+                            },
+                            {
+                              "display": "20 Uhr",
+                              "value": 20
                             }
+
                           ],
                           textField: 'display',
                           valueField: 'value',
@@ -423,6 +467,7 @@ class _CalendarState extends State<Calendar> {
                                 name_medical.clear();
                                 dosage.clear();
                                 note.clear();
+                                day_duration.clear();
                               }
                             }
                           },
