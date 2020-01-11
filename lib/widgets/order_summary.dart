@@ -10,6 +10,7 @@ import 'package:maph_group3/widgets/maps.dart';
 import 'package:maph_group3/widgets/order_confirmation.dart';
 import 'package:maph_group3/widgets/personal.dart';
 import 'package:intl/intl.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class OrderSummary extends StatefulWidget {
   final ShopItem item;
@@ -44,6 +45,8 @@ class _OrderSummaryState extends State<OrderSummary> {
 
   PlacesSearchResult _pickedApo;
 
+  TextEditingController passwordController = new TextEditingController();
+
   @override
   initState() {
     super.initState();
@@ -55,7 +58,7 @@ class _OrderSummaryState extends State<OrderSummary> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Bestellübersicht"),
+        title: Text('Bestellübersicht'),
       ),
       body: Visibility(
         visible: dataIsComplete,
@@ -112,18 +115,18 @@ class _OrderSummaryState extends State<OrderSummary> {
           TableRow(
             children: [
               Text(
-                "\nProdukt",
+                '\nProdukt',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Center(
                 child: Text(
-                  "\nAnzahl",
+                  '\nAnzahl',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               Center(
                 child: Text(
-                  "\nGesamtpreis",
+                  '\nGesamtpreis',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -144,11 +147,11 @@ class _OrderSummaryState extends State<OrderSummary> {
                     ),
                     Flexible(
                       child: Text(
-                        "\n" +
+                        '\n' +
                             widget.item.name +
-                            "\n" +
+                            '\n' +
                             widget.item.dosage +
-                            "\n",
+                            '\n',
                         textWidthBasis: TextWidthBasis.parent,
                       ),
                     ),
@@ -156,10 +159,10 @@ class _OrderSummaryState extends State<OrderSummary> {
                 ),
               ),
               Center(
-                child: Text("\n" + widget.item.orderQuantity.toString()),
+                child: Text('\n' + widget.item.orderQuantity.toString()),
               ),
               Center(
-                child: Text("\n" + netPrice.toStringAsFixed(2) + " €\n"),
+                child: Text('\n' + netPrice.toStringAsFixed(2) + ' €\n'),
               ),
             ],
           ),
@@ -168,20 +171,20 @@ class _OrderSummaryState extends State<OrderSummary> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text("\nMehrwertsteuer 10%"),
-                  Text("\nVersandkosten\n"),
+                  Text('\nMehrwertsteuer 10%'),
+                  Text('\nVersandkosten\n'),
                 ],
               ),
               Column(
                 children: <Widget>[
-                  Text(""),
-                  Text(""),
+                  Text(''),
+                  Text(''),
                 ],
               ),
               Column(
                 children: <Widget>[
-                  Text("\n" + tax.toStringAsFixed(2) + " €"),
-                  Text("\n" + shippingCosts.toStringAsFixed(2) + " €"),
+                  Text('\n' + tax.toStringAsFixed(2) + ' €'),
+                  Text('\n' + shippingCosts.toStringAsFixed(2) + ' €'),
                 ],
               ),
             ],
@@ -189,12 +192,12 @@ class _OrderSummaryState extends State<OrderSummary> {
           TableRow(
             children: [
               Text(
-                "\nGesamtsumme:\n",
+                '\nGesamtsumme:\n',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Center(child: Text("")),
+              Center(child: Text('')),
               Center(
-                child: Text("\n" + grossPrice.toStringAsFixed(2) + " €"),
+                child: Text('\n' + grossPrice.toStringAsFixed(2) + ' €'),
               ),
             ],
           ),
@@ -209,7 +212,7 @@ class _OrderSummaryState extends State<OrderSummary> {
       decoration: _getContainerDecoration(1, 5),
       child: Column(
         children: <Widget>[
-          Text("Zahlungsmöglichkeiten"),
+          Text('Zahlungsmöglichkeiten'),
           RadioButtonGroup(
               activeColor: Colors.green,
               labels: <String>[
@@ -280,7 +283,7 @@ class _OrderSummaryState extends State<OrderSummary> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text("Lieferadresse:",
+                  Text('Lieferadresse:',
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   Text(address),
                 ],
@@ -368,8 +371,7 @@ class _OrderSummaryState extends State<OrderSummary> {
           child: IconButton(
             icon: Icon(Icons.add),
             onPressed: () => {
-              Navigator.push(context,
-                  NoAnimationMaterialPageRoute(builder: (context) => Maps())),
+              Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => Maps())),
             },
           ),
         );
@@ -408,7 +410,7 @@ class _OrderSummaryState extends State<OrderSummary> {
       decoration: _getContainerDecoration(1, 5),
       child: Column(
         children: <Widget>[
-          Text("Geschäftsbedingungen und Benachrichtigungen"),
+          Text('Geschäftsbedingungen und Benachrichtigungen'),
           CheckboxGroup(
               checkColor: Colors.white,
               activeColor: Colors.green,
@@ -425,7 +427,7 @@ class _OrderSummaryState extends State<OrderSummary> {
           RaisedButton(
             onPressed: goToOrderConfirmed,
             child: Text(
-              "Zahlungspflichtig bestellen",
+              'Zahlungspflichtig bestellen',
               style: TextStyle(color: Colors.green),
             ),
           ),
@@ -455,7 +457,9 @@ class _OrderSummaryState extends State<OrderSummary> {
         );
       });
     }
-    dataIsComplete = true;
+    setState(() {
+      dataIsComplete = true;
+    });
   }
 
   Future<void> _buildAlertDialog(
@@ -547,14 +551,48 @@ class _OrderSummaryState extends State<OrderSummary> {
     });
   }
 
-  void goToOrderConfirmed() {
+  Future<void> goToOrderConfirmed() async {
     if (agbIsChecked) {
-      // go to confirmed page
-      Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => OrderConfirmation()));
+      var alert = createAlert(context);
+      alert.show();
     } else {
       // agb not checked
       _buildAlertDialog(
-          context, "AGBs bestätigen", 'Bitte AGBs bestätigen um fortzufahren');
+          context, 'AGBs bestätigen', 'Bitte AGBs bestätigen um fortzufahren');
+    }
+  }
+
+  Alert createAlert(BuildContext context) {
+    var alert = Alert(
+        context: context,
+        title: 'Bestellung mit Passwort bestätigen.',
+        content: TextField(
+          controller: passwordController,
+          obscureText: true,
+          decoration: InputDecoration(
+            icon: Icon(Icons.lock),
+            labelText: 'Passwort',
+          ),
+        ),
+        buttons: [
+          DialogButton(
+            color: Colors.green,
+            onPressed: () => _confirmPassword(),
+            child: Text(
+              'Bestätigen',
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+          )
+        ]);
+    return alert;
+  }
+
+  Future _confirmPassword() async {
+    if (await PersonalData.checkPassword(passwordController.text)) {
+      // go to confirmed page
+      Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => OrderConfirmation()));
+    } else {
+
     }
   }
 
@@ -563,13 +601,13 @@ class _OrderSummaryState extends State<OrderSummary> {
     if (adresse != null)
       setState(() {
         shippingAddress = adresse[0] +
-            " " +
+            ' ' +
             adresse[1] +
-            "\n" +
+            '\n' +
             adresse[2] +
-            "\n" +
+            '\n' +
             adresse[3] +
-            " " +
+            ' ' +
             adresse[4];
       });
   }
