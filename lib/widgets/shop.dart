@@ -52,6 +52,8 @@ class _ShopState extends State<Shop> {
       }
     }
 
+    getShopData(medSearchKey);
+
     super.initState();
   }
 
@@ -172,7 +174,7 @@ class _ShopState extends State<Shop> {
   Widget buildListView(String searchKey) {
     var localSearchKey = localShopItem != null ? localShopItem.searchKey : searchKey;
     return FutureBuilder<List<ShopItem>>(
-      future: getShopData(localSearchKey),
+      future: itemList,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(child: LoadBar.build());
@@ -202,7 +204,7 @@ class _ShopState extends State<Shop> {
                 child: Column(
                   children: <Widget>[
                     Text(item.price ?? '-', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                    if(item.crossedOutPrice != null) Text(item.crossedOutPrice ?? '', style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough),),
+                    if(item.crossedOutPrice != null) Text(item.crossedOutPrice, style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough),),
                     Text(item.pricePerUnit ?? ''),
                   ],
                 )
@@ -248,9 +250,11 @@ class _ShopState extends State<Shop> {
   Future<List<ShopItem>> getShopData(String name) async {
     //var listMedPex = getMedPexList(name);
     setState(() {
-      var listDocMor = getDocMorrisList(name);
+      itemList = getDocMorrisList(name);
+      //var listDocMor = getDocMorrisList(name);
       //var listMedPex = getMedPexList(name);
-      return listDocMor;
+      //return listDocMor;
+
     });
 
 

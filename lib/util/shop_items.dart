@@ -63,6 +63,8 @@ class ShopItem {
   }
 
   int compareTo(ShopItem item) {
+    if(this.priceInt == null) return 1;
+    if(item.priceInt == null) return 0;
     if(this.priceInt == item.priceInt) return 0;
     if(this.priceInt > item.priceInt) return 1;
     else return -1;
@@ -149,44 +151,48 @@ class ShopListParser {
   }
 
   static void _getProductDetailsDocMorris(Element productDetails, ShopItem item) {
-    if(productDetails != null && productDetails.className != null) {
-      if(productDetails.className.contains('product-image')) {
-        var imageElement = productDetails.children.first;
-        if(imageElement != null) {
-          if(imageElement.attributes != null && imageElement.attributes.containsKey('href')) {
-            item.link = productDetails.children.first?.attributes['href'];
-          }
-          if(imageElement.children.isNotEmpty && imageElement.children.first?.attributes != null && imageElement.children.first.attributes.containsKey('data-src')) {
-            item.image = 'https://www.docmorris.de/' + imageElement.children.first.attributes['data-src'];
-          }
-        }
-      }
-      if(productDetails.className.contains('product-description')) {
-        if(productDetails.getElementsByTagName('h2').isNotEmpty
-            && productDetails.getElementsByTagName('h2').first.getElementsByTagName('a').isNotEmpty
-            && productDetails.getElementsByTagName('h2').first.getElementsByTagName('a').first.children.isNotEmpty
-        ) {
-          item.name = productDetails.getElementsByTagName('h2').first.getElementsByTagName('a').first.children.first?.text;
-        }
-        item.dosage = productDetails.getElementsByTagName('p')[0]?.text;
-        item.brand = productDetails.getElementsByTagName('p')[3]?.text;
-      }
-      if(productDetails.className.contains('add-to-cart-form')) {
-        var priceBox = productDetails.children[1]?.children[3];
-        if(priceBox != null) {
-          for(var price in priceBox.children) {
-            if(price.className == 'uvp') {
-              item.crossedOutPrice = price.children?.first?.text;
+    try {
+      if(productDetails != null && productDetails.className != null) {
+        if(productDetails.className.contains('product-image')) {
+          var imageElement = productDetails.children.first;
+          if(imageElement != null) {
+            if(imageElement.attributes != null && imageElement.attributes.containsKey('href')) {
+              item.link = productDetails.children.first?.attributes['href'];
             }
-            if(price.className == 'price') {
-              item.setPrice(price.children?.first?.text);
-            }
-            if(price.className == 'additional-info basePrice') {
-              item.pricePerUnit = price.text.split('\n')[1].replaceAll(' ', '');
+            if(imageElement.children.isNotEmpty && imageElement.children.first?.attributes != null && imageElement.children.first.attributes.containsKey('data-src')) {
+              item.image = 'https://www.docmorris.de/' + imageElement.children.first.attributes['data-src'];
             }
           }
         }
+        if(productDetails.className.contains('product-description')) {
+          if(productDetails.getElementsByTagName('h2').isNotEmpty
+              && productDetails.getElementsByTagName('h2').first.getElementsByTagName('a').isNotEmpty
+              && productDetails.getElementsByTagName('h2').first.getElementsByTagName('a').first.children.isNotEmpty
+          ) {
+            item.name = productDetails.getElementsByTagName('h2').first.getElementsByTagName('a').first.children.first?.text;
+          }
+          item.dosage = productDetails.getElementsByTagName('p')[0]?.text;
+          item.brand = productDetails.getElementsByTagName('p')[3]?.text;
+        }
+        if(productDetails.className.contains('add-to-cart-form')) {
+          var priceBox = productDetails.children[1]?.children[3];
+          if(priceBox != null) {
+            for(var price in priceBox.children) {
+              if(price.className == 'uvp') {
+                item.crossedOutPrice = price.children?.first?.text;
+              }
+              if(price.className == 'price') {
+                item.setPrice(price.children?.first?.text);
+              }
+              if(price.className == 'additional-info basePrice') {
+                item.pricePerUnit = price.text.split('\n')[1].replaceAll(' ', '');
+              }
+            }
+          }
+        }
       }
+    } catch (Exception) {
+
     }
   }
 
