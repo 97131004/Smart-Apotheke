@@ -45,13 +45,14 @@ class _ShopState extends State<Shop> {
     });
 
     if(widget.med != null) {
-      medSearchKey = widget.med.pzn;
-      if(globals.items.containsKey(medSearchKey)) {
-        localShopItem = globals.items[medSearchKey];
-      } else {
-        medSearchKey = widget.med.name;
+      medSearchKey = widget.med.name;
+      if(globals.items.containsKey(widget.med.pzn)) {
+        localShopItem = globals.items[widget.med.pzn];
+        medSearchKey = localShopItem.searchKey;
       }
     }
+
+    getShopData(medSearchKey);
 
     super.initState();
   }
@@ -150,7 +151,7 @@ class _ShopState extends State<Shop> {
       contentPadding: EdgeInsets.all(10),
       onTap: () => {Navigator.push(
          context,
-         NoAnimationMaterialPageRoute(builder: (context) => ProductDetails(searchKey: this.medSearchKey))),
+         NoAnimationMaterialPageRoute(builder: (context) => ProductDetails(searchKey: this.localShopItem.pzn))),
       },
       leading: Image.asset('assets/dummy_med.png'),
       title: Text(localShopItem.name),
@@ -173,7 +174,7 @@ class _ShopState extends State<Shop> {
   Widget buildListView(String searchKey) {
     var localSearchKey = localShopItem != null ? localShopItem.searchKey : searchKey;
     return FutureBuilder<List<ShopItem>>(
-      future: getShopData(localSearchKey),
+      future: itemList,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(child: LoadBar.build());
@@ -196,16 +197,15 @@ class _ShopState extends State<Shop> {
                 onTap: () async {
                   await launchUrl(item);
                 },
-                leading: Image.network(item.image),
+                leading: item.image != null ? Image.network(item.image) : Image.asset('assets/dummy_med.png'),
                 title: Text(item.name),
-                subtitle: Text(item.dosage + "\n" + item.brand + "\n\nAnbieter: " + item.merchant, style: TextStyle(fontSize: 12)),
+                subtitle: Text((item.dosage ?? '') + "\n" + (item.brand ?? '') + "\n\nAnbieter: " + (item.merchant ?? ''), style: TextStyle(fontSize: 12)),
                 trailing: Container(
                 child: Column(
                   children: <Widget>[
-
-                    Text(item.price, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                    Text(item.price ?? '-', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
                     if(item.crossedOutPrice != null) Text(item.crossedOutPrice, style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough),),
-                    Text(item.pricePerUnit),
+                    Text(item.pricePerUnit ?? ''),
                   ],
                 )
               ),
@@ -247,13 +247,12 @@ class _ShopState extends State<Shop> {
     );
   }
 
-  Future<List<ShopItem>> getShopData(String name) async {
-    //var listMedPex = getMedPexList(name);
-    var listDocMor = getDocMorrisList(name);
-
-    //var result = await ShopListParser.mergeLists(listMedPex, listDocMor);
-
-    return listDocMor;
+  Future<void> getShopData(String name) async {
+    var dmList = await getDocMorrisList(name);
+    var mpList = await getMedPexList(name);
+    setState(() {
+      itemList = ShopListParser.mergeLists(dmList, mpList);
+    });
   }
 
   Future<List<ShopItem>> getDocMorrisList(String name) async {
