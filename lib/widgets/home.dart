@@ -41,61 +41,61 @@ class _HomeState extends State<Home> {
   }
 
   void passwordenter(BuildContext context) async {
-    if (!(await PersonalData.isPasswordExists())) {
-      alert = createAlert(context);
-      alert.show();
+      if (!(await PersonalData.isPasswordExists())) {
+        alert = createAlert(context);
+        alert.show();
+      }
     }
-  }
   Alert createAlert(BuildContext context) {
-    var alert = Alert(
-        context: context,
-        title: "SET YOUR PASSWORD",
-        content: Column(
-          children: <Widget>[
-            TextField(
-              controller: pass,
-              obscureText: true,
-              decoration: InputDecoration(
-                icon: Icon(Icons.lock),
-                labelText: 'Password',
+      var alert = Alert(
+          context: context,
+          title: "SET YOUR PASSWORD",
+          content: Column(
+            children: <Widget>[
+              TextField(
+                controller: pass,
+                obscureText: true,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.lock),
+                  labelText: 'Password',
+                ),
               ),
-            ),
-            TextField(
-              controller: ePass,
-              obscureText: true,
-              decoration: InputDecoration(
-                icon: Icon(Icons.lock),
-                labelText: 'Re-entered Password',
+              TextField(
+                controller: ePass,
+                obscureText: true,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.lock),
+                  labelText: 'Re-entered Password',
+                ),
               ),
-            ),
-          ],
-        ),
-        buttons: [
-          DialogButton(
-            color: Colors.green,
-            onPressed: () => _submitpasswort(),
-            child: Text(
-              "SUBMIT",
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-          )
-        ]);
-    return alert;
-  }
-  Future _submitpasswort() async {
-    //bool isdone = false;
-    if (pass.text == ePass.text && pass.text.isNotEmpty) {
-      await PersonalData.setpassword(pass.text);
-      Navigator.pop(context);
-    } else {
-      setState(() {
-        pass.text = '';
-        ePass.text = '';
-      });
-    }
-  }
+            ],
+          ),
+          buttons: [
+            DialogButton(
+              color: Colors.green,
+              onPressed: () => _submitpasswort(),
+              child: Text(
+                "SUBMIT",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            )
+          ]);
+      return alert;
+    } 
+    Future _submitpasswort() async {
+      //bool isdone = false;
+      if (pass.text == ePass.text && pass.text.isNotEmpty) {
+        await PersonalData.setpassword(pass.text);
+        Navigator.pop(context);
+      } else {
+        setState(() {
+          pass.text = '';
+          ePass.text = '';
+        });
+      }
+    }  
 
-  showAlert(BuildContext context) async{
+    showAlert(BuildContext context) async{
      SharedPreferences prefs =await SharedPreferences.getInstance();
      bool isfirstLoaded = prefs.getBool(load);
       // flutter defined functionc
