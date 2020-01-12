@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'MultiSelectDialogItem.dart';
 
 class Calendar extends StatefulWidget {
-  Calendar({Key key, list}) : super(key: key);
+  Calendar({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
