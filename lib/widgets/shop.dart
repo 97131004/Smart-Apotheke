@@ -199,7 +199,7 @@ class _ShopState extends State<Shop> {
                 },
                 leading: item.image != null ? Image.network(item.image) : Image.asset('assets/dummy_med.png'),
                 title: Text(item.name),
-                subtitle: Text(item.dosage ?? '' + "\n" + item.brand ?? '' + "\n\nAnbieter: " + item.merchant ?? '', style: TextStyle(fontSize: 12)),
+                subtitle: Text((item.dosage ?? '') + "\n" + (item.brand ?? '') + "\n\nAnbieter: " + (item.merchant ?? ''), style: TextStyle(fontSize: 12)),
                 trailing: Container(
                 child: Column(
                   children: <Widget>[
@@ -247,20 +247,12 @@ class _ShopState extends State<Shop> {
     );
   }
 
-  Future<List<ShopItem>> getShopData(String name) async {
-    //var listMedPex = getMedPexList(name);
+  Future<void> getShopData(String name) async {
+    var dmList = await getDocMorrisList(name);
+    var mpList = await getMedPexList(name);
     setState(() {
-      itemList = getDocMorrisList(name);
-      //var listDocMor = getDocMorrisList(name);
-      //var listMedPex = getMedPexList(name);
-      //return listDocMor;
-
+      itemList = ShopListParser.mergeLists(dmList, mpList);
     });
-
-
-    //var result = await ShopListParser.mergeLists(listMedPex, listDocMor);
-
-
   }
 
   Future<List<ShopItem>> getDocMorrisList(String name) async {

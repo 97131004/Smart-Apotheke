@@ -80,7 +80,7 @@ class ShopListParser {
     if(listElement != null) {
       for(var element in listElement.children) {
         if(element?.className != null && element.className == 'product-list-entry') {
-          var formElement = element.getElementsByTagName('form')?.first;
+          var formElement = element.getElementsByTagName('form').isNotEmpty? element.getElementsByTagName('form').first : null;
           if(formElement != null) {
             ShopItem item = new ShopItem.empty();
             // prices
@@ -154,7 +154,7 @@ class ShopListParser {
     try {
       if(productDetails != null && productDetails.className != null) {
         if(productDetails.className.contains('product-image')) {
-          var imageElement = productDetails.children.first;
+          var imageElement = productDetails.children.isNotEmpty? productDetails.children.first: null;
           if(imageElement != null) {
             if(imageElement.attributes != null && imageElement.attributes.containsKey('href')) {
               item.link = productDetails.children.first?.attributes['href'];
@@ -196,12 +196,12 @@ class ShopListParser {
     }
   }
 
-  static List<ShopItem> mergeLists(List<ShopItem> listA, List<ShopItem> listB) {
+  static Future<List<ShopItem>> mergeLists(List<ShopItem> listA, List<ShopItem> listB) {
     if(listA == null || listA.length == 0) {
-      return listB;
+      return Future<List<ShopItem>>.value(listB);
     }
     if(listB == null || listB.length == 0) {
-      return listA;
+      return Future<List<ShopItem>>.value(listA);
     }
 
     List<ShopItem> tempList = [];
@@ -210,7 +210,7 @@ class ShopListParser {
         tempList.add(listA.elementAt(i));
         tempList.add(listB.elementAt(i));
     }
-    //return Future<List<ShopItem>>.value(tempList);
-    return tempList;
+    return Future<List<ShopItem>>.value(tempList);
+    //return tempList;
   }
 }
