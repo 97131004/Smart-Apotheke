@@ -6,8 +6,9 @@ import 'dart:convert';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:async';
-import 'package:flutter_multiselect/flutter_multiselect.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'MultiSelectDialogItem.dart';
 
 class Calendar extends StatefulWidget {
   Calendar({Key key}) : super(key: key);
@@ -19,12 +20,14 @@ class Calendar extends StatefulWidget {
 }
 
 class _CalendarState extends State<Calendar> {
+
   final _formKey = GlobalKey<FormState>(); //for validate input
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
 
   CalendarController _controller;
   Map<DateTime, List<dynamic>> _events;
   List<dynamic> _selectedEvents;
+  List<int> selectedValues;
   TextEditingController _eventController;
   SharedPreferences prefs;
 
@@ -112,7 +115,7 @@ class _CalendarState extends State<Calendar> {
   }
 
   int generator_id_notification (int year, int month, int day, int event_index, int hour){
-    int id = int.parse(year.toString() + month.toString() + day.toString() + event_index.toString() + hour.toString());
+    int id = int.parse(month.toString() + day.toString() + event_index.toString() + hour.toString());
     return id;
   }
 
@@ -146,10 +149,9 @@ class _CalendarState extends State<Calendar> {
       for (int i = 0; i < time.length ; i++){
         int hour = time[i];
         int id = generator_id_notification(year, month, day, event_index, hour);
-        //print(id);
         await flutterLocalNotificationsPlugin.showDailyAtTime(
             id,
-            'Mediminder: $text',
+            'Calendar: $text',
             'It is time to take your medicine, according to schedule',
             Time(hour, 0, 0),
             platformChannelSpecifics);
@@ -282,6 +284,40 @@ class _CalendarState extends State<Calendar> {
     print('CALLBACK: _onVisibleDaysChanged');
   }
 
+  void _showMultiSelect(BuildContext context) async {
+    final items = <MultiSelectDialogItem<int>>[
+      MultiSelectDialogItem(9, '9 Uhr'),
+      MultiSelectDialogItem(12, '12 Uhr'),
+      MultiSelectDialogItem(18, '18 Uhr'),
+      MultiSelectDialogItem(21, '21 Uhr'),
+      MultiSelectDialogItem(10, '10 Uhr'),
+      MultiSelectDialogItem(11, '11 Uhr'),
+      MultiSelectDialogItem(13, '13 Uhr'),
+      MultiSelectDialogItem(14, '14 Uhr'),
+      MultiSelectDialogItem(15, '15 Uhr'),
+      MultiSelectDialogItem(16, '16 Uhr'),
+      MultiSelectDialogItem(17, '17 Uhr'),
+      MultiSelectDialogItem(19, '19 Uhr'),
+      MultiSelectDialogItem(20, '20 Uhr'),
+    ];
+
+    final setResult = await showDialog<Set<int>>(
+      context: context,
+      builder: (BuildContext context) {
+        return MultiSelectDialog(
+          items: items,
+          initialSelectedValues: [9, 12, 18, 21].toSet(),
+        );
+      },
+    );
+
+    setState(() {
+      if(setResult.length > 0){
+        selectedValues = setResult.toList();
+      }
+    });
+  }
+
   _showAddDialog() {
     showDialog(
         context: context,
@@ -331,90 +367,12 @@ class _CalendarState extends State<Calendar> {
                       controller: note,
                     ),
                     Container(
-                      margin: new EdgeInsets.only(
-                          left: 0, top: 15.0, right: 0, bottom: 15.0),
-                      child: MultiSelect(
-                          autovalidate: false,
-                          titleText: "Wählen Sie die Uhrzeit",
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select one or more option(s)';
-                            }
-                          },
-                          errorText: 'Please select one or more option(s)',
-                          dataSource: [
-                            {
-                              "display": "9 UHR",
-                              "value": 9,
-                            },
-                            {
-                              "display": "12 UHR",
-                              "value": 12,
-                            },
-                            {
-                              "display": "18 UHR",
-                              "value": 18,
-                            },
-                            {
-                              "display": "21 UHR",
-                              "value": 21,
-                            },
-                            {
-                              "display": "10 Uhr",
-                              "value": 10
-                            },
-                            {
-                              "display": "11 Uhr",
-                              "value": 11
-                            },
-                            {
-                              "display": "12 Uhr",
-                              "value": 12
-                            },
-                            {
-                              "display": "13 Uhr",
-                              "value": 13
-                            },
-                            {
-                              "display": "14 Uhr",
-                              "value": 14
-                            },
-                            {
-                              "display": "15 Uhr",
-                              "value": 15
-                            },
-                            {
-                              "display": "16 Uhr",
-                              "value": 16
-                            },
-                            {
-                              "display": "17 Uhr",
-                              "value": 17
-                            },
-                            {
-                              "display": "18 Uhr",
-                              "value": 18
-                            },
-                            {
-                              "display": "19 Uhr",
-                              "value": 19
-                            },
-                            {
-                              "display": "20 Uhr",
-                              "value": 20
-                            }
-
-                          ],
-                          textField: 'display',
-                          valueField: 'value',
-                          filterable: true,
-                          required: true,
-                          value: _myclock,
-                          onSaved: (value) {
-                              setState(() {
-                                _myclock = value;
-                              });
-                          }),
+                      child: RaisedButton(
+                        child: Text('Wählen Sie Uhrzeit'),
+                        onPressed: (){
+                         _showMultiSelect(context);
+                        },
+                      ),
                     ),
                     Container(
                         margin: new EdgeInsets.symmetric(horizontal: 80.0),
@@ -457,7 +415,9 @@ class _CalendarState extends State<Calendar> {
                                       ];
                                     }
                                     prefs.setString("events", json.encode(encodeMap(_events)));
-                                    scheduleNotification(_controller.selectedDay, _events[_controller.selectedDay].indexOf(_eventController.text) , _myclock, _eventController.toString());
+                                    if(selectedValues != null){
+                                      scheduleNotification(_controller.selectedDay, _events[_controller.selectedDay].indexOf(_eventController.text) , selectedValues, _eventController.toString());
+                                    }
                                     _controller.setSelectedDay(time_anfang);
                                   }
 
