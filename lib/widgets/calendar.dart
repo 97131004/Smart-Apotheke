@@ -301,7 +301,7 @@ class _CalendarState extends State<Calendar> {
       MultiSelectDialogItem(20, '20 Uhr'),
     ];
 
-    final selectedValues2 = await showDialog<Set<int>>(
+    final setResult = await showDialog<Set<int>>(
       context: context,
       builder: (BuildContext context) {
         return MultiSelectDialog(
@@ -312,8 +312,8 @@ class _CalendarState extends State<Calendar> {
     );
 
     setState(() {
-      if(selectedValues.length > 0){
-        selectedValues = selectedValues2.toList();
+      if(setResult.length > 0){
+        selectedValues = setResult.toList();
       }
     });
   }
