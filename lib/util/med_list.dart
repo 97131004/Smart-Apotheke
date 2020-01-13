@@ -92,7 +92,7 @@ class MedList {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Beipackzettel anzeigen',
-                style: TextStyle(fontSize: 16),
+                style: Theme.of(context).textTheme.body2,
               ),
             ),
             onPressed: () {
@@ -112,7 +112,7 @@ class MedList {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Bestellen',
-                style: TextStyle(fontSize: 16),
+                style: Theme.of(context).textTheme.body2,
               ),
             ),
             onPressed: () {
@@ -132,7 +132,7 @@ class MedList {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Löschen',
-                style: TextStyle(fontSize: 16),
+                style: Theme.of(context).textTheme.body2,
               ),
             ),
             onPressed: () {

@@ -94,7 +94,7 @@ class _MedSearchState extends State<MedSearch> {
                         'Fehler beim Suchen.\n' +
                             'Prüfen Sie Ihre Internetverbindung.\n' +
                             'Bitte gehen Sie zurück und versuchen es erneut.',
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(color: Theme.of(context).errorColor),
                       ),
                     ],
                   );

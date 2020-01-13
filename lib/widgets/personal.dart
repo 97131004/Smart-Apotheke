@@ -40,7 +40,8 @@ class _PersonalState extends State<Personal> {
     String iban = await PersonalData.getIban();
     if (iban != '') {
       setState(() {
-        lasofIban = iban.substring(iban.length - 3<0?0:iban.length-3, iban.length);
+        lasofIban = iban.substring(
+            iban.length - 3 < 0 ? 0 : iban.length - 3, iban.length);
       });
     }
     List<String> adresse = await PersonalData.getadresse();
@@ -133,11 +134,12 @@ class _PersonalState extends State<Personal> {
       if (await PersonalData.changeIban(iban, newp.text)) {
         handleWillPop();
         showToast('Änderung von IBAN erfolgreich!');
-         String iban = await PersonalData.getIban();
-         print(iban);
+        String iban = await PersonalData.getIban();
+        print(iban);
         setState(() {
           newp.clear();
-          lasofIban = iban.substring(iban.length - 3 < 0? 0:iban.length-3, iban.length);
+          lasofIban = iban.substring(
+              iban.length - 3 < 0 ? 0 : iban.length - 3, iban.length);
           ibancontroller.clear();
           status = '';
         });
@@ -267,7 +269,7 @@ class _PersonalState extends State<Personal> {
           SizedBox(height: 20),
           Text(
             status,
-            style: TextStyle(color: Colors.red),
+            style: TextStyle(color: Theme.of(context).errorColor),
           )
         ],
       ),
@@ -323,7 +325,7 @@ class _PersonalState extends State<Personal> {
           SizedBox(height: 20),
           Text(
             status,
-            style: TextStyle(color: Colors.red),
+            style: TextStyle(color: Theme.of(context).errorColor),
           )
         ],
       ),
@@ -362,7 +364,7 @@ class _PersonalState extends State<Personal> {
           ),
           Text(
             status,
-            style: TextStyle(color: Colors.red),
+            style: TextStyle(color: Theme.of(context).errorColor),
           )
         ],
       ),

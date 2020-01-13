@@ -1,17 +1,12 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-//import 'package:maph_group3/widgets/shop.dart';
-import 'package:maph_group3/data/med.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../util/nampr.dart';
-import '../data/globals.dart' as globals;
 import '../widgets/personal.dart';
 import 'scanner.dart';
 import 'med_search.dart';
-import 'history.dart';
+import 'recent.dart';
 import 'userguide.dart';
 import 'datenschutzerklaerung.dart';
 import 'calendar.dart';
@@ -29,98 +24,86 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   TextEditingController pass = new TextEditingController();
-  TextEditingController ePass = new TextEditingController();
-  String hash;
-  Alert alert;
+  TextEditingController passConfirm = new TextEditingController();
   final load = 'premiere';
   final buttonHeight = 100.0;
   final iconSize = 32.0;
   @override
   void initState() {
     super.initState();
-    passwordenter(context);
+    alertEula(context);
+    alertPassword(context);
   }
 
-  void passwordenter(BuildContext context) async {
+  void alertPassword(BuildContext context) async {
     if (!(await PersonalData.isPasswordExists())) {
-      alert = createAlert(context);
-      alert.show();
+      Alert(
+          context: context,
+          title: "Setze ein Passwort",
+          content: Column(
+            children: <Widget>[
+              TextField(
+                controller: pass,
+                obscureText: true,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.lock),
+                  labelText: 'Passwort',
+                ),
+              ),
+              TextField(
+                controller: passConfirm,
+                obscureText: true,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.lock),
+                  labelText: 'Passwort bestätigen',
+                ),
+              ),
+            ],
+          ),
+          buttons: [
+            DialogButton(
+              color: Colors.green,
+              onPressed: () async {
+                if (pass.text == passConfirm.text && pass.text.isNotEmpty) {
+                  await PersonalData.setpassword(pass.text);
+                  Navigator.pop(context);
+                } else {
+                  setState(() {
+                    pass.text = '';
+                    passConfirm.text = '';
+                    //show error text
+                  });
+                }
+              },
+              child: Text(
+                "Speichern",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            )
+          ]).show();
     }
   }
 
-  Alert createAlert(BuildContext context) {
-    var alert = Alert(
-        context: context,
-        title: "SET YOUR PASSWORD",
-        content: Column(
-          children: <Widget>[
-            TextField(
-              controller: pass,
-              obscureText: true,
-              decoration: InputDecoration(
-                icon: Icon(Icons.lock),
-                labelText: 'Password',
-              ),
-            ),
-            TextField(
-              controller: ePass,
-              obscureText: true,
-              decoration: InputDecoration(
-                icon: Icon(Icons.lock),
-                labelText: 'Re-entered Password',
-              ),
-            ),
-          ],
-        ),
-        buttons: [
-          DialogButton(
-            color: Colors.green,
-            onPressed: () => _submitpasswort(),
-            child: Text(
-              "SUBMIT",
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-          )
-        ]);
-    return alert;
-  }
-
-  Future _submitpasswort() async {
-    //bool isdone = false;
-    if (pass.text == ePass.text && pass.text.isNotEmpty) {
-      await PersonalData.setpassword(pass.text);
-      Navigator.pop(context);
-    } else {
-      setState(() {
-        pass.text = '';
-        ePass.text = '';
-      });
-    }
-  }
-
-  showAlert(BuildContext context) async {
+  alertEula(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool isfirstLoaded = prefs.getBool(load);
-    // flutter defined functionc
-    if (isfirstLoaded == null) {
+    if (prefs.getBool(load) == null) {
       showDialog(
+        barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
-          // return object of type Dialog
           return AlertDialog(
-            title: new Text("Hinweis zum Datenschutz"),
+            title: Text("Hinweis zum Datenschutz"),
             content:
-                new Text("Bitte die Datenshutzerlärung lesen und bestätigen"),
+                Text("Bitte die Datenschutzerklärung lesen und bestätigen."),
             actions: <Widget>[
-              // usually buttons at the bottom of the dialog
-              new FlatButton(
-                child: new Text("Lesen"),
-                onPressed: () {
+              FlatButton(
+                child: Text("Lesen"),
+                onPressed: () async {
+                  await prefs.setBool(load, false);
                   Navigator.push(
                       context,
                       NoAnimationMaterialPageRoute(
                           builder: (context) => Datenschutz()));
-                  prefs.setBool(load, false);
                 },
               ),
             ],
@@ -132,14 +115,12 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(Duration.zero, () => showAlert(context));
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(statusBarColor: Theme.of(context).primaryColor));
     return SafeArea(
       child: Scaffold(
         drawer: Drawer(
           child: ListView(
-            // Important: Remove any padding from the ListView.
             padding: EdgeInsets.zero,
             children: <Widget>[
               DrawerHeader(
@@ -311,7 +292,7 @@ class _HomeState extends State<Home> {
                               Padding(
                                 padding: const EdgeInsets.all(2.0),
                                 child: Text(
-                                  "Geschichte",
+                                  "Verlauf",
                                   style: TextStyle(
                                     color: Colors.white,
                                   ),
@@ -323,7 +304,7 @@ class _HomeState extends State<Home> {
                             Navigator.push(
                               context,
                               NoAnimationMaterialPageRoute(
-                                  builder: (context) => History()),
+                                  builder: (context) => Recent()),
                             );
                           },
                         ),

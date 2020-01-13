@@ -5,20 +5,20 @@ import 'package:maph_group3/data/med.dart';
 import '../util/nampr.dart';
 import 'scanner.dart';
 
-class History extends StatefulWidget {
+class Recent extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return _HistoryState();
+    return _RecentState();
   }
 }
 
-class _HistoryState extends State<History> {
-  _HistoryState();
+class _RecentState extends State<Recent> {
+  _RecentState();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Geschichte'),
+        title: Text('Verlauf'),
       ),
       body: (globals.meds.length > 0)
           ? MedList.build(
