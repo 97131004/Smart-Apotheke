@@ -211,6 +211,5 @@ class ShopListParser {
         tempList.add(listB.elementAt(i));
     }
     return Future<List<ShopItem>>.value(tempList);
-    //return tempList;
   }
 }

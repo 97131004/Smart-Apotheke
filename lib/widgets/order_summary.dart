@@ -30,20 +30,19 @@ class _OrderSummaryState extends State<OrderSummary> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   Map<String, PlacesSearchResult> foundPlaces = <String, PlacesSearchResult>{};
 
+  PlacesSearchResult currentMarker;
+  PlacesSearchResult _pickedApo;
+
   bool agbIsChecked = false;
   bool dataIsComplete = false;
   bool visibilityShippingCosts = false;
   bool deliverToApo = false;
-
   bool markerIsTabbed = false;
-  PlacesSearchResult currentMarker;
   bool isLoaded = false;
-  String shippingAddress = '';
 
+  String shippingAddress = '';
   String _pickedDelivered = 'Nach Hause liefern lassen ( + 2.99 € )';
   String _pickedPayment = 'Lastschrift';
-
-  PlacesSearchResult _pickedApo;
 
   TextEditingController passwordController = new TextEditingController();
 
@@ -104,105 +103,117 @@ class _OrderSummaryState extends State<OrderSummary> {
       decoration: _getContainerDecoration(1, 5),
       child: Table(
         border: TableBorder(
-          horizontalInside: BorderSide(width: 1.0, color: Colors.black54),
+          horizontalInside: BorderSide(width: 1.0, color: Theme.of(context).splashColor),
         ),
         columnWidths: {
-          0: FixedColumnWidth(MediaQuery.of(context).size.width * 0.65),
-          1: FixedColumnWidth(MediaQuery.of(context).size.width * 0.10),
-          2: FixedColumnWidth(MediaQuery.of(context).size.width * 0.25),
+          0: FlexColumnWidth(1.0),//FixedColumnWidth(MediaQuery.of(context).size.width * 0.65),
+          1: FlexColumnWidth(0.2),
+          2: FlexColumnWidth(0.3),
         },
         children: [
-          TableRow(
-            children: [
-              Text(
-                '\nProdukt',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Center(
-                child: Text(
-                  '\nAnzahl',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              Center(
-                child: Text(
-                  '\nGesamtpreis',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-          TableRow(
-            children: [
-              Container(
-                child: Row(
-                  children: <Widget>[
-                    Image.asset(
-                      'assets/dummy_med.png',
-                      height: 50,
-                      width: 50,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(3),
-                    ),
-                    Flexible(
-                      child: Text(
-                        '\n' +
-                            widget.item.name +
-                            '\n' +
-                            widget.item.dosage +
-                            '\n',
-                        textWidthBasis: TextWidthBasis.parent,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Center(
-                child: Text('\n' + widget.item.orderQuantity.toString()),
-              ),
-              Center(
-                child: Text('\n' + netPrice.toStringAsFixed(2) + ' €\n'),
-              ),
-            ],
-          ),
-          TableRow(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text('\nMehrwertsteuer 10%'),
-                  Text('\nVersandkosten\n'),
-                ],
-              ),
-              Column(
-                children: <Widget>[
-                  Text(''),
-                  Text(''),
-                ],
-              ),
-              Column(
-                children: <Widget>[
-                  Text('\n' + tax.toStringAsFixed(2) + ' €'),
-                  Text('\n' + shippingCosts.toStringAsFixed(2) + ' €'),
-                ],
-              ),
-            ],
-          ),
-          TableRow(
-            children: [
-              Text(
-                '\nGesamtsumme:\n',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Center(child: Text('')),
-              Center(
-                child: Text('\n' + grossPrice.toStringAsFixed(2) + ' €'),
-              ),
-            ],
-          ),
+          _buildTableRowHeader(),
+          _buildTableRowProduct(netPrice),
+          _buildTableRowTaxAndShipping(tax, shippingCosts),
+          _buildGrossPrice(grossPrice),
         ],
       ),
+    );
+  }
+
+  TableRow _buildTableRowHeader() {
+    return TableRow(
+      children: [
+        Text(
+          '\nProdukt',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          '\nAnzahl',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          '\nGesamtpreis',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+  TableRow _buildTableRowProduct(double netPrice) {
+    return TableRow(
+      children: [
+        Container(
+          child: Row(
+            children: <Widget>[
+              Image.asset(
+                'assets/dummy_med.png',
+                height: 50,
+                width: 50,
+              ),
+              Padding(
+                padding: EdgeInsets.all(3),
+              ),
+              Flexible(
+                child: Text(
+                    '\n' +
+                    widget.item.name +
+                    '\n' +
+                    widget.item.dosage +
+                    '\n',
+                    textWidthBasis: TextWidthBasis.parent,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Center(
+          child: Text('\n' + widget.item.orderQuantity.toString()),
+        ),
+        Center(
+          child: Text('\n' + netPrice.toStringAsFixed(2) + ' €\n'),
+        ),
+      ],
+    );
+  }
+
+  TableRow _buildTableRowTaxAndShipping(double tax, double shippingCosts){
+    return TableRow(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('\nMehrwertsteuer 10%'),
+            Text('\nVersandkosten\n'),
+          ],
+        ),
+        Column(
+          children: <Widget>[
+            Text(''),
+            Text(''),
+          ],
+        ),
+        Column(
+          children: <Widget>[
+            Text('\n' + tax.toStringAsFixed(2) + ' €'),
+            Text('\n' + shippingCosts.toStringAsFixed(2) + ' €'),
+          ],
+        ),
+      ],
+    );
+  }
+
+  TableRow _buildGrossPrice(double grossPrice) {
+    return TableRow(
+      children: [
+        Text(
+          '\nGesamtsumme:\n',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Center(child: Text('')),
+        Center(
+          child: Text('\n' + grossPrice.toStringAsFixed(2) + ' €'),
+        ),
+      ],
     );
   }
 
@@ -213,19 +224,24 @@ class _OrderSummaryState extends State<OrderSummary> {
       child: Column(
         children: <Widget>[
           Text('Zahlungsmöglichkeiten'),
-          RadioButtonGroup(
-              activeColor: Colors.green,
-              labels: <String>[
-                'Lastschrift',
-                'PayPal',
-                'Nachname / Bar vor Ort',
-              ],
-              picked: _pickedPayment,
-              onSelected: (String selected) => {
-                    setState(() => {_pickedPayment = selected})
-                  })
+          _buildRadioButtonGroupPayment(),
         ],
       ),
+    );
+  }
+
+  RadioButtonGroup _buildRadioButtonGroupPayment() {
+    return RadioButtonGroup(
+        activeColor: Theme.of(context).primaryColor,
+        labels: <String>[
+          'Lastschrift',
+          'PayPal',
+          'Nachname / Bar vor Ort',
+        ],
+        picked: _pickedPayment,
+        onSelected: (String selected) => {
+          setState(() => {_pickedPayment = selected})
+        }
     );
   }
 
@@ -236,28 +252,33 @@ class _OrderSummaryState extends State<OrderSummary> {
       child: Column(
         children: <Widget>[
           Text('Liefermöglichkeiten:'),
-          RadioButtonGroup(
-              activeColor: Colors.green,
-              labels: <String>[
-                'Nach Hause liefern lassen ( + 2.99 € )',
-                'An Apotheke liefern lassen',
-              ],
-              picked: _pickedDelivered,
-              onSelected: (String selected) => {
-                    _pickedDelivered = selected,
-                    if (_pickedApo == null) _findApo(selected),
-                    setState(() => {
-                          if (selected == 'An Apotheke liefern lassen')
-                            {deliverToApo = true}
-                          else
-                            {deliverToApo = false}
-                        })
-                  }),
+          _buildRadioButtonGroupShipping(),
           _buildGooglemapsContainer(),
           _buildApoAddressContainer(),
           _buildBillingAdress(),
         ],
       ),
+    );
+  }
+
+  RadioButtonGroup _buildRadioButtonGroupShipping() {
+    return RadioButtonGroup(
+        activeColor: Theme.of(context).primaryColor,
+        labels: <String>[
+          'Nach Hause liefern lassen ( + 2.99 € )',
+          'An Apotheke liefern lassen',
+        ],
+        picked: _pickedDelivered,
+        onSelected: (String selected) => {
+          _pickedDelivered = selected,
+          if (_pickedApo == null) _findApo(selected),
+          setState(() => {
+            if (selected == 'An Apotheke liefern lassen')
+              {deliverToApo = true}
+            else
+              {deliverToApo = false}
+          })
+        }
     );
   }
 
@@ -306,11 +327,6 @@ class _OrderSummaryState extends State<OrderSummary> {
   }
 
   Widget _buildGooglemapsContainer() {
-    var temp = new DateTime.now();
-    var date = new DateTime(temp.year,temp.month, temp.day, temp.hour + 2, 30);
-    var formatter = new DateFormat('HH:mm - dd.MM.yyyy');
-    String formattedDate = formatter.format(date);
-
     if (_pickedApo != null) {
       return Visibility(
         visible: deliverToApo,
@@ -330,38 +346,10 @@ class _OrderSummaryState extends State<OrderSummary> {
                       markers: Set<Marker>.of(markers.values),
                       //onTap: MapsHelper.openMap(currentMarker.geometry.location.lat, currentMarker.geometry.location.lng),
                     ),
-                    Positioned(
-                        right: 10.0,
-                        top: 10.0,
-                        child: Opacity(
-                          opacity: 0.6,
-                          child: FloatingActionButton.extended(
-                            icon: Icon(Icons.fullscreen),
-                            label: Text('Auswahl'),
-                            backgroundColor: Colors.green,
-                            onPressed: () {
-                              Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => Maps()));
-                            },
-                          ),
-                        ))
+                    _buildSearchApoButton(),
                   ],
                 )),
-            Container(
-              padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Icon(Icons.location_on),
-                  Column(
-                    children: <Widget>[
-                      Text(_pickedApo.name, style: TextStyle(fontWeight: FontWeight.bold),),
-                      Text(_pickedApo.formattedAddress),
-                      Text('Früheste Abholzeit: ' + formattedDate, style: TextStyle(color: Colors.red),),
-                    ],
-                  ),
-                ],
-              )
-            )
+            _buildApoPickUpContainer(),
           ],
         ),
       );
@@ -379,6 +367,48 @@ class _OrderSummaryState extends State<OrderSummary> {
         return Container();
       }
     }
+  }
+
+  Widget _buildSearchApoButton() {
+    return Positioned(
+      right: 10.0,
+      top: 10.0,
+      child: Opacity(
+        opacity: 0.6,
+        child: FloatingActionButton.extended(
+          icon: Icon(Icons.fullscreen),
+          label: Text('Auswahl'),
+          backgroundColor: Theme.of(context).primaryColor,
+          onPressed: () {
+            Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => Maps()));
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildApoPickUpContainer() {
+    var temp = new DateTime.now();
+    var date = new DateTime(temp.year,temp.month, temp.day, temp.hour + 2, 30);
+    var formatter = new DateFormat('HH:mm - dd.MM.yyyy');
+    String formattedDate = formatter.format(date);
+
+    return Container(
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Icon(Icons.location_on),
+            Column(
+              children: <Widget>[
+                Text(_pickedApo.name, style: TextStyle(fontWeight: FontWeight.bold),),
+                Text(_pickedApo.formattedAddress),
+                Text('Früheste Abholzeit: ' + formattedDate, style: TextStyle(color: Theme.of(context).errorColor),),
+              ],
+            ),
+          ],
+        )
+    );
   }
 
   _buildApoAddressContainer() {
@@ -412,8 +442,8 @@ class _OrderSummaryState extends State<OrderSummary> {
         children: <Widget>[
           Text('Geschäftsbedingungen und Benachrichtigungen'),
           CheckboxGroup(
-              checkColor: Colors.white,
-              activeColor: Colors.green,
+              checkColor: Theme.of(context).backgroundColor,
+              activeColor: Theme.of(context).primaryColor,
               labels: <String>[
                 'AGBs zustimmen',
                 'Ich bin damit einverstanden, dass...',
@@ -428,7 +458,7 @@ class _OrderSummaryState extends State<OrderSummary> {
             onPressed: goToOrderConfirmed,
             child: Text(
               'Zahlungspflichtig bestellen',
-              style: TextStyle(color: Colors.green),
+              style: TextStyle(color: Theme.of(context).primaryColor),
             ),
           ),
         ],
@@ -439,7 +469,7 @@ class _OrderSummaryState extends State<OrderSummary> {
   BoxDecoration _getContainerDecoration(double borderWidth, double circular) {
     return BoxDecoration(
       border: Border.all(
-        color: Colors.black54,
+        color: Theme.of(context).splashColor,
         width: borderWidth,
       ),
       borderRadius: BorderRadius.circular(circular),
@@ -462,8 +492,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     });
   }
 
-  Future<void> _buildAlertDialog(
-      BuildContext context, String caption, String text) {
+  Future<void> _buildAlertDialog(BuildContext context, String caption, String text) {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -576,11 +605,11 @@ class _OrderSummaryState extends State<OrderSummary> {
         ),
         buttons: [
           DialogButton(
-            color: Colors.green,
+            color: Theme.of(context).primaryColor,
             onPressed: () => _confirmPassword(),
             child: Text(
               'Bestätigen',
-              style: TextStyle(color: Colors.white, fontSize: 20),
+              style: TextStyle(color: Theme.of(context).backgroundColor, fontSize: 20),
             ),
           )
         ]);
@@ -591,8 +620,6 @@ class _OrderSummaryState extends State<OrderSummary> {
     if (await PersonalData.checkPassword(passwordController.text)) {
       // go to confirmed page
       Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => OrderConfirmation()));
-    } else {
-
     }
   }
 

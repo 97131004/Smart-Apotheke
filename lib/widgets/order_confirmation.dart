@@ -42,16 +42,7 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
             alignment: Alignment.center,
             child: Column(
               children: <Widget>[
-                Expanded(
-                  child: GestureDetector(
-                    child: AnimatedIcon(
-                      size: 200,
-                      icon: AnimatedIcons.menu_home,
-                      progress: _animationController,
-                    ),
-                    onTap: _onBackToHome,
-                  ),
-                ),
+                _buildHomeButton(),
                 Expanded(
                   child: Text('Bestellung abgeschlossen.'),
                 ),
@@ -63,11 +54,24 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
     );
   }
 
+  Widget _buildHomeButton() {
+    return Expanded(
+      child: GestureDetector(
+        child: AnimatedIcon(
+          size: 200,
+          icon: AnimatedIcons.menu_home,
+          progress: _animationController,
+        ),
+        onTap: _onBackToHome,
+      ),
+    );
+  }
+
   Future<bool> _onWillPop() {
     // go back to product details
     var nav = Navigator.of(context);
     nav.pop();
-    //nav.pop();
+    nav.pop();
     return nav.maybePop();
   }
 

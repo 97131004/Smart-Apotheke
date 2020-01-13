@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:maph_group3/widgets/datenschutzerklaerung.dart';
 
 import 'data/med.dart';
 import 'widgets/home.dart';
@@ -20,10 +19,20 @@ void main() {
     title: 'MAPH',
     theme: ThemeData(
       appBarTheme: AppBarTheme( color: Colors.green,),
+      primaryColor: Colors.green,
       accentColorBrightness: Brightness.light,
+      accentColor: Colors.green,
       backgroundColor: Colors.white,
       scaffoldBackgroundColor: Colors.white,
+      splashColor: Colors.black54,
+      errorColor: Colors.red,
       primaryTextTheme: TextTheme(title: TextStyle(color: Colors.white)),
+
+      textTheme: TextTheme(
+        headline: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
+        title: TextStyle(fontSize: 20.0),
+        body1: TextStyle(fontSize: 15.0 ),
+      ),
     ),
     home: Home(),
     //home: MedSearch(),
