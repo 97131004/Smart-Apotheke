@@ -101,11 +101,11 @@ class _ShopState extends State<Shop> {
       iconSize: 18,
       elevation: 16,
       style: TextStyle(
-          color: Colors.green
+          color: Theme.of(context).primaryColor,
       ),
       underline: Container(
         height: 2,
-        color: Colors.green,
+        color: Theme.of(context).primaryColor,
       ),
       onChanged: (String newValue) {
         setState(() {
@@ -130,11 +130,11 @@ class _ShopState extends State<Shop> {
         child: Container(
             decoration: new BoxDecoration (
               borderRadius: new BorderRadius.circular(5),
-              border: Border.all(color: Colors.black54),
+              border: Border.all(color: Theme.of(context).splashColor),
               gradient: LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [Colors.green, Colors.white]
+                  colors: [Theme.of(context).primaryColor, Theme.of(context).backgroundColor]
               ),
             ),
             child: buildListTileOwnProd()
@@ -149,7 +149,7 @@ class _ShopState extends State<Shop> {
   ListTile buildListTileOwnProd() {
     return ListTile(
       contentPadding: EdgeInsets.all(10),
-      onTap: () => {Navigator.push(
+      onTap: () => { Navigator.push(
          context,
          NoAnimationMaterialPageRoute(builder: (context) => ProductDetails(searchKey: this.localShopItem.pzn))),
       },
@@ -158,11 +158,11 @@ class _ShopState extends State<Shop> {
       subtitle: Text(localShopItem.dosage + '\n' + localShopItem.brand + '\n\n' + localShopItem.merchant, style: TextStyle(fontSize: 12)),
       trailing: Column(
         children: <Widget>[
-          Flexible(child: Text('In-App bestellen!', style: TextStyle(color: Colors.red),),),
+          Flexible(child: Text('In-App bestellen!', style: TextStyle(color: Theme.of(context).errorColor),),),
           Column(
             children: <Widget>[
               Text(localShopItem.price, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              Text(localShopItem.crossedOutPrice, style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough)),
+              Text(localShopItem.crossedOutPrice, style: TextStyle(color: Theme.of(context).errorColor, decoration: TextDecoration.lineThrough)),
               Text(localShopItem.pricePerUnit),
             ]
           ),
@@ -172,7 +172,6 @@ class _ShopState extends State<Shop> {
   }
 
   Widget buildListView(String searchKey) {
-    var localSearchKey = localShopItem != null ? localShopItem.searchKey : searchKey;
     return FutureBuilder<List<ShopItem>>(
       future: itemList,
       builder: (context, snapshot) {
@@ -204,7 +203,7 @@ class _ShopState extends State<Shop> {
                 child: Column(
                   children: <Widget>[
                     Text(item.price ?? '-', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-                    if(item.crossedOutPrice != null) Text(item.crossedOutPrice, style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough),),
+                    if(item.crossedOutPrice != null) Text(item.crossedOutPrice, style: TextStyle(color: Theme.of(context).errorColor, decoration: TextDecoration.lineThrough),),
                     Text(item.pricePerUnit ?? ''),
                   ],
                 )
@@ -224,7 +223,7 @@ class _ShopState extends State<Shop> {
         child: RaisedButton(
           shape: RoundedRectangleBorder(
               borderRadius: new BorderRadius.circular(18.0),
-              side: BorderSide(color: Colors.black)
+              side: BorderSide(color: Theme.of(context).splashColor)
           ),
           onPressed: () {
             Navigator.push(
