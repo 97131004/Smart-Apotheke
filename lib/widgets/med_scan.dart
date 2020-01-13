@@ -8,6 +8,7 @@ import '../util/med_get.dart';
 import '../data/med.dart';
 import 'med_search.dart';
 
+/// Seite nach einem abgeschlossenen Scanvorgang
 class MedScan extends StatefulWidget {
   final List<Med> meds;
 
@@ -15,13 +16,13 @@ class MedScan extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _MedScanState();
+    return MedScanState();
   }
 }
 
-class _MedScanState extends State<MedScan> {
+class MedScanState extends State<MedScan> {
+  /// [getMedsDone] ist true, wenn alle Medikamente geladen wurden
   bool getMedsDone = false;
-  List<Med> display = new List<Med>();
 
   @override
   void initState() {
