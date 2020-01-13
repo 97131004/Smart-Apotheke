@@ -61,7 +61,6 @@ class _PersonalState extends State<Personal> {
       child: Scaffold(
         appBar: AppBar(
           title: Text('Persönliche Daten'),
-          backgroundColor: Colors.green[600]
         ),
         body: ListView(
           children: <Widget>[
@@ -98,8 +97,8 @@ class _PersonalState extends State<Personal> {
         msg: msg,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.greenAccent,
-        textColor: Colors.black,
+        backgroundColor: Theme.of(context).primaryColor,
+        textColor: Colors.white,
         timeInSecForIos: 1,
         fontSize: 16.0);
   }
@@ -219,7 +218,7 @@ class _PersonalState extends State<Personal> {
           },
         ),
         ListTile(
-          title: Text('Adresse ändern'),
+          title: Text('Name und Adresse ändern'),
           trailing: Icon(Icons.keyboard_arrow_right),
           onTap: () {
             setState(() {

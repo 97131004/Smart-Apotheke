@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:maph_group3/widgets/scanner.dart';
-
 import '../util/no_internet_alert.dart';
 import '../util/nampr.dart';
 import '../util/helper.dart';
@@ -38,9 +36,11 @@ class _MedScanState extends State<MedScan> {
     if (widget.meds != null && widget.meds.length > 0) {
       getMeds();
     } else {
-      setState(() {
-        getMedsDone = true;
-      });
+      if (this.mounted) {
+        setState(() {
+          getMedsDone = true;
+        });
+      }
     }
   }
 
@@ -54,9 +54,11 @@ class _MedScanState extends State<MedScan> {
         }
       }
     }
-    setState(() {
-      getMedsDone = true;
-    });
+    if (this.mounted) {
+      setState(() {
+        getMedsDone = true;
+      });
+    }
   }
 
   @override
@@ -64,14 +66,12 @@ class _MedScanState extends State<MedScan> {
     return WillPopScope(
       onWillPop: () async {
         //back to home page, skipping scanner
-        Scanner.imageloaddone = false;
         Navigator.pop(context);
         return true;
       },
       child: Scaffold(
         appBar: AppBar(
           title: Text('Gefundene Medikamente'),
-          backgroundColor: Colors.green,
         ),
         body: getMedsDone ? buildList() : LoadBar.build(),
       ),
@@ -87,8 +87,8 @@ class _MedScanState extends State<MedScan> {
             //first item
             return Container(
               width: double.infinity,
-              color: Colors.red[600],
-              padding: EdgeInsets.all(16),
+              color: Colors.blueAccent,
+              padding: EdgeInsets.all(15),
               child: Text(
                 'Bitte überprüfen Sie die Korrektheit der gescannten Medikamente. ' +
                     'Wir übernehmen keine Haftung. Nutzung auf eigene Gefahr.',
@@ -118,13 +118,10 @@ class _MedScanState extends State<MedScan> {
               children: <Widget>[
                 SizedBox(height: 10),
                 ButtonTheme(
-                  buttonColor: Colors.grey[200],
-                  minWidth: double.infinity,
+                  buttonColor: Theme.of(context).buttonColor,
+                  minWidth: MediaQuery.of(context).size.width * 0.75,
                   height: 50.0,
                   child: RaisedButton.icon(
-                    shape: new RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(30.0),
-                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -132,22 +129,21 @@ class _MedScanState extends State<MedScan> {
                             builder: (context) => MedSearch()),
                       );
                     },
-                    icon: Icon(Icons.edit),
-                    label: Text("Name / PZN manuell eingeben"),
+                    icon: Icon(Icons.edit, color: Colors.white),
+                    label: Text("Name / PZN manuell eingeben",
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 4),
                 ButtonTheme(
-                  buttonColor: Colors.grey[200],
-                  minWidth: double.infinity,
+                  buttonColor: Theme.of(context).buttonColor,
+                  minWidth: MediaQuery.of(context).size.width * 0.75,
                   height: 50.0,
                   child: RaisedButton.icon(
-                    icon: Icon(Icons.update),
-                    shape: new RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(30.0),
-                    ),
-                    onPressed: onScanAgainClick,
-                    label: Text("Nochmals scannen"),
+                    icon: Icon(Icons.update, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                    label: Text("Nochmals scannen",
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ),
               ],
@@ -157,10 +153,5 @@ class _MedScanState extends State<MedScan> {
         },
       ),
     );
-  }
-
-  void onScanAgainClick() {
-    Scanner.imageloaddone = false;
-    Navigator.pop(context);
   }
 }
