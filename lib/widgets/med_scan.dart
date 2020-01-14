@@ -110,7 +110,7 @@ class MedScanState extends State<MedScan> {
             return Column(
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.only(top: 20),
                   child: Text('Keine Medikamente gefunden.'),
                 ),
               ],
