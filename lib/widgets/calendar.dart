@@ -149,10 +149,11 @@ class _CalendarState extends State<Calendar> {
       for (int i = 0; i < time.length ; i++){
         int hour = time[i];
         int id = generator_id_notification(year, month, day, event_index, hour);
+        print(id);
         await flutterLocalNotificationsPlugin.showDailyAtTime(
             id,
-            'Calendar: $text',
-            'It is time to take your medicine, according to schedule',
+            'Medikamente: $text',
+            'Es ist an der Zeit, Ihre Medikamente gemäß Zeitplan einzunehmen',
             Time(hour, 0, 0),
             platformChannelSpecifics);
       }
@@ -416,7 +417,7 @@ class _CalendarState extends State<Calendar> {
                                     }
                                     prefs.setString("events", json.encode(encodeMap(_events)));
                                     if(selectedValues != null){
-                                      scheduleNotification(_controller.selectedDay, _events[_controller.selectedDay].indexOf(_eventController.text) , selectedValues, _eventController.toString());
+                                      scheduleNotification(_controller.selectedDay, _events[_controller.selectedDay].indexOf(_eventController.text) , selectedValues, _eventController.text.toString());
                                     }
                                     _controller.setSelectedDay(time_anfang);
                                   }
