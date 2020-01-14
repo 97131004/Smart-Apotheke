@@ -12,7 +12,6 @@ import '../data/med.dart';
 
 class Scanner extends StatefulWidget {
   Scanner({Key key}) : super(key: key);
-  static bool imageloaddone = false;
   @override
   State<StatefulWidget> createState() {
     return _ScannerState();
@@ -21,82 +20,155 @@ class Scanner extends StatefulWidget {
 
 class _ScannerState extends State<Scanner> {
   static List<Med> medicaments;
+  bool imageChosen = false;
+  bool imageLoaded = false;
+  final buttonHeight = 100.0;
+  final iconSize = 32.0;
+  Uint8List image;
+  int rot = 0;
 
   @override
   void initState() {
     super.initState();
   }
 
-  Uint8List image;
-  int rot = 0;
-  bool imagechoosed = false;
-
   @override
   Widget build(BuildContext context) {
-    if (!imagechoosed)
-     return buildChooseImage();
+    if (!imageChosen)
+      return buildChosenImage();
     else
-     return buildPreview(image);
+      return buildPreview(image);
   }
 
-  Widget buildChooseImage() {
-    return Scaffold(
+  Widget buildChosenImage() {
+    return WillPopScope(
+      onWillPop: () async {
+        if (!imageLoaded) {
+          imageChosen = false;
+          Navigator.pop(context);
+        }
+        return false;
+      },
+      child: Scaffold(
         appBar: AppBar(
           title: Text('Rezept scannen'),
         ),
-        body: Scanner.imageloaddone ? LoadBar.build() : loadImage());
+        body: imageLoaded ? LoadBar.build() : buildImage(),
+      ),
+    );
   }
 
-  Widget loadImage() {
-    return Center(
-      child: Container(
-          alignment: Alignment.center,
-          //Text('Hier die Rezept-/Texterkennung durch Kamera'),
-          child: new Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  Widget buildNotification() {
+    return Container(
+      width: double.infinity,
+      color: Colors.blueAccent,
+      padding: EdgeInsets.all(15),
+      child: Text(
+        'Bitte beachten Sie, dass das Bild des Rezepts Pharmazentralnummern ' +
+            '(PZN) enthält, waagerecht und scharf ist.',
+        style: TextStyle(color: Colors.white),
+      ),
+    );
+  }
+
+  Widget buildImage() {
+    return Stack(
+      children: <Widget>[
+        buildNotification(),
+        Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              RaisedButton.icon(
-                icon: Image.asset(
-                  'assets/gallery.jpg',
-                  width: 100,
-                  height: 100,
+              Padding(
+                padding: EdgeInsets.only(left: 4, top: 4),
+                child: ButtonTheme(
+                  minWidth: MediaQuery.of(context).size.width * 0.5 - 6,
+                  height: buttonHeight,
+                  child: RaisedButton(
+                    color: Theme.of(context).buttonColor,
+                    padding: EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.folder,
+                            color: Colors.white,
+                            size: iconSize,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Text(
+                            "Galerie",
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    onPressed: getImagefromGallery,
+                  ),
                 ),
-                textColor: Colors.black,
-                color: Colors.yellow,
-                onPressed: () => getImagefromGallery(),
-                label: new Text("Gallery"),
               ),
-              RaisedButton.icon(
-                icon: Image.asset(
-                  'assets/camera.png',
-                  width: 100,
-                  height: 100,
-                ),
-                onPressed: () => getImagefromCamera(),
-                textColor: Colors.black,
-                color: Colors.redAccent,
-                label: new Text(
-                  "Camera",
+              Padding(
+                padding: EdgeInsets.only(left: 4, top: 4),
+                child: ButtonTheme(
+                  minWidth: MediaQuery.of(context).size.width * 0.5 - 6,
+                  height: buttonHeight,
+                  child: RaisedButton(
+                    color: Theme.of(context).buttonColor,
+                    padding: EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: iconSize,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Text(
+                            "Kamera",
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    onPressed: getImagefromCamera,
+                  ),
                 ),
               ),
             ],
-          )),
+          ),
+        )
+      ],
     );
   }
 
   Widget buildPreview(Uint8List rotateImg) {
     return Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: Text('Vorschau'),
-        ),
-        body: SingleChildScrollView(
-            child: Column(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text('Vorschau'),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
           children: <Widget>[
+            buildNotification(),
             FittedBox(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height / 3 * 2,
+                height: MediaQuery.of(context).size.height / 3 * 2 - 60,
                 child: RotatedBox(
                   quarterTurns: rot,
                   child: Image.memory(
@@ -119,7 +191,7 @@ class _ScannerState extends State<Scanner> {
                     icon: Icon(Icons.clear),
                     onPressed: () {
                       setState(() {
-                        imagechoosed = false;
+                        imageChosen = false;
                       });
                     },
                     iconSize: 40,
@@ -136,7 +208,6 @@ class _ScannerState extends State<Scanner> {
                         } else {
                           rot += 1;
                         }
-                        print(rot);
                       });
                     },
                     iconSize: 60,
@@ -146,27 +217,28 @@ class _ScannerState extends State<Scanner> {
                   IconButton(
                     alignment: Alignment.topRight,
                     icon: Icon(Icons.check),
-                    onPressed: () => backtoScanner(),
+                    onPressed: () => backToScanner(),
                     iconSize: 50,
                   )
                 ]),
               ],
             )
           ],
-        )));
+        ),
+      ),
+    );
   }
 
-  void backtoScanner() async {
+  void backToScanner() async {
     ImageEditorOption option = ImageEditorOption();
     option.addOption(RotateOption(rot * 90));
 
     image =
         await ImageEditor.editImage(image: image, imageEditorOption: option);
     analyzeImage();
-    //Navigator.pop(context);
     setState(() {
-      Scanner.imageloaddone = true;
-      imagechoosed = false;
+      imageLoaded = true;
+      imageChosen = false;
     });
   }
 
@@ -188,7 +260,7 @@ class _ScannerState extends State<Scanner> {
         //  provider = ExtendedFileImageProvider(file);
         image = file.readAsBytesSync();
         setState(() {
-          imagechoosed = true;
+          imageChosen = true;
         });
       }
     } catch (e) {
@@ -202,7 +274,7 @@ class _ScannerState extends State<Scanner> {
       if (file.existsSync()) {
         image = file.readAsBytesSync();
         setState(() {
-          imagechoosed = true;
+          imageChosen = true;
         });
       }
     } catch (e) {
@@ -243,5 +315,7 @@ class _ScannerState extends State<Scanner> {
             meds: medicaments,
           ),
         ));
+    imageChosen = false;
+    imageLoaded = false;
   }
 }

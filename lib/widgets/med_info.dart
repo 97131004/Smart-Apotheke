@@ -100,37 +100,37 @@ class _MedInfoState extends State<MedInfo> {
           title: Text(widget.med.name),
           actions: <Widget>[
             if (getMedInfoDataDone && medInfoData.length > 0)
-            Row(
-              children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.zoom_in),
-                  onPressed: () {
-                    if (varSize < 6) {
-                      setState(() {
-                        varSize += 1;
-                      });
-                    }
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.zoom_out),
-                  onPressed: () {
-                    if (varSize > 0) {
-                      setState(() {
-                        varSize -= 1;
-                      });
-                    }
-                  },
-                ),
-              ],
-            )
+              Row(
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.zoom_in),
+                    onPressed: () {
+                      if (varSize < 6) {
+                        setState(() {
+                          varSize += 1;
+                        });
+                      }
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.zoom_out),
+                    onPressed: () {
+                      if (varSize > 0) {
+                        setState(() {
+                          varSize -= 1;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              )
           ],
         ),
         body: getMedInfoDataDone
             ? ((medInfoData.length > 0) ? buildHtml() : buildNotFound())
             : LoadBar.build(),
         floatingActionButton: Visibility(
-          visible: getMedInfoDataDone && (medInfoData.length > 0),
+          visible: (getMedInfoDataDone && medInfoData.length > 0),
           child: FloatingActionButton(
             foregroundColor: Colors.white,
             child: Icon(Icons.arrow_upward),
@@ -142,30 +142,29 @@ class _MedInfoState extends State<MedInfo> {
   }
 
   Widget buildNotFound() {
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.all(20),
-          child: Text(
-            'Beipackzettel nicht gefunden.',
-            textAlign: TextAlign.center,
-          ),
-        ),
-        ButtonTheme(
-          buttonColor: Colors.grey[300],
-          minWidth: double.infinity,
-          height: 50.0,
-          child: RaisedButton.icon(
-            shape: new RoundedRectangleBorder(
-              borderRadius: new BorderRadius.circular(30.0),
+    return Center(
+      child: Column(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              'Beipackzettel nicht gefunden.',
+              textAlign: TextAlign.center,
             ),
-            onPressed: getMedInfoDataInit,
-            color: Colors.grey[200],
-            icon: Icon(Icons.refresh),
-            label: Text("Nochmals versuchen"),
           ),
-        )
-      ],
+          ButtonTheme(
+            buttonColor: Theme.of(context).buttonColor,
+            minWidth: MediaQuery.of(context).size.width * 0.5,
+            height: 50.0,
+            child: RaisedButton.icon(
+              onPressed: getMedInfoDataInit,
+              icon: Icon(Icons.refresh, color: Colors.white),
+              label: Text("Nochmals versuchen",
+                  style: TextStyle(color: Colors.white)),
+            ),
+          )
+        ],
+      ),
     );
   }
 
