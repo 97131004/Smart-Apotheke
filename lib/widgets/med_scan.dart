@@ -147,6 +147,7 @@ class MedScanState extends State<MedScan> {
                         style: TextStyle(color: Colors.white)),
                   ),
                 ),
+                SizedBox(height: 10),
               ],
             );
           }

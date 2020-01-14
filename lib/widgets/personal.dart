@@ -95,27 +95,30 @@ class _PersonalState extends State<Personal> {
 
   void showToast(String msg) {
     Fluttertoast.showToast(
-        msg: msg,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Theme.of(context).primaryColor,
-        textColor: Colors.white,
-        timeInSecForIos: 1,
-        fontSize: 16.0);
+      msg: msg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Theme.of(context).primaryColor,
+      textColor: Colors.white,
+      timeInSecForIos: 1,
+      fontSize: 15,
+    );
   }
 
   void onPressedSavePassButton() async {
     bool isdone = false;
-    if (newp.text == newpW.text && newp.text != '') {
+    if (newp.text == newpW.text && newp.text.length > 0) {
       isdone = await PersonalData.resetPassword(oldp.text, newp.text);
-      showToast('Passwortänderung erfolgreich!');
-      handleWillPop();
-      setState(() {
-        newp.clear();
-        newpW.clear();
-        oldp.clear();
-        status = '';
-      });
+      if (isdone) {
+        showToast('Passwortänderung erfolgreich!');
+        handleWillPop();
+        setState(() {
+          newp.clear();
+          newpW.clear();
+          oldp.clear();
+          status = '';
+        });
+      }
     }
     if (!isdone) {
       setState(() {
@@ -341,12 +344,14 @@ class _PersonalState extends State<Personal> {
         children: <Widget>[
           Text('Aktuelles Passwort:'),
           TextField(
+            obscureText: true,
             controller: oldp,
             decoration: InputDecoration(hintText: passHintText),
           ),
           SizedBox(height: 20),
           Text('Neues Passwort:'),
           TextField(
+            obscureText: true,
             controller: newp,
             decoration: InputDecoration(hintText: passHintText),
           ),

@@ -64,7 +64,8 @@ class _ScannerState extends State<Scanner> {
       color: Colors.blueAccent,
       padding: EdgeInsets.all(15),
       child: Text(
-        'Bitte beachten Sie, dass das Bild des Rezepts waagerecht und scharf sein muss.',
+        'Bitte beachten Sie, dass das Bild des Rezepts Pharmazentralnummern ' +
+            '(PZN) enthält, waagerecht und scharf ist.',
         style: TextStyle(color: Colors.white),
       ),
     );
@@ -207,7 +208,6 @@ class _ScannerState extends State<Scanner> {
                         } else {
                           rot += 1;
                         }
-                        print(rot);
                       });
                     },
                     iconSize: 60,
@@ -236,7 +236,6 @@ class _ScannerState extends State<Scanner> {
     image =
         await ImageEditor.editImage(image: image, imageEditorOption: option);
     analyzeImage();
-    //Navigator.pop(context);
     setState(() {
       imageLoaded = true;
       imageChosen = false;

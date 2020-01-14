@@ -130,7 +130,7 @@ class _MedInfoState extends State<MedInfo> {
             ? ((medInfoData.length > 0) ? buildHtml() : buildNotFound())
             : LoadBar.build(),
         floatingActionButton: Visibility(
-          visible: getMedInfoDataDone && (medInfoData.length > 0),
+          visible: (getMedInfoDataDone && medInfoData.length > 0),
           child: FloatingActionButton(
             foregroundColor: Colors.white,
             child: Icon(Icons.arrow_upward),

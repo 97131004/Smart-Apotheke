@@ -56,7 +56,7 @@ class MedList {
       Function(Med) onButtonDelete) {
     return ExpansionTile(
       key: new PageStorageKey<Key>(item.key),
-      backgroundColor: Colors.yellow, //background color when selected
+      backgroundColor: Colors.red[100], //background color when selected
       title: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
