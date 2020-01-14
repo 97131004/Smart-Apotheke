@@ -1,25 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:maph_group3/util/helper.dart';
+import 'package:maph_group3/util/load_bar.dart';
 import '../util/med_list.dart';
 import '../data/globals.dart' as globals;
 import 'package:maph_group3/data/med.dart';
 import '../util/nampr.dart';
 import 'scanner.dart';
 
-class DummyMedList extends StatefulWidget {
+class Recent extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return _DummyMedListState();
+    return _RecentState();
   }
 }
 
-class _DummyMedListState extends State<DummyMedList> {
-  _DummyMedListState();
+class _RecentState extends State<Recent> {
+  bool getGlobalMedListDone = false;
+  List<Med> medList = [];
+  _RecentState();
+
+  @override
+  void initState() {
+    super.initState();
+    getGlobalMedList();
+  }
+
+  Future getGlobalMedList() async {
+    if (this.mounted) {
+      await Helper.loadGlobalMedList();
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Medikamente Liste'),
-        backgroundColor: Colors.green,
+        title: Text('Verlauf'),
       ),
       body: (globals.meds.length > 0)
           ? MedList.build(
@@ -97,9 +114,10 @@ class _DummyMedListState extends State<DummyMedList> {
     );
   }
 
-  void medItemDelete(Med med) {
+  void medItemDelete(Med med) async {
     setState(() {
       globals.meds.remove(med);
     });
+    await Helper.saveGlobalMedList();
   }
 }

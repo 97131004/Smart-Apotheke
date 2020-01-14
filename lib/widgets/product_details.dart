@@ -66,7 +66,7 @@ class _ProductDetailsState extends State<ProductDetails> {
         width: MediaQuery.of(context).size.width,
         decoration: new BoxDecoration (
           borderRadius: new BorderRadius.horizontal(),
-          border: Border.all(color: Colors.black54),
+          border: Border.all(color: Theme.of(context).splashColor),
         ),
         padding: EdgeInsets.all(15),
         child: Image.asset(localShopItem.image),
@@ -101,44 +101,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                 alignment: Alignment.centerLeft,
                 child: Text("Details", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
               ),
-              Container(
-                padding: EdgeInsets.all(10),
-                child: Table(
-                    columnWidths: {
-                      0: FixedColumnWidth(MediaQuery.of(context).size.width*0.3),
-                      1: FixedColumnWidth(MediaQuery.of(context).size.width*0.7),
-                    },
-                    children: [
-                      TableRow(
-                        children: [
-                          Text("Hersteller", style: TextStyle(fontWeight: FontWeight.bold),),
-                          Text(localShopItem.brand),
-                        ],
-                      ),
-                      TableRow(
-                        children: [
-                          Text("\nDosierung", style: TextStyle(fontWeight: FontWeight.bold),),
-                          Text("\n" + localShopItem.dosage),
-                        ],
-                      ),
-                      TableRow(
-                        children: [
-                          Text("\nPZN", style: TextStyle(fontWeight: FontWeight.bold),),
-                          Text("\n" + localShopItem.pzn),
-                        ],
-                      ),
-                      TableRow(
-                        children: [
-                          Text("\nRezeptfrei", style: TextStyle(fontWeight: FontWeight.bold),),
-                          Container(
-                            alignment: Alignment.bottomLeft,
-                            child: localShopItem.onlyAvailableOnPrescription? Icon(Icons.block, color: Colors.red,) : Icon(Icons.check_circle_outline, color: Colors.green,),
-                          ),
-                        ],
-                      ),
-                    ]
-                ),
-              ),
+              _buildDetailsContainer(),
               Divider(),
             ],
           ),
@@ -150,70 +113,131 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
+  Widget _buildDetailsContainer() {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: Table(
+          columnWidths: {
+            0: FixedColumnWidth(MediaQuery.of(context).size.width*0.3),
+            1: FixedColumnWidth(MediaQuery.of(context).size.width*0.7),
+          },
+          children: [
+            TableRow(
+              children: [
+                Text("Hersteller", style: TextStyle(fontWeight: FontWeight.bold),),
+                Text(localShopItem.brand),
+              ],
+            ),
+            TableRow(
+              children: [
+                Text("\nDosierung", style: TextStyle(fontWeight: FontWeight.bold),),
+                Text("\n" + localShopItem.dosage),
+              ],
+            ),
+            TableRow(
+              children: [
+                Text("\nPZN", style: TextStyle(fontWeight: FontWeight.bold),),
+                Text("\n" + localShopItem.pzn),
+              ],
+            ),
+            TableRow(
+              children: [
+                Text("\nRezeptfrei", style: TextStyle(fontWeight: FontWeight.bold),),
+                Container(
+                  alignment: Alignment.bottomLeft,
+                  child: localShopItem.onlyAvailableOnPrescription?
+                  Icon(Icons.block, color: Theme.of(context).errorColor,) :
+                  Icon(Icons.check_circle_outline, color: Theme.of(context).primaryColor,),
+                ),
+              ],
+            ),
+          ]
+      ),
+    );
+  }
+
   Widget buildOrderCompleteContainer() {
-    double price = ((localShopItem.priceInt * quantity) / 100);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        new Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('Gesamtpreis:', style: TextStyle(fontWeight: FontWeight.bold),),
-                  Text(price.toString() + ' €', style: TextStyle(fontWeight: FontWeight.bold),)
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('Stückpreis:'),
-                  Text(localShopItem.price)
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('UVP*:'),
-                  Text(localShopItem.crossedOutPrice, style: TextStyle(color: Colors.red, decoration: TextDecoration.lineThrough,),)
-                ],
-              ),
-            ],
-          ),
-        ),
-        //Padding(padding: EdgeInsets.all(20),),
-        new Flexible(
-          child: Container(
-            padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-            child: TextField(
-              keyboardType: TextInputType.number,
-              controller: textEditController,
-              decoration: new InputDecoration(
-                  border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black54)
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.green, width: 2)
-                  )
-              ),
-              onChanged: (String value) => {
-                setState(() => {
-                  quantity = int.parse(value)
-                }),
-              },
-            ),
-          ),
-        ),
-        //Padding(padding: EdgeInsets.all(10),),
+        _buildPricingContainer(),
+        _buildInputField(),
         new Flexible(
           child: RaisedButton(
             onPressed: validateInputAndProceed,
-            child: Text("Jetzt bestellen", style: TextStyle(color: Colors.green),),
+            child: Text("Bestellen", style: TextStyle(color: Theme.of(context).primaryColor),),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildInputField() {
+    return new Flexible(
+      child: Container(
+        padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+        child: TextField(
+          keyboardType: TextInputType.number,
+          controller: textEditController,
+          decoration: new InputDecoration(
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).splashColor)
+              ),
+              enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2)
+              )
+          ),
+          onChanged: (String value) => {
+            setState(() => {
+              quantity = int.parse(value)
+            }),
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPricingContainer() {
+    double price = ((localShopItem.priceInt * quantity) / 100);
+    return new Flexible(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Flexible(
+                child: Text('Gesamtpreis:', style: TextStyle(fontWeight: FontWeight.bold),),
+              ),
+              Flexible(
+                child: Text(price.toString() + ' €', style: TextStyle(fontWeight: FontWeight.bold),),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Flexible(
+                child: Text('Stückpreis:'),
+              ),
+              Flexible(
+                child: Text(localShopItem.price),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Flexible(
+                child: Text('UVP*:'),
+              ),
+              Flexible(
+                  child: Text(localShopItem.crossedOutPrice, style: TextStyle(color: Theme.of(context).errorColor, decoration: TextDecoration.lineThrough,),)
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

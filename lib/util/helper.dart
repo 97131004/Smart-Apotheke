@@ -1,11 +1,17 @@
+import 'dart:convert';
+
+import 'package:maph_group3/data/med.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:connectivity/connectivity.dart';
+import '../data/globals.dart' as globals;
 
 import 'package:http/http.dart' as http;
 
 class Helper {
+  static String keyGlobalsList = 'globalsList';
+
   static String parseMid(String source, String delim1, String delim2,
       [int startIndex]) {
     int iDelim1 = source.indexOf(delim1, (startIndex != null) ? startIndex : 0);
@@ -90,11 +96,33 @@ class Helper {
 
     if (response.statusCode == 200)
       return response.body;
-    else return null;
+    else
+      return null;
   }
 
-  static String jsonDecode(String data) {
-    return jsonDecode(data);
+  static void globalMedListAdd(Med m) {
+    globals.meds.removeWhere((item) => item.pzn == m.pzn);
+    m.isHistory = true;
+    globals.meds.insert(0, m);
   }
 
+  static Future saveGlobalMedList() async {
+    List<String> list = [];
+    for (int i = 0; i < globals.meds.length; i++) {
+      list.add(jsonEncode(globals.meds[i].toJson()));
+    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(keyGlobalsList, list);
+  }
+
+  static Future loadGlobalMedList() async {
+    //disable next line to not add predefined meds from globals.dart
+    //globals.meds.clear();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> list = (prefs.getStringList(keyGlobalsList) ?? List<String>());
+    for (int i = 0; i < list.length; i++) {
+      Med m = Med.fromJson(jsonDecode(list[i]));
+     globalMedListAdd(m);
+    }
+  }
 }

@@ -32,7 +32,7 @@ class _CalendarState extends State<Calendar> {
   CalendarController _controller;
   Map<DateTime, List<dynamic>> _events;
   List<dynamic> _selectedEvents;
-  List<int> selectedTimes;
+  List<int> selectedTimes ;
   TextEditingController _eventController;
   SharedPreferences prefs;
 
@@ -59,6 +59,7 @@ class _CalendarState extends State<Calendar> {
     _myclock = [];
 
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    selectedTimes = [8,14,20];
   }
 
   initializeNotifications() async {
@@ -107,7 +108,7 @@ class _CalendarState extends State<Calendar> {
 
   void removeNotification(
       int year, int month, int day, int event_index, List list_hours) async {
-    //e.g list_hours = [9,12,18,21]
+   
     for (int i = 0; i < list_hours.length; i++) {
       int id = generator_id_notification(
           year, month, day, event_index, list_hours[i]);
@@ -164,10 +165,11 @@ class _CalendarState extends State<Calendar> {
       for (int i = 0; i < time.length; i++) {
         int hour = time[i];
         int id = generator_id_notification(year, month, day, event_index, hour);
+        print(id);
         await flutterLocalNotificationsPlugin.showDailyAtTime(
             id,
-            'Calendar: $text',
-            'It is time to take your medicine, according to schedule',
+            'Medikamente: $text',
+            'Es ist an der Zeit, Ihre Medikamente gemäß Zeitplan einzunehmen',
             Time(hour, 0, 0),
             platformChannelSpecifics);
       }
@@ -308,30 +310,19 @@ class _CalendarState extends State<Calendar> {
       DateTime first, DateTime last, CalendarFormat format) {
     print('CALLBACK: _onVisibleDaysChanged');
   }
-
+  
   void _showMultiSelect(BuildContext context) async {
-    final items = <MultiSelectDialogItem<int>>[
-      MultiSelectDialogItem(9, '9 Uhr'),
-      MultiSelectDialogItem(12, '12 Uhr'),
-      MultiSelectDialogItem(18, '18 Uhr'),
-      MultiSelectDialogItem(21, '21 Uhr'),
-      MultiSelectDialogItem(10, '10 Uhr'),
-      MultiSelectDialogItem(11, '11 Uhr'),
-      MultiSelectDialogItem(13, '13 Uhr'),
-      MultiSelectDialogItem(14, '14 Uhr'),
-      MultiSelectDialogItem(15, '15 Uhr'),
-      MultiSelectDialogItem(16, '16 Uhr'),
-      MultiSelectDialogItem(17, '17 Uhr'),
-      MultiSelectDialogItem(19, '19 Uhr'),
-      MultiSelectDialogItem(20, '20 Uhr'),
-    ];
+    final List<MultiSelectDialogItem> items = [];
 
+    for(int i = 0; i <24; i ++ ){
+      items.add(MultiSelectDialogItem(i, i.toString() + ' Uhr'));
+    }
     final setResult = await showDialog<Set<int>>(
       context: context,
       builder: (BuildContext context) {
         return MultiSelectDialog(
           items: items,
-          initialSelectedValues: [9, 12, 18, 21].toSet(),
+          initialSelectedValues: [9, 12, 18].toSet(),
         );
       },
     );
@@ -357,8 +348,11 @@ class _CalendarState extends State<Calendar> {
                     builder: (BuildContext context, StateSetter setState) {
               return Form(
                   key: _formKey,
-                  child: Wrap(
-                   // crossAxisAlignment: CrossAxisAlignment.start,
+                  child: SingleChildScrollView(
+                      child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       DropdownButton<String>(
                           value: selectedMed,
@@ -376,7 +370,6 @@ class _CalendarState extends State<Calendar> {
                             );
                           }).toList()),
                       SizedBox(height: 20),
-
                       InkWell(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -419,23 +412,11 @@ class _CalendarState extends State<Calendar> {
                           }
                           return null;
                         },
-                        decoration: InputDecoration(
-                            labelText: 'Einnahmedauer*'),
+                        decoration:
+                            InputDecoration(labelText: 'Einnahmedauer*'),
                         keyboardType: TextInputType.number,
                         controller: day_duration,
                       ),
-                      // TextFormField(
-                      //   validator: (value) {
-                      //     if (value.isEmpty) {
-                      //       return 'Please enter some text';
-                      //     }
-                      //     return null;
-                      //   },
-                      //   decoration:
-                      //       InputDecoration(labelText: 'Medikament Name *'),
-                      //   controller: name_medical,
-                      // ),
-
                       SizedBox(height: 20),
                       TextFormField(
                         validator: (value) {
@@ -452,82 +433,74 @@ class _CalendarState extends State<Calendar> {
                         decoration: InputDecoration(labelText: 'Notizen'),
                         controller: note,
                       ),
-                      Container(
-                        child: RaisedButton(
-                          child: Text('Wählen Sie Uhrzeit'),
-                          onPressed: () {
-                            _showMultiSelect(context);
-                          },
-                        ),
+                      SizedBox(height: 20),
+                      InkWell(
+                        child: Text('Wählen Sie Uhrzeit'),
+                        onTap: () {
+                          _showMultiSelect(context);
+                        },
                       ),
-                      Container(
-                          margin: new EdgeInsets.symmetric(horizontal: 80.0),
-                          child: FlatButton(
-                            color: Colors.teal,
-                            child: Text(
-                              "Hinzufügen",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            onPressed: () {
-                              if (_formKey.currentState.validate()) {
-                                _formKey.currentState.save();
+                      SizedBox(height: 20),
+                      FlatButton(
+                        color: Colors.teal,
+                        child: Text(
+                          "Hinzufügen",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onPressed: () {
+                          if (_formKey.currentState.validate()) {
+                            _formKey.currentState.save();
 
-                                if (note.text != null) {
-                                  _eventController.text = /*name_medical.text*/ selectedMed +
-                                      "-- " +
-                                      dosage.text +
-                                      "--" +
-                                      note.text;
-                                } else {
-                                  _eventController.text =
-                                      /*name_medical.text*/ selectedMed +
-                                          "--" +
-                                          dosage.text;
-                                }
-                                if (_eventController.text != null &&
-                                    _eventController.text != "") {
-                                  // DateTime time_anfang = _controller.selectedDay;
+                            if (note.text != null) {
+                              _eventController.text = selectedMed +
+                                  "-- " +
+                                  dosage.text +
+                                  "--" +
+                                  note.text;
+                            } else {
+                              _eventController.text =
+                                  selectedMed + "--" + dosage.text;
+                            }
+                            if (_eventController.text != null &&
+                                _eventController.text != "") {
+                              // DateTime time_anfang = _controller.selectedDay;
 
-                                  setState(() {
-                                    for (int i = 0;
-                                        i <= int.parse(day_duration.text);
-                                        i++) {
-                                     
-                                      DateTime nextDay =
-                                          beginDate.add(new Duration(days: i));
-                                      if (_events[nextDay] != null) {
+                              setState(() {
+                                for (int i = 0;
+                                    i <= int.parse(day_duration.text);
+                                    i++) {
+                                  DateTime nextDay =
+                                      beginDate.add(new Duration(days: i));
+                                  if (_events[nextDay] != null) {
+                                    _events[nextDay].add(_eventController.text);
+                                  } else {
+                                    _events[nextDay] = [_eventController.text];
+                                  }
+
+                                  prefs.setString('events',
+                                      json.encode(encodeMap(_events)));
+                                  if (selectedTimes != null) {
+                                    scheduleNotification(
+                                        nextDay,
                                         _events[nextDay]
-                                            .add(_eventController.text);
-                                      } else {
-                                        _events[nextDay] = [
-                                          _eventController.text
-                                        ];
-                                      }
-
-                                      prefs.setString('events',
-                                          json.encode(encodeMap(_events)));
-                                      if (selectedTimes != null) {
-                                        scheduleNotification(
-                                            nextDay,
-                                            _events[nextDay]
-                                                .indexOf(_eventController.text),
-                                            selectedTimes,
-                                            _eventController.toString());
-                                      }
-                                    }
-                                    _eventController.clear();
-                                    Navigator.pop(context);
-                                  });
-                                  //name_medical.clear();
-                                  dosage.clear();
-                                  note.clear();
-                                  day_duration.clear();
+                                            .indexOf(_eventController.text),
+                                        selectedTimes,
+                                        _eventController.toString());
+                                  }
                                 }
-                              }
-                            },
-                          )),
+                                _eventController.clear();
+                                Navigator.pop(context);
+                              });
+                              //name_medical.clear();
+                              dosage.clear();
+                              note.clear();
+                              day_duration.clear();
+                            }
+                          }
+                        },
+                      ),
                     ],
-                  ));
+                  )));
             })));
   }
 }

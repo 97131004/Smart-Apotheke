@@ -52,7 +52,6 @@ class _MedSearchState extends State<MedSearch> {
     return Scaffold(
         appBar: AppBar(
           title: Text('Medikament suchen'),
-          backgroundColor: Colors.green,
         ),
         body: Column(
           children: <Widget>[
@@ -62,16 +61,12 @@ class _MedSearchState extends State<MedSearch> {
                     autofocus: true,
                     onSubmitted: search,
                     decoration: new InputDecoration(
-                     focusedBorder: InputBorder.none,
                       hintText: 'Name / PZN',
                       prefixIcon: const Icon(
-                        
                         Icons.search,
-                        color: Colors.green
                       ),
                     ))),
             SizedBox(height: 10),
-            //if (getSearchDone)
             Expanded(
               child: PagewiseListView(
                 pageLoadController: plc,
@@ -99,7 +94,7 @@ class _MedSearchState extends State<MedSearch> {
                         'Fehler beim Suchen.\n' +
                             'Prüfen Sie Ihre Internetverbindung.\n' +
                             'Bitte gehen Sie zurück und versuchen es erneut.',
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(color: Theme.of(context).errorColor),
                       ),
                     ],
                   );

@@ -56,7 +56,7 @@ class MedList {
       Function(Med) onButtonDelete) {
     return ExpansionTile(
       key: new PageStorageKey<Key>(item.key),
-      backgroundColor: Colors.yellow, //background color when selected
+      backgroundColor: Colors.red[100], //background color when selected
       title: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +92,7 @@ class MedList {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Beipackzettel anzeigen',
-                style: TextStyle(fontSize: 16),
+                style: Theme.of(context).textTheme.body2,
               ),
             ),
             onPressed: () {
@@ -112,7 +112,7 @@ class MedList {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Bestellen',
-                style: TextStyle(fontSize: 16),
+                style: Theme.of(context).textTheme.body2,
               ),
             ),
             onPressed: () {
@@ -132,7 +132,7 @@ class MedList {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Löschen',
-                style: TextStyle(fontSize: 16),
+                style: Theme.of(context).textTheme.body2,
               ),
             ),
             onPressed: () {

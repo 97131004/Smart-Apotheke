@@ -40,7 +40,8 @@ class _PersonalState extends State<Personal> {
     String iban = await PersonalData.getIban();
     if (iban != '') {
       setState(() {
-        lasofIban = iban.substring(iban.length - 3<0?0:iban.length-3, iban.length);
+        lasofIban = iban.substring(
+            iban.length - 3 < 0 ? 0 : iban.length - 3, iban.length);
       });
     }
     List<String> adresse = await PersonalData.getadresse();
@@ -61,7 +62,6 @@ class _PersonalState extends State<Personal> {
       child: Scaffold(
         appBar: AppBar(
           title: Text('Persönliche Daten'),
-          backgroundColor: Colors.green[600]
         ),
         body: ListView(
           children: <Widget>[
@@ -95,27 +95,30 @@ class _PersonalState extends State<Personal> {
 
   void showToast(String msg) {
     Fluttertoast.showToast(
-        msg: msg,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.greenAccent,
-        textColor: Colors.black,
-        timeInSecForIos: 1,
-        fontSize: 16.0);
+      msg: msg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Theme.of(context).primaryColor,
+      textColor: Colors.white,
+      timeInSecForIos: 1,
+      fontSize: 15,
+    );
   }
 
   void onPressedSavePassButton() async {
     bool isdone = false;
-    if (newp.text == newpW.text && newp.text != '') {
+    if (newp.text == newpW.text && newp.text.length > 0) {
       isdone = await PersonalData.resetPassword(oldp.text, newp.text);
-      showToast('Passwortänderung erfolgreich!');
-      handleWillPop();
-      setState(() {
-        newp.clear();
-        newpW.clear();
-        oldp.clear();
-        status = '';
-      });
+      if (isdone) {
+        showToast('Passwortänderung erfolgreich!');
+        handleWillPop();
+        setState(() {
+          newp.clear();
+          newpW.clear();
+          oldp.clear();
+          status = '';
+        });
+      }
     }
     if (!isdone) {
       setState(() {
@@ -134,11 +137,12 @@ class _PersonalState extends State<Personal> {
       if (await PersonalData.changeIban(iban, newp.text)) {
         handleWillPop();
         showToast('Änderung von IBAN erfolgreich!');
-         String iban = await PersonalData.getIban();
-         print(iban);
+        String iban = await PersonalData.getIban();
+        print(iban);
         setState(() {
           newp.clear();
-          lasofIban = iban.substring(iban.length - 3 < 0? 0:iban.length-3, iban.length);
+          lasofIban = iban.substring(
+              iban.length - 3 < 0 ? 0 : iban.length - 3, iban.length);
           ibancontroller.clear();
           status = '';
         });
@@ -219,7 +223,7 @@ class _PersonalState extends State<Personal> {
           },
         ),
         ListTile(
-          title: Text('Adresse ändern'),
+          title: Text('Name und Adresse ändern'),
           trailing: Icon(Icons.keyboard_arrow_right),
           onTap: () {
             setState(() {
@@ -268,7 +272,7 @@ class _PersonalState extends State<Personal> {
           SizedBox(height: 20),
           Text(
             status,
-            style: TextStyle(color: Colors.red),
+            style: TextStyle(color: Theme.of(context).errorColor),
           )
         ],
       ),
@@ -324,7 +328,7 @@ class _PersonalState extends State<Personal> {
           SizedBox(height: 20),
           Text(
             status,
-            style: TextStyle(color: Colors.red),
+            style: TextStyle(color: Theme.of(context).errorColor),
           )
         ],
       ),
@@ -340,12 +344,14 @@ class _PersonalState extends State<Personal> {
         children: <Widget>[
           Text('Aktuelles Passwort:'),
           TextField(
+            obscureText: true,
             controller: oldp,
             decoration: InputDecoration(hintText: passHintText),
           ),
           SizedBox(height: 20),
           Text('Neues Passwort:'),
           TextField(
+            obscureText: true,
             controller: newp,
             decoration: InputDecoration(hintText: passHintText),
           ),
@@ -363,7 +369,7 @@ class _PersonalState extends State<Personal> {
           ),
           Text(
             status,
-            style: TextStyle(color: Colors.red),
+            style: TextStyle(color: Theme.of(context).errorColor),
           )
         ],
       ),
