@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -10,6 +8,8 @@ import 'dart:convert';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../data/globals.dart';
+import '../util/nampr.dart';
 import 'MultiSelectDialogItem.dart';
 import 'package:maph_group3/data/globals.dart';
 import 'package:maph_group3/data/med.dart';
@@ -32,34 +32,24 @@ class _CalendarState extends State<Calendar> {
   CalendarController _controller;
   Map<DateTime, List<dynamic>> _events;
   List<dynamic> _selectedEvents;
-  List<int> selectedTimes ;
+  List<int> selectedTimes;
   TextEditingController _eventController;
   SharedPreferences prefs;
+  String selectedMed;
 
   // variables are in the calendar form
   TextEditingController day_duration = new TextEditingController();
   // TextEditingController name_medical = new TextEditingController();
   TextEditingController dosage = new TextEditingController();
   TextEditingController note = new TextEditingController();
-  List _myclock; //for multiple select o' clock
 
   @override
   void initState() {
     super.initState();
-    _controller = CalendarController();
-    _eventController = TextEditingController();
     _events = {};
     _selectedEvents = [];
     initPrefs();
-
-    day_duration = TextEditingController();
-    // name_medical = TextEditingController();
-    note = TextEditingController();
-    dosage = TextEditingController();
-    _myclock = [];
-
-    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    selectedTimes = [8,14,20];
+    selectedTimes = [8, 14, 20];
   }
 
   initializeNotifications() async {
@@ -108,7 +98,6 @@ class _CalendarState extends State<Calendar> {
 
   void removeNotification(
       int year, int month, int day, int event_index, List list_hours) async {
-   
     for (int i = 0; i < list_hours.length; i++) {
       int id = generator_id_notification(
           year, month, day, event_index, list_hours[i]);
@@ -310,48 +299,53 @@ class _CalendarState extends State<Calendar> {
       DateTime first, DateTime last, CalendarFormat format) {
     print('CALLBACK: _onVisibleDaysChanged');
   }
-  
-  void _showMultiSelect(BuildContext context) async {
-    final List<MultiSelectDialogItem> items = [];
 
-    for(int i = 0; i <24; i ++ ){
+  void _showMultiSelect(BuildContext context) async {
+    final List<MultiSelectDialogItem<int>> items = [];
+
+    for (int i = 0; i < 24; i++) {
       items.add(MultiSelectDialogItem(i, i.toString() + ' Uhr'));
     }
-    final setResult = await showDialog<Set<int>>(
-      context: context,
-      builder: (BuildContext context) {
-        return MultiSelectDialog(
-          items: items,
-          initialSelectedValues: [9, 12, 18].toSet(),
-        );
-      },
-    );
+
+    final result = await Navigator.push(
+        context,
+        NoAnimationMaterialPageRoute<Set<int>>(
+            builder: (context) => MultiSelectDialog(
+                  items: items,
+                  initialSelectedValues: selectedTimes.toSet(),
+                )));
 
     setState(() {
-      if (setResult.length > 0) {
-        selectedTimes = setResult.toList();
+      if (result.length > 0) {
+        selectedTimes = result.toList();
+        selectedTimes.sort();
       }
     });
   }
 
-  String selectedMed;
+  _showTimes() {
+    List<Widget> timesWidget = [];
+    for (var item in selectedTimes) {
+      timesWidget.add(Text(item.toString() + ' Uhr'));
+    }
+    return timesWidget;
+  }
 
+  _onAddButtonClick() {}
   var beginDate;
   _showAddDialog() {
     beginDate = _controller.selectedDay;
     bool isdatepicker = false;
     showDialog(
         context: context,
-        builder: (context) => AlertDialog(content:
-                StatefulBuilder(// You need this, notice the parameters below:
-
-                    builder: (BuildContext context, StateSetter setState) {
+        builder: (context) => AlertDialog(content: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
               return Form(
                   key: _formKey,
                   child: SingleChildScrollView(
                       child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       DropdownButton<String>(
@@ -435,14 +429,19 @@ class _CalendarState extends State<Calendar> {
                       ),
                       SizedBox(height: 20),
                       InkWell(
-                        child: Text('Wählen Sie Uhrzeit'),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text('Uhrzeiten: '),
+                            Column(children: _showTimes())
+                          ],
+                        ),
                         onTap: () {
                           _showMultiSelect(context);
                         },
                       ),
                       SizedBox(height: 20),
-                      FlatButton(
-                        color: Colors.teal,
+                      RaisedButton(
                         child: Text(
                           "Hinzufügen",
                           style: TextStyle(color: Colors.white),
@@ -451,56 +450,46 @@ class _CalendarState extends State<Calendar> {
                           if (_formKey.currentState.validate()) {
                             _formKey.currentState.save();
 
-                            if (note.text != null) {
-                              _eventController.text = selectedMed +
-                                  "-- " +
-                                  dosage.text +
-                                  "--" +
-                                  note.text;
-                            } else {
-                              _eventController.text =
-                                  selectedMed + "--" + dosage.text;
-                            }
-                            if (_eventController.text != null &&
-                                _eventController.text != "") {
-                              // DateTime time_anfang = _controller.selectedDay;
+                            _eventController.text = selectedMed +
+                                "\nDosierung: " +
+                                dosage.text +
+                                "\nNote: " +
+                                note.text;
 
-                              setState(() {
-                                for (int i = 0;
-                                    i <= int.parse(day_duration.text);
-                                    i++) {
-                                  DateTime nextDay =
-                                      beginDate.add(new Duration(days: i));
-                                  if (_events[nextDay] != null) {
-                                    _events[nextDay].add(_eventController.text);
-                                  } else {
-                                    _events[nextDay] = [_eventController.text];
-                                  }
-
-                                  prefs.setString('events',
-                                      json.encode(encodeMap(_events)));
-                                  if (selectedTimes != null) {
-                                    scheduleNotification(
-                                        nextDay,
-                                        _events[nextDay]
-                                            .indexOf(_eventController.text),
-                                        selectedTimes,
-                                        _eventController.toString());
-                                  }
+                            setState(() {
+                              for (int i = 0;
+                                  i < int.parse(day_duration.text);
+                                  i++) {
+                                DateTime nextDay =
+                                    beginDate.add(new Duration(days: i));
+                                if (_events[nextDay] != null) {
+                                  _events[nextDay].add(_eventController.text);
+                                } else {
+                                  _events[nextDay] = [_eventController.text];
                                 }
-                                _eventController.clear();
-                                Navigator.pop(context);
-                              });
-                              //name_medical.clear();
-                              dosage.clear();
-                              note.clear();
-                              day_duration.clear();
-                            }
+
+                                prefs.setString(
+                                    'events', json.encode(encodeMap(_events)));
+                                if (selectedTimes != null) {
+                                  scheduleNotification(
+                                      nextDay,
+                                      _events[nextDay]
+                                          .indexOf(_eventController.text),
+                                      selectedTimes,
+                                      _eventController.toString());
+                                }
+                              }
+                            });
                           }
+                          _eventController.clear();
+                          dosage.clear();
+                          day_duration.clear();
+
+                          Navigator.of(context).pop();
                         },
                       ),
                     ],
                   )));
-            })));
+            }))).then((_)=>setState((){}));
   }
 }
