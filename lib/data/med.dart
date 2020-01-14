@@ -21,4 +21,21 @@ class Med {
     }
     this.key = UniqueKey();
   }
+
+  Med.fromJson(Map<String, dynamic> json)
+      : name = json['name'],
+        pzn = json['pzn'],
+        url = json['url'],
+        isHistory = (json['isHistory'].toLowerCase() == 'true'),
+        key = Key(json['key']);
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'pzn': pzn,
+      'url': url,
+      'isHistory': isHistory.toString(),
+      'key': key.toString(),
+    };
+  }
 }

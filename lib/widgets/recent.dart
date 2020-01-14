@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:maph_group3/util/helper.dart';
+import 'package:maph_group3/util/load_bar.dart';
 import '../util/med_list.dart';
 import '../data/globals.dart' as globals;
 import 'package:maph_group3/data/med.dart';
@@ -13,7 +15,23 @@ class Recent extends StatefulWidget {
 }
 
 class _RecentState extends State<Recent> {
+  bool getGlobalMedListDone = false;
+  List<Med> medList = [];
   _RecentState();
+
+  @override
+  void initState() {
+    super.initState();
+    getGlobalMedList();
+  }
+
+  Future getGlobalMedList() async {
+    if (this.mounted) {
+      await Helper.loadGlobalMedList();
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,9 +114,10 @@ class _RecentState extends State<Recent> {
     );
   }
 
-  void medItemDelete(Med med) {
+  void medItemDelete(Med med) async {
     setState(() {
       globals.meds.remove(med);
     });
+    await Helper.saveGlobalMedList();
   }
 }
