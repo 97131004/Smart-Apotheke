@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'helper.dart';
 
 class NoInternetAlert {
@@ -11,7 +10,9 @@ class NoInternetAlert {
         int i = 1;
         return StatefulBuilder(builder: (context, setState) {
           return WillPopScope(
-              onWillPop: () {},
+              onWillPop: () {
+                return;
+              },
               child: AlertDialog(
                 title: Text(
                     "Kein Internet " + (i > 1 ? '(' + i.toString() + ')' : '')),

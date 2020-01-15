@@ -63,6 +63,7 @@ class _MapsState extends State<Maps> {
         child: Opacity(
             opacity: 0.8,
           child: RaisedButton(
+            padding: EdgeInsets.all(10),
             onPressed: searchInSelectedArea,
             child: Row(
               children: <Widget>[
@@ -300,8 +301,6 @@ class _MapsState extends State<Maps> {
     });
   }
 
-
-
   Future<LatLng> getCenterOfMap() async {
     final devicePixelRatio = Platform.isAndroid
         ? MediaQuery.of(context).devicePixelRatio
@@ -329,7 +328,7 @@ class _MapsState extends State<Maps> {
       String oh = MapsHelper.getOpenString(place);
 
       if(colorDescriptor == null) {
-        colorDescriptor = BitmapDescriptor.hueAzure;
+        colorDescriptor = BitmapDescriptor.hueRose;
       }
       marker = Marker(
         markerId: markerId,

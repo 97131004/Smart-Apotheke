@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'widgets/home.dart';
 import 'widgets/intro.dart';
 
@@ -17,7 +16,7 @@ void main() async {
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
     runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'MAPH',
+      title: 'Smart Apotheke',
       theme: ThemeData(
         appBarTheme: AppBarTheme(color: Colors.redAccent),
         accentColorBrightness: Brightness.light,
@@ -36,7 +35,7 @@ void main() async {
           body2: TextStyle(fontSize: 16.0),
         ),
       ),
-      home: firstRun ? Intro(showOnlyEula: false) : Home(),
+      home: firstRun ? Intro() : Home(),
     ));
   });
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:maph_group3/util/helper.dart';
-import 'package:maph_group3/util/load_bar.dart';
 import '../util/med_list.dart';
 import '../data/globals.dart' as globals;
 import 'package:maph_group3/data/med.dart';
@@ -41,7 +40,7 @@ class _RecentState extends State<Recent> {
       body: (globals.meds.length > 0)
           ? MedList.build(
               context,
-              globals.meds,
+              globals.meds.reversed.toList(),
               true,
               medItemOnSwipe,
               medItemOnButtonDelete,

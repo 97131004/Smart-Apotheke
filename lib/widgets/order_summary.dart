@@ -458,7 +458,7 @@ class _OrderSummaryState extends State<OrderSummary> {
             onPressed: goToOrderConfirmed,
             child: Text(
               'Zahlungspflichtig bestellen',
-              style: TextStyle(color: Theme.of(context).primaryColor),
+              style: TextStyle(color: Theme.of(context).backgroundColor),
             ),
           ),
         ],
@@ -550,7 +550,7 @@ class _OrderSummaryState extends State<OrderSummary> {
             : 'Momentan geschlossen';
       }
       if (colorDescriptor == null) {
-        colorDescriptor = BitmapDescriptor.hueGreen;
+        colorDescriptor = BitmapDescriptor.hueRose;
       }
       marker = Marker(
         markerId: markerId,
@@ -624,7 +624,7 @@ class _OrderSummaryState extends State<OrderSummary> {
   }
 
   Future<String> getShippingAddress() async {
-    List<String> adresse = await PersonalData.getadresse();
+    List<String> adresse = await PersonalData.getAddress();
     if (adresse != null)
       setState(() {
         shippingAddress = adresse[0] +

@@ -1,12 +1,10 @@
 import 'dart:convert';
-
 import 'package:maph_group3/data/med.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import '../data/globals.dart' as globals;
-
 import 'package:http/http.dart' as http;
 
 class Helper {
@@ -103,7 +101,7 @@ class Helper {
   static void globalMedListAdd(Med m) {
     globals.meds.removeWhere((item) => item.pzn == m.pzn);
     m.isHistory = true;
-    globals.meds.insert(0, m);
+    globals.meds.add(m);
   }
 
   static Future saveGlobalMedList() async {

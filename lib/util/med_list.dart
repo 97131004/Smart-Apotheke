@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../widgets/shop.dart';
 import '../widgets/med_info.dart';
 import '../data/med.dart';
@@ -56,7 +55,7 @@ class MedList {
       Function(Med) onButtonDelete) {
     return ExpansionTile(
       key: new PageStorageKey<Key>(item.key),
-      backgroundColor: Colors.red[100], //background color when selected
+      backgroundColor: Color(0xffFFD4D4), //background color when selected
       title: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,

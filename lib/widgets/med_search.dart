@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pagewise/flutter_pagewise.dart';
-
 import '../util/no_internet_alert.dart';
 import '../util/helper.dart';
 import '../util/med_get.dart';
@@ -36,11 +35,11 @@ class _MedSearchState extends State<MedSearch> {
   }
 
   static PagewiseLoadController plc = PagewiseLoadController(
-    pageFuture: (pageIndex) {
+    pageFuture: (pageIndex) async {
       if (searchValue.length > 0) {
         getSearchDone = true;
         MedGet.getMedsPrefix(plc, pageIndex, searchValue);
-        return MedGet.getMeds(searchValue, pageIndex, pageCount);
+        return await MedGet.getMeds(searchValue, pageIndex, pageCount, true);
       }
       return null;
     },

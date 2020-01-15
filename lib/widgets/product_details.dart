@@ -80,7 +80,7 @@ class _ProductDetailsState extends State<ProductDetails> {
       children: <Widget>[
         Container(
           padding: EdgeInsets.all(10),
-          child: Text(localShopItem.name, style: TextStyle(fontSize: 30),),
+          child: Center(child: Text(localShopItem.name, style: TextStyle(fontSize: 30),),),
         ),
         Container(
           child: Column(
@@ -146,8 +146,8 @@ class _ProductDetailsState extends State<ProductDetails> {
                 Container(
                   alignment: Alignment.bottomLeft,
                   child: localShopItem.onlyAvailableOnPrescription?
-                  Icon(Icons.block, color: Theme.of(context).errorColor,) :
-                  Icon(Icons.check_circle_outline, color: Theme.of(context).primaryColor,),
+                  Icon(Icons.block, color: Colors.red,) :
+                  Icon(Icons.check_circle_outline, color: Colors.green,),
                 ),
               ],
             ),
@@ -158,14 +158,14 @@ class _ProductDetailsState extends State<ProductDetails> {
 
   Widget buildOrderCompleteContainer() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         _buildPricingContainer(),
         _buildInputField(),
         new Flexible(
           child: RaisedButton(
             onPressed: validateInputAndProceed,
-            child: Text("Bestellen", style: TextStyle(color: Theme.of(context).primaryColor),),
+            child: Text("Bestellen", style: TextStyle(color: Theme.of(context).backgroundColor),),
           ),
         ),
       ],

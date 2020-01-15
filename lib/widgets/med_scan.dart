@@ -59,6 +59,7 @@ class MedScanState extends State<MedScan> {
       setState(() {
         getMedsDone = true;
       });
+      //addings meds to recent med list
       for (int i = 0; i < widget.meds.length; i++) {
         Helper.globalMedListAdd(widget.meds[i]);
       }

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:maph_group3/util/personal_data.dart';
 import 'package:maph_group3/widgets/intro.dart';
 import '../util/nampr.dart';
 import '../widgets/personal.dart';
 import 'scanner.dart';
 import 'med_search.dart';
 import 'recent.dart';
-import 'userguide.dart';
+import 'user_guide.dart';
 import 'calendar.dart';
 
 class Home extends StatefulWidget {
@@ -21,10 +22,24 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final buttonHeight = 100.0;
   final iconSize = 32.0;
+  String firstName = '';
+  String lastName = '';
 
   @override
   void initState() {
     super.initState();
+
+    loadName();
+  }
+
+  Future loadName() async {
+    List<String> address = await PersonalData.getAddress();
+    if (address != null) {
+      setState(() {
+        firstName = address[0];
+        lastName = address[1];
+      });
+    }
   }
 
   @override
@@ -33,7 +48,9 @@ class _HomeState extends State<Home> {
         SystemUiOverlayStyle(statusBarColor: Theme.of(context).primaryColor));
     return SafeArea(
       child: WillPopScope(
-        onWillPop: () {},
+        onWillPop: () {
+          return;
+        },
         child: Scaffold(
           drawer: Drawer(
             child: ListView(
@@ -41,7 +58,7 @@ class _HomeState extends State<Home> {
               children: <Widget>[
                 DrawerHeader(
                   child: Text(
-                    '<Vorname> <Name>',
+                    firstName + ' ' + lastName,
                     style: TextStyle(color: Colors.white, fontSize: 18),
                   ),
                   decoration: BoxDecoration(
@@ -56,7 +73,11 @@ class _HomeState extends State<Home> {
                     Navigator.push(
                       context,
                       NoAnimationMaterialPageRoute(
-                          builder: (context) => Personal()),
+                          builder: (context) => Personal(
+                                funcUpdateHome: () async {
+                                  await loadName();
+                                },
+                              )),
                     );
                   },
                 ),
@@ -67,7 +88,7 @@ class _HomeState extends State<Home> {
                     Navigator.push(
                       context,
                       NoAnimationMaterialPageRoute(
-                          builder: (context) => Userguide()),
+                          builder: (context) => UserGuide()),
                     );
                   },
                 ),
@@ -75,6 +96,12 @@ class _HomeState extends State<Home> {
                   title: Text('Über uns'),
                   onTap: () {
                     Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        NoAnimationMaterialPageRoute(
+                          builder: (context) =>
+                              Intro(showOnlyPage: IntroPage.about),
+                        ));
                   },
                 ),
                 ListTile(
@@ -84,7 +111,8 @@ class _HomeState extends State<Home> {
                     Navigator.push(
                         context,
                         NoAnimationMaterialPageRoute(
-                          builder: (context) => Intro(showOnlyEula: true),
+                          builder: (context) =>
+                              Intro(showOnlyPage: IntroPage.eula),
                         ));
                   },
                 ),
