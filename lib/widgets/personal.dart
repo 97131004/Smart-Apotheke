@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart';
-
 import 'package:maph_group3/util/personal_data.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class Personal extends StatefulWidget {
-  Personal({Key key}) : super(key: key);
+  final Function funcUpdateHome;
+
+  Personal({Key key, this.funcUpdateHome}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -14,45 +14,46 @@ class Personal extends StatefulWidget {
   }
 }
 
-enum Page { home, iban, pass, addr }
+enum PersonalPage { home, iban, pass, addr }
 
 class _PersonalState extends State<Personal> {
-  Page curPage = Page.home;
+  PersonalPage curPage = PersonalPage.home;
   String passHintText = '\u2022\u2022\u2022';
   String status = '';
-  String lasofIban = '--';
-  TextEditingController oldp = new TextEditingController();
-  TextEditingController newp = new TextEditingController();
-  TextEditingController newpW = new TextEditingController();
-  TextEditingController fname = new TextEditingController();
-  TextEditingController name = new TextEditingController();
+  String lastOfIban = '−−';
+  TextEditingController oldPass = new TextEditingController();
+  TextEditingController newPass = new TextEditingController();
+  TextEditingController newPassConfirm = new TextEditingController();
+  TextEditingController firstName = new TextEditingController();
+  TextEditingController lastName = new TextEditingController();
   TextEditingController street = new TextEditingController();
-  TextEditingController postcode = new TextEditingController();
+  TextEditingController postalCode = new TextEditingController();
   TextEditingController city = new TextEditingController();
+  TextEditingController iban = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    getcurrentdata();
   }
 
-  Future getcurrentdata() async {
+  Future getIbanAdressData() async {
     String iban = await PersonalData.getIban();
     if (iban != '') {
       setState(() {
-        lasofIban = iban.substring(
-            iban.length - 3 < 0 ? 0 : iban.length - 3, iban.length);
+        lastOfIban = iban.substring(
+            iban.length - 2 < 0 ? 0 : iban.length - 2, iban.length);
       });
     }
-    List<String> adresse = await PersonalData.getadresse();
-    if (adresse != null)
+    List<String> address = await PersonalData.getAddress();
+    if (address != null) {
       setState(() {
-        fname.text = adresse[0];
-        name.text = adresse[1];
-        street.text = adresse[2];
-        postcode.text = adresse[3];
-        city.text = adresse[4];
+        firstName.text = address[0];
+        lastName.text = address[1];
+        street.text = address[2];
+        postalCode.text = address[3];
+        city.text = address[4];
       });
+    }
   }
 
   @override
@@ -63,17 +64,19 @@ class _PersonalState extends State<Personal> {
         appBar: AppBar(
           title: Text('Persönliche Daten'),
         ),
-        body: ListView(
-          children: <Widget>[
-            if (curPage == Page.home)
-              buildHome()
-            else if (curPage == Page.iban)
-              buildIban()
-            else if (curPage == Page.addr)
-              buildAddr()
-            else if (curPage == Page.pass)
-              buildPass()
-          ],
+        body: Scrollbar(
+          child: ListView(
+            children: <Widget>[
+              if (curPage == PersonalPage.home)
+                buildHome()
+              else if (curPage == PersonalPage.iban)
+                buildIban()
+              else if (curPage == PersonalPage.addr)
+                buildAddr()
+              else if (curPage == PersonalPage.pass)
+                buildPass()
+            ],
+          ),
         ),
       ),
     );
@@ -106,102 +109,116 @@ class _PersonalState extends State<Personal> {
   }
 
   void onPressedSavePassButton() async {
-    bool isdone = false;
-    if (newp.text == newpW.text && newp.text.length > 0) {
-      isdone = await PersonalData.resetPassword(oldp.text, newp.text);
-      if (isdone) {
-        showToast('Passwortänderung erfolgreich!');
+    bool isDone = false;
+    if (newPass.text == newPassConfirm.text && newPass.text.length > 0) {
+      isDone = await PersonalData.resetPassword(oldPass.text, newPass.text);
+      if (isDone) {
+        showToast('Passwortänderung erfolgreich.');
         handleWillPop();
         setState(() {
-          newp.clear();
-          newpW.clear();
-          oldp.clear();
+          newPass.clear();
+          newPassConfirm.clear();
+          oldPass.clear();
           status = '';
         });
       }
     }
-    if (!isdone) {
+    if (!isDone) {
       setState(() {
-        newp.clear();
-        newpW.clear();
-        oldp.clear();
+        newPass.clear();
+        newPassConfirm.clear();
+        oldPass.clear();
         status =
-            'Passwortänderung fehlgeschlagen. Versuchen Sie bitte nochmal!';
+            'Passwortänderung fehlgeschlagen. Versuchen Sie es bitte nochmal.';
       });
     }
   }
 
   void onPressedSaveIbanButton() async {
-    if (ibancontroller.text.isNotEmpty) {
-      String iban = ibancontroller.text;
-      if (await PersonalData.changeIban(iban, newp.text)) {
+    if (iban.text.isNotEmpty) {
+      String ibanGet = iban.text;
+      if (await PersonalData.changeIban(ibanGet, newPass.text)) {
         handleWillPop();
-        showToast('Änderung von IBAN erfolgreich!');
-        String iban = await PersonalData.getIban();
-        print(iban);
+        showToast('Änderung der IBAN erfolgreich.');
+        String ibanStr = await PersonalData.getIban();
+        print(ibanStr);
         setState(() {
-          newp.clear();
-          lasofIban = iban.substring(
-              iban.length - 3 < 0 ? 0 : iban.length - 3, iban.length);
-          ibancontroller.clear();
+          newPass.clear();
+          lastOfIban = ibanStr.substring(
+              ibanStr.length - 2 < 0 ? 0 : ibanStr.length - 2, ibanStr.length);
+          iban.clear();
           status = '';
         });
       } else {
         setState(() {
-          newp.clear();
-          status = 'Passwort falsch. Versuchen Sie bitte nochmal!';
+          newPass.clear();
+          status = 'Passwort ist falsch. Versuchen Sie es bitte nochmal.';
         });
       }
     } else {
       setState(() {
-        status = 'Geben Sie bitte IBAN ein!';
+        status = 'Geben Sie bitte eine IBAN ein.';
       });
     }
   }
 
-  void onPressedSaveAdresseButton() async {
-    if (fname.text.isEmpty ||
-        name.text.isEmpty ||
+  void onPressedSaveAddressButton() async {
+    if (firstName.text.isEmpty ||
+        lastName.text.isEmpty ||
         street.text.isEmpty ||
-        postcode.text.isEmpty ||
+        postalCode.text.isEmpty ||
         city.text.isEmpty) {
       setState(() {
-        status = "Bitte alle Felder ausfüllen";
+        status = "Bitte alle Felder ausfüllen.";
       });
     } else {
       List<String> adresse = [
-        fname.text,
-        name.text,
+        firstName.text,
+        lastName.text,
         street.text,
-        postcode.text,
+        postalCode.text,
         city.text
       ];
-      if (await PersonalData.changeadresse(adresse, newp.text)) {
-        showToast('Änderung von Adresse erfolgreich!');
+      if (await PersonalData.changeAddress(adresse, newPass.text)) {
+        showToast('Änderung der Adresse erfolgreich.');
+        if (widget.funcUpdateHome != null) {
+          widget.funcUpdateHome();
+        }
         setState(() {
-          newp.clear();
+          newPass.clear();
           status = '';
         });
         handleWillPop();
       } else {
         setState(() {
-          newp.clear();
-          status = 'Passwort falsch. Versuchen Sie bitte nochmal!';
+          newPass.clear();
+          status = 'Passwort ist falsch. Versuchen Sie es bitte nochmal.';
         });
       }
     }
   }
 
   Future<bool> handleWillPop() async {
+    status = '';
+    newPass.clear();
+    newPassConfirm.clear();
+    oldPass.clear();
+    firstName.clear();
+    lastName.clear();
+    street.clear();
+    postalCode.clear();
+    city.clear();
+    iban.clear();
+
     switch (curPage) {
-      case Page.home:
+      case PersonalPage.home:
         Navigator.pop(context);
         break;
-      case Page.pass:
-      case Page.iban:
-      case Page.addr:
+      case PersonalPage.pass:
+      case PersonalPage.iban:
+      case PersonalPage.addr:
         setState(() {
-          curPage = Page.home;
+          curPage = PersonalPage.home;
         });
         break;
     }
@@ -217,8 +234,9 @@ class _PersonalState extends State<Personal> {
           title: Text('IBAN ändern'),
           trailing: Icon(Icons.keyboard_arrow_right),
           onTap: () {
+            getIbanAdressData();
             setState(() {
-              curPage = Page.iban;
+              curPage = PersonalPage.iban;
             });
           },
         ),
@@ -226,8 +244,9 @@ class _PersonalState extends State<Personal> {
           title: Text('Name und Adresse ändern'),
           trailing: Icon(Icons.keyboard_arrow_right),
           onTap: () {
+            getIbanAdressData();
             setState(() {
-              curPage = Page.addr;
+              curPage = PersonalPage.addr;
             });
           },
         ),
@@ -236,7 +255,7 @@ class _PersonalState extends State<Personal> {
           trailing: Icon(Icons.keyboard_arrow_right),
           onTap: () {
             setState(() {
-              curPage = Page.pass;
+              curPage = PersonalPage.pass;
             });
           },
         ),
@@ -244,7 +263,6 @@ class _PersonalState extends State<Personal> {
     );
   }
 
-  TextEditingController ibancontroller = TextEditingController();
   Widget buildIban() {
     return Padding(
       padding: EdgeInsets.all(16),
@@ -252,18 +270,19 @@ class _PersonalState extends State<Personal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Text('Aktuelle IBAN endet auf ' + lasofIban),
+          Text('Aktuelle IBAN endet auf ' + lastOfIban),
           SizedBox(height: 20),
-          Text('Neue IBAN:'),
+          Text('Neue IBAN: *'),
           TextField(
-            controller: ibancontroller,
+            controller: iban,
             decoration:
                 InputDecoration(hintText: 'XXXX XXXX XXXX XXXX XXXX XX'),
+            keyboardType: TextInputType.number,
           ),
           SizedBox(height: 20),
-          Text('Zur Bestätigung aktuelles Passwort eingeben:'),
+          Text('Zur Bestätigung aktuelles Passwort eingeben: *'),
           TextField(
-            controller: newp,
+            controller: newPass,
             obscureText: true,
             decoration: InputDecoration(hintText: passHintText),
           ),
@@ -286,45 +305,45 @@ class _PersonalState extends State<Personal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Text('Vorname:'),
+          Text('Vorname: *'),
           TextField(
-            controller: fname,
+            controller: firstName,
             decoration: InputDecoration(hintText: 'Max'),
           ),
           SizedBox(height: 20),
-          Text('Name:'),
+          Text('Name: *'),
           TextField(
-            controller: name,
+            controller: lastName,
             decoration: InputDecoration(hintText: 'Mustermann'),
           ),
           SizedBox(height: 20),
-          Text('Straße:'),
+          Text('Straße: *'),
           TextField(
             controller: street,
             decoration: InputDecoration(hintText: 'Musterstr. 123'),
           ),
           SizedBox(height: 20),
-          Text('Postleitzahl:'),
+          Text('Postleitzahl: *'),
           TextField(
             keyboardType: TextInputType.number,
-            controller: postcode,
+            controller: postalCode,
             decoration: InputDecoration(hintText: '12345'),
           ),
           SizedBox(height: 20),
-          Text('Stadt:'),
+          Text('Stadt: *'),
           TextField(
             controller: city,
             decoration: InputDecoration(hintText: 'Musterstadt'),
           ),
           SizedBox(height: 20),
-          Text('Zur Bestätigung aktuelles Passwort eingeben:'),
+          Text('Zur Bestätigung aktuelles Passwort eingeben: *'),
           TextField(
-            controller: newp,
+            controller: newPass,
             obscureText: true,
             decoration: InputDecoration(hintText: passHintText),
           ),
           SizedBox(height: 20),
-          buildSaveButton(() => onPressedSaveAdresseButton()),
+          buildSaveButton(() => onPressedSaveAddressButton()),
           SizedBox(height: 20),
           Text(
             status,
@@ -342,24 +361,24 @@ class _PersonalState extends State<Personal> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Text('Aktuelles Passwort:'),
+          Text('Aktuelles Passwort: *'),
           TextField(
             obscureText: true,
-            controller: oldp,
+            controller: oldPass,
             decoration: InputDecoration(hintText: passHintText),
           ),
           SizedBox(height: 20),
-          Text('Neues Passwort:'),
+          Text('Neues Passwort: *'),
           TextField(
             obscureText: true,
-            controller: newp,
+            controller: newPass,
             decoration: InputDecoration(hintText: passHintText),
           ),
           SizedBox(height: 20),
-          Text('Neues Passwort wiederholen:'),
+          Text('Neues Passwort wiederholen: *'),
           TextField(
             obscureText: true,
-            controller: newpW,
+            controller: newPassConfirm,
             decoration: InputDecoration(hintText: passHintText),
           ),
           SizedBox(height: 20),

@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:steel_crypt/steel_crypt.dart';
 import '../util/helper.dart';
 
@@ -15,14 +14,14 @@ class PersonalData {
     return addr != '' && iban != '';
   }
 
-  static Future<bool> isPasswordExists() async {
+  static Future<bool> passwordExists() async {
     final value = await Helper.readDataFromsp(keyPassword);
     //print('read: $value');
     if (value != '') return true;
     return false;
   }
 
-  static Future setpassword(String password) async {
+  static Future setPassword(String password) async {
     String hash = hasher.hash(password);
     Helper.writeDatatoSp(keyPassword, hash);
   }
@@ -35,7 +34,7 @@ class PersonalData {
 
   static Future<bool> resetPassword(String oldp, String newp) async {
     if (await checkPassword(oldp)) {
-      await setpassword(newp);
+      await setPassword(newp);
       return true;
     }
     return false;
@@ -50,7 +49,7 @@ class PersonalData {
     return false;
   }
 
-  static Future<bool> changeadresse(
+  static Future<bool> changeAddress(
       List<String> adresse, String password) async {
     if (await checkPassword(password)) {
       String _adresse = adresse.join('?').toString();
@@ -69,7 +68,7 @@ class PersonalData {
       return '';
   }
 
-  static Future<List<String>> getadresse() async {
+  static Future<List<String>> getAddress() async {
     String adresseencrypted = await Helper.readDataFromsp(keyadresse);
     if (adresseencrypted.isNotEmpty)
       return (await decrypt(adresseencrypted)).split('?');
@@ -77,19 +76,19 @@ class PersonalData {
   }
 
   static Future<String> encrypt(String text) async {
-    var FortunaKey  = CryptKey().genFortuna();
+    var fortunaKey = CryptKey().genFortuna();
     var iv2 = CryptKey().genDart(12);
-    var encrypter3 = AesCrypt(FortunaKey , 'cbc', 'iso10126-2');
+    var encrypter3 = AesCrypt(fortunaKey, 'cbc', 'iso10126-2');
     String en = encrypter3.encrypt(text, iv2);
-    return FortunaKey + " " + iv2 + " " + en;
+    return fortunaKey + " " + iv2 + " " + en;
   }
 
   static Future<String> decrypt(String encrypted) async {
     List<String> enc = encrypted.split(" ");
-    String FortunaKey = enc[0];
+    String fortunaKey = enc[0];
     String iv2 = enc[1];
     encrypted = enc[2];
-    var encrypter3 = AesCrypt(FortunaKey , 'cbc', 'iso10126-2');
+    var encrypter3 = AesCrypt(fortunaKey, 'cbc', 'iso10126-2');
     return encrypter3.decrypt(encrypted, iv2);
   }
 }

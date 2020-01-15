@@ -624,7 +624,7 @@ class _OrderSummaryState extends State<OrderSummary> {
   }
 
   Future<String> getShippingAddress() async {
-    List<String> adresse = await PersonalData.getadresse();
+    List<String> adresse = await PersonalData.getAddress();
     if (adresse != null)
       setState(() {
         shippingAddress = adresse[0] +

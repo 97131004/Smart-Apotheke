@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'widgets/home.dart';
 import 'widgets/intro.dart';
 
@@ -36,7 +35,7 @@ void main() async {
           body2: TextStyle(fontSize: 16.0),
         ),
       ),
-      home: firstRun ? Intro(showOnlyEula: false) : Home(),
+      home: firstRun ? Intro() : Home(),
     ));
   });
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:html/dom.dart' as dom;
-
 import '../util/helper.dart';
 import '../util/no_internet_alert.dart';
 import '../util/med_get.dart';
@@ -26,9 +25,6 @@ class _MedInfoState extends State<MedInfo> {
   List<GlobalKey> scrollKeys;
   ScrollController scrollController;
   double titleSize = 24;
-  double linkSize = 16;
-  double subtitleSize = 16;
-  double textSize = 14;
   double varSize = 0;
   bool varSizeLoaded = false;
   String keyMedInfoTextSize = 'medInfoTextSize';
@@ -209,7 +205,9 @@ class _MedInfoState extends State<MedInfo> {
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
-                            fontSize: subtitleSize + varSize,
+                            fontSize:
+                                Theme.of(context).textTheme.body2.fontSize +
+                                    varSize,
                           ),
                         )
                       ]);
@@ -217,18 +215,19 @@ class _MedInfoState extends State<MedInfo> {
                   //title
                   String html = node.innerHtml;
                   if (html.length > 0 && html[0] == ' ') {
-                    node.innerHtml =
-                        html.replaceFirst(new RegExp(r"^\s+"), '') +
-                            ' (PZN: ' +
-                            widget.med.pzn +
-                            ')';
+                    node.innerHtml = html
+                            .replaceAll('Patienteninformation für', '')
+                            .replaceFirst(new RegExp(r"^\s+"), '') +
+                        ' (PZN: ' +
+                        widget.med.pzn +
+                        ')';
                   }
                   return DefaultTextStyle(
                     child: Column(children: children),
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
-                      fontSize: titleSize,
+                      fontSize: titleSize + varSize,
                     ),
                   );
                 } else if (node.className == 'accordion') {
@@ -240,7 +239,8 @@ class _MedInfoState extends State<MedInfo> {
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
-                        fontSize: linkSize + varSize,
+                        fontSize: Theme.of(context).textTheme.body2.fontSize +
+                            varSize,
                       ),
                     ),
                   );
@@ -260,7 +260,8 @@ class _MedInfoState extends State<MedInfo> {
                     child: Column(children: children),
                     style: TextStyle(
                       color: Colors.black,
-                      fontSize: textSize + varSize,
+                      fontSize:
+                          Theme.of(context).textTheme.body2.fontSize + varSize,
                     ),
                   );
                 }
