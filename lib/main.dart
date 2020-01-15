@@ -36,7 +36,7 @@ void main() async {
           body2: TextStyle(fontSize: 16.0),
         ),
       ),
-      home: firstRun ? Intro() : Home(),
+      home: firstRun ? Intro(showOnlyEula: false) : Home(),
     ));
   });
 }

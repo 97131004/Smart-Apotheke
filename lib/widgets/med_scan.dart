@@ -59,6 +59,10 @@ class MedScanState extends State<MedScan> {
       setState(() {
         getMedsDone = true;
       });
+      for (int i = 0; i < widget.meds.length; i++) {
+        Helper.globalMedListAdd(widget.meds[i]);
+      }
+      await Helper.saveGlobalMedList();
     }
   }
 
@@ -106,7 +110,7 @@ class MedScanState extends State<MedScan> {
             return Column(
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.only(top: 20),
                   child: Text('Keine Medikamente gefunden.'),
                 ),
               ],
@@ -117,7 +121,7 @@ class MedScanState extends State<MedScan> {
             //last item
             return Column(
               children: <Widget>[
-                SizedBox(height: 10),
+                SizedBox(height: 20),
                 ButtonTheme(
                   buttonColor: Theme.of(context).buttonColor,
                   minWidth: MediaQuery.of(context).size.width * 0.75,
@@ -147,7 +151,7 @@ class MedScanState extends State<MedScan> {
                         style: TextStyle(color: Colors.white)),
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 20),
               ],
             );
           }

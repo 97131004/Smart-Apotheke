@@ -154,7 +154,7 @@ class _MedInfoState extends State<MedInfo> {
           ),
           ButtonTheme(
             buttonColor: Theme.of(context).buttonColor,
-            minWidth: MediaQuery.of(context).size.width * 0.5,
+            minWidth: MediaQuery.of(context).size.width * 0.75,
             height: 50.0,
             child: RaisedButton.icon(
               onPressed: getMedInfoDataInit,

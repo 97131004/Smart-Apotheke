@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:maph_group3/widgets/intro.dart';
 import '../util/nampr.dart';
 import '../widgets/personal.dart';
 import 'scanner.dart';
@@ -80,13 +81,11 @@ class _HomeState extends State<Home> {
                   title: Text('Datenschutzerklärung'),
                   onTap: () {
                     Navigator.pop(context);
-                    /*
-                  Navigator.push(
-                    context,
-                    NoAnimationMaterialPageRoute(
-                        builder: (context) => Datenschutz()),
-                  );
-                  */
+                    Navigator.push(
+                        context,
+                        NoAnimationMaterialPageRoute(
+                          builder: (context) => Intro(showOnlyEula: true),
+                        ));
                   },
                 ),
               ],
@@ -268,7 +267,7 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               )
             ],

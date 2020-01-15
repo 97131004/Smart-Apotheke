@@ -11,6 +11,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'home.dart';
 
 class Intro extends StatefulWidget {
+  final bool showOnlyEula;
+
+  Intro({Key key, @required this.showOnlyEula}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return _IntroState();
@@ -35,6 +39,12 @@ class _IntroState extends State<Intro> {
   void initState() {
     super.initState();
     loadEula();
+
+    if (widget.showOnlyEula != null && widget.showOnlyEula) {
+      setState(() {
+        curPage = Page.eula;
+      });
+    }
   }
 
   @override
@@ -56,11 +66,15 @@ class _IntroState extends State<Intro> {
   }
 
   Future<bool> handleWillPop() async {
-    if (curPage == Page.eula) {
-      setState(() {
-        appBarText = Text('');
-        curPage = Page.title;
-      });
+    if (widget.showOnlyEula == null || !widget.showOnlyEula) {
+      if (curPage == Page.eula) {
+        setState(() {
+          appBarText = Text('');
+          curPage = Page.title;
+        });
+      }
+    } else {
+      Navigator.pop(context);
     }
     return false;
   }
