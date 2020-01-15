@@ -458,7 +458,7 @@ class _OrderSummaryState extends State<OrderSummary> {
             onPressed: goToOrderConfirmed,
             child: Text(
               'Zahlungspflichtig bestellen',
-              style: TextStyle(color: Theme.of(context).primaryColor),
+              style: TextStyle(color: Theme.of(context).backgroundColor),
             ),
           ),
         ],
@@ -550,7 +550,7 @@ class _OrderSummaryState extends State<OrderSummary> {
             : 'Momentan geschlossen';
       }
       if (colorDescriptor == null) {
-        colorDescriptor = BitmapDescriptor.hueGreen;
+        colorDescriptor = BitmapDescriptor.hueRose;
       }
       marker = Marker(
         markerId: markerId,

@@ -140,7 +140,7 @@ class _ShopState extends State<Shop> {
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                   colors: [
-                    Theme.of(context).primaryColor,
+                    Theme.of(context).accentColor,
                     Theme.of(context).backgroundColor
                   ]),
             ),
