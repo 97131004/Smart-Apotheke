@@ -16,7 +16,7 @@ void main() async {
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
     runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'MAPH',
+      title: 'Smart Apotheke',
       theme: ThemeData(
         appBarTheme: AppBarTheme(color: Colors.redAccent),
         accentColorBrightness: Brightness.light,

@@ -216,6 +216,8 @@ class _MedInfoState extends State<MedInfo> {
                   String html = node.innerHtml;
                   if (html.length > 0 && html[0] == ' ') {
                     node.innerHtml = html
+                            .replaceAll('?', '')
+                            .replaceAll('"', "")
                             .replaceAll('Patienteninformation für', '')
                             .replaceFirst(new RegExp(r"^\s+"), '') +
                         ' (PZN: ' +
