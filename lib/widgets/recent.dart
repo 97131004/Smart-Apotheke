@@ -5,21 +5,20 @@ import 'package:maph_group3/data/med.dart';
 import '../util/nampr.dart';
 import 'scanner.dart';
 
-class DummyMedList extends StatefulWidget {
+class Recent extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return _DummyMedListState();
+    return _RecentState();
   }
 }
 
-class _DummyMedListState extends State<DummyMedList> {
-  _DummyMedListState();
+class _RecentState extends State<Recent> {
+  _RecentState();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Medikamente Liste'),
-        backgroundColor: Colors.green,
+        title: Text('Verlauf'),
       ),
       body: (globals.meds.length > 0)
           ? MedList.build(

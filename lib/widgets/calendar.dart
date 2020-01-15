@@ -313,8 +313,10 @@ class _CalendarState extends State<Calendar> {
     );
 
     setState(() {
-      if(setResult.length > 0){
-        selectedValues = setResult.toList();
+      if(setResult != null){
+        if(setResult.length > 0){
+          selectedValues = setResult.toList();
+        }
       }
     });
   }
