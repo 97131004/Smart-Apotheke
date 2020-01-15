@@ -29,11 +29,11 @@ class _CalendarState extends State<Calendar> {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       new FlutterLocalNotificationsPlugin();
 
-  CalendarController _controller;
+  CalendarController _controller = CalendarController();
   Map<DateTime, List<dynamic>> _events;
   List<dynamic> _selectedEvents;
   List<int> selectedTimes;
-  TextEditingController _eventController;
+  TextEditingController _eventController = TextEditingController();
   SharedPreferences prefs;
   String selectedMed;
 
@@ -481,9 +481,9 @@ class _CalendarState extends State<Calendar> {
                               }
                             });
                           }
-                          _eventController.clear();
-                          dosage.clear();
-                          day_duration.clear();
+                          _eventController.text = '';
+                          dosage.text = '';
+                          day_duration.text= '';
 
                           Navigator.of(context).pop();
                         },
