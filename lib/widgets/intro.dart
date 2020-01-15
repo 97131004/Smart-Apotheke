@@ -20,13 +20,17 @@ class Intro extends StatefulWidget {
   }
 }
 
-enum IntroPage { about, eula, pass }
+enum IntroPage { about, privacy, eula, pass }
 
 class _IntroState extends State<Intro> {
   IntroPage curPage = IntroPage.about;
+  String privacyText = 'Datenschutzerklärung';
+  String privacyHtml = '';
+  String privacyPath = 'assets/files/privacy_policy.html';
+  String eulaText = 'Nutzungsbedingungen';
   String eulaHtml = '';
-  String eulaPath = 'assets/files/privacy_policy.html';
-  bool eulaChecked = false;
+  String eulaPath = 'assets/files/eula.html';
+  bool agreementChecked = false;
   String passHintText = '\u2022\u2022\u2022';
   TextEditingController newPass = new TextEditingController();
   TextEditingController newPassConfirm = new TextEditingController();
@@ -37,7 +41,7 @@ class _IntroState extends State<Intro> {
   @override
   void initState() {
     super.initState();
-    loadEula();
+    loadEulaPrivacy();
 
     if (widget.showOnlyPage != null) {
       setState(() {
@@ -61,15 +65,19 @@ class _IntroState extends State<Intro> {
           ),
           body: (curPage == IntroPage.about)
               ? buildTitle()
-              : (curPage == IntroPage.eula)
-                  ? buildEula()
-                  : (curPage == IntroPage.pass) ? buildPass() : buildTitle()),
+              : (curPage == IntroPage.privacy)
+                  ? buildEulaPrivacy(false)
+                  : (curPage == IntroPage.eula)
+                      ? buildEulaPrivacy(true)
+                      : (curPage == IntroPage.pass)
+                          ? buildPass()
+                          : buildTitle()),
     );
   }
 
   Future<bool> handleWillPop() async {
     if (widget.showOnlyPage == null) {
-      if (curPage == IntroPage.eula) {
+      if (curPage == IntroPage.privacy || curPage == IntroPage.eula) {
         setState(() {
           appBarText = Text('');
           curPage = IntroPage.about;
@@ -120,10 +128,10 @@ class _IntroState extends State<Intro> {
                         title: RichText(
                             text: TextSpan(children: <TextSpan>[
                           TextSpan(
-                              text: "Ich habe die ",
+                              text: "Ich stimme den ",
                               style: Theme.of(context).textTheme.body1),
                           TextSpan(
-                            text: 'Datenschutzerklärung',
+                            text: eulaText,
                             style: TextStyle(
                               fontSize:
                                   Theme.of(context).textTheme.body1.fontSize,
@@ -133,21 +141,40 @@ class _IntroState extends State<Intro> {
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 setState(() {
-                                  appBarText = Text('Datenschutzerklärung');
+                                  appBarText = Text(eulaText);
                                   curPage = IntroPage.eula;
                                 });
                               },
                           ),
                           TextSpan(
-                              text: " durchgelesen und stimme ihr zu.",
+                              text: " und der ",
+                              style: Theme.of(context).textTheme.body1),
+                          TextSpan(
+                            text: privacyText,
+                            style: TextStyle(
+                              fontSize:
+                                  Theme.of(context).textTheme.body1.fontSize,
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                setState(() {
+                                  appBarText = Text(privacyText);
+                                  curPage = IntroPage.privacy;
+                                });
+                              },
+                          ),
+                          TextSpan(
+                              text: " zu.",
                               style: Theme.of(context).textTheme.body1),
                         ])),
-                        value: eulaChecked,
+                        value: agreementChecked,
                         onChanged: (bool value) {
                           setState(() {
-                            eulaChecked = value;
+                            agreementChecked = value;
                           });
-                          if (eulaChecked) {
+                          if (agreementChecked) {
                             Future.delayed(Duration(milliseconds: 300), () {
                               setState(() {
                                 appBarText = Text('Passwort setzen');
@@ -164,20 +191,21 @@ class _IntroState extends State<Intro> {
     );
   }
 
-  void loadEula() async {
+  void loadEulaPrivacy() async {
+    privacyHtml = await rootBundle.loadString(privacyPath);
     eulaHtml = await rootBundle.loadString(eulaPath);
     setState(() {});
   }
 
-  Widget buildEula() {
+  Widget buildEulaPrivacy([bool eula = true]) {
     setState(() {
-      appBarText = Text('Datenschutzerklärung');
+      appBarText = Text(eula ? eulaText : privacyText);
     });
     return Scrollbar(
       child: ListView(
         children: <Widget>[
           Html(
-            data: eulaHtml,
+            data: (eula ? eulaHtml : privacyHtml),
             padding: EdgeInsets.all(8.0),
             useRichText: true,
             onLinkTap: (url) async {

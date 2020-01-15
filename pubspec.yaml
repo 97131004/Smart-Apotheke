@@ -79,6 +79,7 @@ flutter:
     - assets/userguide3.PNG
     - assets/userguide4.PNG
     - assets/files/privacy_policy.html 
+    - assets/files/eula.html 
     - assets/dummy_med.png
 
   # An image asset can refer to one or more resolution-specific "variants", see

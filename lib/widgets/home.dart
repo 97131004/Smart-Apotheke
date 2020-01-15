@@ -105,7 +105,7 @@ class _HomeState extends State<Home> {
                   },
                 ),
                 ListTile(
-                  title: Text('Datenschutzerklärung'),
+                  title: Text('Nutzungsbedingungen'),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
@@ -113,6 +113,18 @@ class _HomeState extends State<Home> {
                         NoAnimationMaterialPageRoute(
                           builder: (context) =>
                               Intro(showOnlyPage: IntroPage.eula),
+                        ));
+                  },
+                ),
+                ListTile(
+                  title: Text('Datenschutzerklärung'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        NoAnimationMaterialPageRoute(
+                          builder: (context) =>
+                              Intro(showOnlyPage: IntroPage.privacy),
                         ));
                   },
                 ),
