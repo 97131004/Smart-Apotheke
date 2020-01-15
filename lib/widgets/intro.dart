@@ -62,6 +62,13 @@ class _IntroState extends State<Intro> {
       child: Scaffold(
           appBar: AppBar(
             title: appBarText,
+            leading: (widget.showOnlyPage == null &&
+                    (curPage == IntroPage.eula || curPage == IntroPage.privacy))
+                ? IconButton(
+                    icon: Icon(Icons.arrow_back),
+                    onPressed: handleWillPop,
+                  )
+                : null,
           ),
           body: (curPage == IntroPage.about)
               ? buildTitle()
@@ -105,7 +112,8 @@ class _IntroState extends State<Intro> {
                   )),
               SizedBox(height: 15),
               Text(
-                  'Mobile Applications for Public Health\nWS 2019 / 2020\nGruppe 3\n\n' +
+                  'Hochschule für Technik und Wirtschaft Berlin\n' +
+                      'Mobile Anwendungen im Gesundheitswesen\nWS 2019 / 2020\nGruppe 3\n\n' +
                       'Albert Pavlov\nAnge Toko\nMichael Franz\nPhuong Pham\nVan Tinh Chu',
                   style: TextStyle(
                     fontSize: 16,

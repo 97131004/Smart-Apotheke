@@ -9,7 +9,8 @@ void main() async {
 
   final keyFirstrun = 'firstRun';
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  bool firstRun = (prefs.getBool(keyFirstrun) == null);
+  bool firstRun = (prefs.getBool(keyFirstrun) == null ||
+      (prefs.getBool(keyFirstrun) != null && !prefs.getBool(keyFirstrun)));
 
   //fixating app to portrait-mode
   SystemChrome.setPreferredOrientations(

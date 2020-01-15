@@ -58,7 +58,9 @@ class _HomeState extends State<Home> {
               children: <Widget>[
                 DrawerHeader(
                   child: Text(
-                    firstName + ' ' + lastName,
+                    (firstName.length > 0 && lastName.length > 0)
+                        ? firstName + ' ' + lastName
+                        : 'Smart Apotheke',
                     style: TextStyle(color: Colors.white, fontSize: 18),
                   ),
                   decoration: BoxDecoration(
