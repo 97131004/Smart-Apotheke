@@ -101,7 +101,7 @@ class Helper {
   static void globalMedListAdd(Med m) {
     globals.meds.removeWhere((item) => item.pzn == m.pzn);
     m.isHistory = true;
-    globals.meds.insert(0, m);
+    globals.meds.add(m);
   }
 
   static Future saveGlobalMedList() async {

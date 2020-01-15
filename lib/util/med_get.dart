@@ -7,7 +7,8 @@ import 'helper.dart';
 
 class MedGet {
   static Future<List<Med>> getMeds(
-      String searchValue, int pageIndex, int pageCount) async {
+      String searchValue, int pageIndex, int pageCount,
+      [bool isMedSearch = false]) async {
     List<Med> list = new List<Med>();
 
     try {
@@ -33,7 +34,7 @@ class MedGet {
           if (index == pzns.length - 1) return list;
 
           while (true) {
-            if (isMedInGlobalsList(pzns[index])) break;
+            if (isMedSearch && isMedInGlobalsList(pzns[index])) break;
 
             searchIndex =
                 html.indexOf('<span class="link name">', searchIndex + 1);
@@ -55,8 +56,8 @@ class MedGet {
             }
           }
         } else if (pzns.length == 1) {
-          //single-page
-          if (!isMedInGlobalsList(pzns[0])) {
+          if (!(isMedSearch && isMedInGlobalsList(pzns[0]))) {
+            //single-page
             String medName =
                 Helper.parseMid(html, '<h1 itemprop="name">', '</h1>');
             Med m = new Med(medName, pzns[0]);
@@ -96,7 +97,7 @@ class MedGet {
           .toList();
 
       for (var i = 0; i < localMedsFound.length; i++) {
-        plc.loadedItems.insert(i, localMedsFound[i]);
+        plc.loadedItems.insert(0, localMedsFound[i]);
       }
     }
   }

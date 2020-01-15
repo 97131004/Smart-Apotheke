@@ -40,7 +40,7 @@ class _RecentState extends State<Recent> {
       body: (globals.meds.length > 0)
           ? MedList.build(
               context,
-              globals.meds,
+              globals.meds.reversed.toList(),
               true,
               medItemOnSwipe,
               medItemOnButtonDelete,
