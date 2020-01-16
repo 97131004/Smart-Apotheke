@@ -20,15 +20,12 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final buttonHeight = 100.0;
-  final iconSize = 32.0;
   String firstName = '';
   String lastName = '';
 
   @override
   void initState() {
     super.initState();
-
     loadName();
   }
 
@@ -144,176 +141,83 @@ class _HomeState extends State<Home> {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(left: 4, top: 4),
-                        child: ButtonTheme(
-                          minWidth: MediaQuery.of(context).size.width * 0.5 - 6,
-                          height: buttonHeight,
-                          child: RaisedButton(
-                            color: Theme.of(context).buttonColor,
-                            padding: EdgeInsets.all(8.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Icon(
-                                    Icons.calendar_today,
-                                    color: Colors.white,
-                                    size: iconSize,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(2.0),
-                                  child: Text(
-                                    "Kalender",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                NoAnimationMaterialPageRoute(
-                                    builder: (context) => Calendar()),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 4, top: 4),
-                        child: ButtonTheme(
-                          minWidth: MediaQuery.of(context).size.width * 0.5 - 6,
-                          height: buttonHeight,
-                          child: RaisedButton(
-                            color: Theme.of(context).buttonColor,
-                            padding: EdgeInsets.all(8.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Icon(
-                                    Icons.search,
-                                    color: Colors.white,
-                                    size: iconSize,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(2.0),
-                                  child: Text(
-                                    "Medikament suchen",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                NoAnimationMaterialPageRoute(
-                                    builder: (context) => MedSearch()),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
+                      buildButton("Kalender", Icons.calendar_today, () {
+                        Navigator.push(
+                          context,
+                          NoAnimationMaterialPageRoute(
+                              builder: (context) => Calendar()),
+                        );
+                      }),
+                      buildButton("Medikament suchen", Icons.search, () {
+                        Navigator.push(
+                          context,
+                          NoAnimationMaterialPageRoute(
+                              builder: (context) => MedSearch()),
+                        );
+                      }),
                     ],
                   ),
                   Row(
                     children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(left: 4, top: 4),
-                        child: ButtonTheme(
-                          minWidth: MediaQuery.of(context).size.width * 0.5 - 6,
-                          height: buttonHeight,
-                          child: RaisedButton(
-                            color: Theme.of(context).buttonColor,
-                            padding: EdgeInsets.all(8.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Icon(
-                                    Icons.history,
-                                    color: Colors.white,
-                                    size: iconSize,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(2.0),
-                                  child: Text(
-                                    "Verlauf",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                NoAnimationMaterialPageRoute(
-                                    builder: (context) => Recent()),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 4, top: 4),
-                        child: ButtonTheme(
-                          minWidth: MediaQuery.of(context).size.width * 0.5 - 6,
-                          height: buttonHeight,
-                          child: RaisedButton(
-                            color: Theme.of(context).buttonColor,
-                            padding: EdgeInsets.all(8.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Icon(
-                                    Icons.camera_alt,
-                                    color: Colors.white,
-                                    size: iconSize,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(2.0),
-                                  child: Text(
-                                    "Rezept scannen",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                NoAnimationMaterialPageRoute(
-                                    builder: (context) => Scanner()),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
+                      buildButton("Verlauf", Icons.history, () {
+                        Navigator.push(
+                          context,
+                          NoAnimationMaterialPageRoute(
+                              builder: (context) => Recent()),
+                        );
+                      }),
+                      buildButton("Rezept scannen", Icons.camera_alt, () {
+                        Navigator.push(
+                          context,
+                          NoAnimationMaterialPageRoute(
+                              builder: (context) => Scanner()),
+                        );
+                      }),
                     ],
                   ),
                 ],
               )
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildButton(String label, IconData icon, Function funcOnPressed) {
+    return Padding(
+      padding: EdgeInsets.only(left: 4, top: 4),
+      child: ButtonTheme(
+        minWidth: MediaQuery.of(context).size.width * 0.5 - 6,
+        height: 100.0,
+        child: RaisedButton(
+          color: Theme.of(context).buttonColor,
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 32.0,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(2.0),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          onPressed: () {
+            if (funcOnPressed != null) funcOnPressed();
+          },
         ),
       ),
     );

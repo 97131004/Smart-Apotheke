@@ -12,6 +12,9 @@ void main() async {
   bool firstRun = (prefs.getBool(keyFirstrun) == null ||
       (prefs.getBool(keyFirstrun) != null && prefs.getBool(keyFirstrun)));
 
+  SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(statusBarColor: Colors.redAccent));
+
   //fixating app to portrait-mode
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {

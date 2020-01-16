@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:maph_group3/util/load_bar.dart';
+import 'package:maph_group3/util/no_internet_alert.dart';
 import 'package:mlkit/mlkit.dart';
 import 'package:image_editor/image_editor.dart';
 import 'package:maph_group3/util/helper.dart';
@@ -29,6 +30,12 @@ class _ScannerState extends State<Scanner> {
 
   @override
   void initState() {
+     Helper.hasInternet().then((internet) {
+      if (internet == null || !internet) {
+        NoInternetAlert.show(context);
+      }
+    });
+
     super.initState();
   }
 

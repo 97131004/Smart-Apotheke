@@ -229,7 +229,7 @@ class _MedInfoState extends State<MedInfo> {
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
-                      fontSize: titleSize + varSize,
+                      fontSize: Theme.of(context).textTheme.title.fontSize + varSize,
                     ),
                   );
                 } else if (node.className == 'accordion') {

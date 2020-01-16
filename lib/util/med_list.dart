@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:maph_group3/widgets/med_search.dart';
 import '../widgets/shop.dart';
 import '../widgets/med_info.dart';
 import '../data/med.dart';
@@ -62,15 +63,16 @@ class MedList {
         children: <Widget>[
           Stack(
             children: <Widget>[
-              if (item.isHistory)
+              if (item.isHistory && item.name.length > 0)
                 Icon(
                   Icons.history,
                   size: 25,
                 ),
               Padding(
-                padding: EdgeInsets.only(left: (item.isHistory) ? 30 : 0),
+                padding: EdgeInsets.only(
+                    left: (item.isHistory && item.name.length > 0) ? 30 : 0),
                 child: Text(
-                  (item.name != '') ? item.name : '<PZN unbekannt>',
+                  (item.name.length > 0) ? item.name : '<PZN unbekannt>',
                   style: Theme.of(context).textTheme.title,
                 ),
               )
@@ -83,7 +85,7 @@ class MedList {
         ],
       ),
       children: <Widget>[
-        if (item.name != '')
+        if (item.name.length > 0)
           FlatButton(
             padding: EdgeInsets.all(16),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -103,7 +105,7 @@ class MedList {
             },
             color: Colors.white38,
           ),
-        if (item.name != '')
+        if (item.name.length > 0)
           FlatButton(
             padding: EdgeInsets.all(16),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -123,7 +125,7 @@ class MedList {
             },
             color: Colors.white38,
           ),
-        if (item.name != '' && removable)
+        if (item.name.length > 0 && removable)
           FlatButton(
             padding: EdgeInsets.all(16),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -139,6 +141,25 @@ class MedList {
                 onButtonDelete(item);
               }
               return;
+            },
+            color: Colors.white38,
+          ),
+        if (item.name.length <= 0)
+          FlatButton(
+            padding: EdgeInsets.all(16),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Name / PZN manuell eingeben',
+                style: Theme.of(context).textTheme.body2,
+              ),
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                NoAnimationMaterialPageRoute(builder: (context) => MedSearch()),
+              );
             },
             color: Colors.white38,
           ),

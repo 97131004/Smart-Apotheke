@@ -8,7 +8,8 @@ import '../util/med_get.dart';
 import '../data/med.dart';
 import 'med_search.dart';
 
-/// Seite nach einem abgeschlossenen Scanvorgang
+/// Seite nach einem abgeschlossenen Scanvorgang. Eingangsparameter ist eine
+/// [List<Med> meds], die die zuvor gescannten Medikamente enthält.
 class MedScan extends StatefulWidget {
   final List<Med> meds;
 
@@ -21,7 +22,8 @@ class MedScan extends StatefulWidget {
 }
 
 class MedScanState extends State<MedScan> {
-  /// [getMedsDone] ist true, wenn alle Medikamente geladen wurden
+  /// [getMedsDone] wird true, wenn alle Medikamente geladen wurden,
+  /// und können anschließend angezeigt werden.
   bool getMedsDone = false;
 
   @override
@@ -61,7 +63,9 @@ class MedScanState extends State<MedScan> {
       });
       //addings meds to recent med list
       for (int i = 0; i < widget.meds.length; i++) {
-        Helper.globalMedListAdd(widget.meds[i]);
+        if (widget.meds[i].name.length > 0) {
+          Helper.globalMedListAdd(widget.meds[i]);
+        }
       }
       await Helper.saveGlobalMedList();
     }
