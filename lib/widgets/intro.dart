@@ -222,7 +222,6 @@ class _IntroState extends State<Intro> {
               } else {
                 print('Could not launch $url');
               }
-              print(url);
             },
           )
         ],
