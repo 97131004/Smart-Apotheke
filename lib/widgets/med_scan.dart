@@ -55,7 +55,7 @@ class MedScanState extends State<MedScan> {
     for (int i = 0; i < widget.meds.length; i++) {
       String pzn = widget.meds[i].pzn;
       if (Helper.isNumber(pzn)) {
-        /// Getting remaining data based on [pzn]. Searching on page 1, 
+        /// Getting remaining data based on [pzn]. Searching on page 1,
         /// since result is expected to be singular.
         List<Med> med = await MedGet.getMeds(pzn, 0, 1);
         if (med.length > 0) {
@@ -63,14 +63,17 @@ class MedScanState extends State<MedScan> {
         }
       }
     }
+
     /// Refreshing UI.
     if (this.mounted) {
       setState(() {
         getMedsDone = true;
       });
     }
+
     /// Adding scanned medicaments to [globals.meds] list and saving it.
     for (int i = 0; i < widget.meds.length; i++) {
+      /// Skipping those, to which no medicament [name] could be found.
       if (widget.meds[i].name.length > 0) {
         Helper.globalMedListAdd(widget.meds[i]);
       }
@@ -96,8 +99,8 @@ class MedScanState extends State<MedScan> {
     );
   }
 
-  /// Builds final list, includes top note, list of scanned medicaments, 
-  /// buttons to do a manual medicament search or retry scan. 
+  /// Builds final list, includes top note, list of scanned medicaments,
+  /// buttons to do a manual medicament search or retry scan.
   Widget buildList() {
     return Scrollbar(
       child: ListView.builder(

@@ -7,7 +7,7 @@ import 'helper.dart';
 
 class MedGet {
   static Future<List<Med>> getMeds(
-      String searchValue, int pageIndex, int pageCount,
+      String searchValue, int pageIndex, int resultsPerPage,
       [bool isMedSearch = false]) async {
     List<Med> list = new List<Med>();
 
@@ -17,7 +17,7 @@ class MedGet {
           '"&page=' +
           pageIndex.toString() +
           '&resultsPerPage=' +
-          pageCount.toString());
+          resultsPerPage.toString());
       //print(resp.body);
 
       if (resp.statusCode == HttpStatus.ok) {

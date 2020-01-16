@@ -5,23 +5,30 @@ import '../util/helper.dart';
 import '../util/med_get.dart';
 import '../util/med_list.dart';
 
+/// Searches for medicament [name] or [pzn] defined by the user. Search results
+/// are coming from a GET-Request to [docmorris.de], then parsed and displayed here.
+/// First loads a fixed number of results, then loads the next set of results
+/// when user scrolls further down.
 class MedSearch extends StatefulWidget {
   MedSearch({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return _MedSearchState();
+    return MedSearchState();
   }
 }
 
-class _MedSearchState extends State<MedSearch> {
+class MedSearchState extends State<MedSearch> {
+  /// [true] when [plc] finishes loading first search results.
   static bool getSearchDone = false;
-  static int pageCount = 8;
+  static int resultsPerPage = 8;
   static String searchValue = '';
   String lastSearchValue = '';
 
   @override
   void initState() {
+    /// Checks for internet connection. If there's no connection, a
+    /// [no_internet_alert] will be shown.
     Helper.hasInternet().then((internet) {
       if (internet == null || !internet) {
         NoInternetAlert.show(context);
@@ -30,22 +37,35 @@ class _MedSearchState extends State<MedSearch> {
 
     super.initState();
 
+    /// Since it's required to create a static [PagewiseLoadController], we have to reset
+    /// the other static variables, that might have been changed in previous searchings.
     getSearchDone = false;
     searchValue = '';
   }
 
+  /// Controls the page-wise output of the search results. [pageFuture] is called
+  /// (also increases [pageIndex] by 1) when the user's scrollview reaches the bottom
+  /// of the widget. Then, another GET-Request is done to fetch the search
+  /// results from the next page.
   static PagewiseLoadController plc = PagewiseLoadController(
     pageFuture: (pageIndex) async {
       if (searchValue.length > 0) {
         getSearchDone = true;
+
+        /// Adding local search results on top from the [globals.meds] list.
         MedGet.getMedsPrefix(plc, pageIndex, searchValue);
-        return await MedGet.getMeds(searchValue, pageIndex, pageCount, true);
+
+        /// Adding search results from the web.
+        return await MedGet.getMeds(
+            searchValue, pageIndex, resultsPerPage, true);
       }
       return null;
     },
-    pageSize: pageCount,
+    pageSize: resultsPerPage,
   );
 
+  /// Shows a list of search results and corresponding loading bars.
+  /// Shows a note on no search results found.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,6 +124,8 @@ class _MedSearchState extends State<MedSearch> {
         ));
   }
 
+  /// Starts a new medicament search if search value differs
+  /// from last one and is not empty.
   void search(String value) {
     if (value != lastSearchValue && value.length > 0) {
       searchValue = value;

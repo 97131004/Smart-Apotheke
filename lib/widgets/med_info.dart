@@ -8,6 +8,10 @@ import '../util/med_get.dart';
 import '../util/load_bar.dart';
 import '../data/med.dart';
 
+/// Shows medicament information from the package leaflet. Loads the information with a
+/// GET-Request from [beipackzettel.de], then parses and displays it here. You can jump
+/// (autoscroll) to certain categories by clicking on the links at the top. Users can
+/// increase and decrease the text size.
 class MedInfo extends StatefulWidget {
   final Med med;
 
@@ -15,22 +19,34 @@ class MedInfo extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _MedInfoState();
+    return MedInfoState();
   }
 }
 
-class _MedInfoState extends State<MedInfo> {
+class MedInfoState extends State<MedInfo> {
+  /// [true] when [getMedInfoData] finishes loading medicament information.
   bool getMedInfoDataDone = false;
+
+  /// Storing retrieved medicament information text.
   String medInfoData = '';
+
+  /// List of keys which represent the anchors to jump to.
   List<GlobalKey> scrollKeys;
+
   ScrollController scrollController;
-  double titleSize = 24;
+
+  /// Dynamic size variable, that is added to the corresponding text sizes.
   double varSize = 0;
+
   bool varSizeLoaded = false;
+
+  /// Save key for [varSize]
   String keyMedInfoTextSize = 'medInfoTextSize';
 
   @override
   void initState() {
+    /// Checks for internet connection. If there's no connection, a
+    /// [no_internet_alert] will be shown.
     Helper.hasInternet().then((internet) {
       if (internet == null || !internet) {
         NoInternetAlert.show(context);
@@ -43,6 +59,7 @@ class _MedInfoState extends State<MedInfo> {
     getMedInfoDataInit();
   }
 
+  /// Retrieving medicament information.
   void getMedInfoDataInit() {
     setState(() {
       getMedInfoDataDone = false;
@@ -50,6 +67,7 @@ class _MedInfoState extends State<MedInfo> {
     if (widget.med.url.length > 0) {
       getMedInfoData();
     } else {
+      /// Empty [medInfoData] shows error note.
       medInfoData = '';
       setState(() {
         getMedInfoDataDone = true;
@@ -57,6 +75,8 @@ class _MedInfoState extends State<MedInfo> {
     }
   }
 
+  /// Retrieving medicament information from web and generating correct amount
+  /// of anchors depending on page's category count.
   Future getMedInfoData() async {
     String resp = await MedGet.getMedInfoData(widget.med);
 
@@ -69,7 +89,7 @@ class _MedInfoState extends State<MedInfo> {
         scrollKeys.add(new GlobalKey());
       }
     } else {
-      //error
+      /// Empty [medInfoData] shows error note.
       medInfoData = '';
     }
 
@@ -77,16 +97,17 @@ class _MedInfoState extends State<MedInfo> {
       loadMedInfoTextSize();
     }
 
-    setState(() {
-      getMedInfoDataDone = true;
-    });
+    if (this.mounted) {
+      setState(() {
+        getMedInfoDataDone = true;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        //back to home page, skipping scanner
         saveMedInfoTextSize();
         Navigator.pop(context);
         return false;
@@ -101,6 +122,7 @@ class _MedInfoState extends State<MedInfo> {
                   IconButton(
                     icon: Icon(Icons.zoom_in),
                     onPressed: () {
+                      /// Increasing text size.
                       if (varSize < 6) {
                         setState(() {
                           varSize += 1;
@@ -111,6 +133,7 @@ class _MedInfoState extends State<MedInfo> {
                   IconButton(
                     icon: Icon(Icons.zoom_out),
                     onPressed: () {
+                      /// Decreasing text size.
                       if (varSize > 0) {
                         setState(() {
                           varSize -= 1;
@@ -130,6 +153,8 @@ class _MedInfoState extends State<MedInfo> {
           child: FloatingActionButton(
             foregroundColor: Colors.white,
             child: Icon(Icons.arrow_upward),
+
+            /// Jumping to the very top on floating button press.
             onPressed: () => scrollController.jumpTo(0),
           ),
         ),
@@ -137,6 +162,7 @@ class _MedInfoState extends State<MedInfo> {
     );
   }
 
+  /// Visualization on no package leaflet found.
   Widget buildNotFound() {
     return Center(
       child: Column(
@@ -164,6 +190,7 @@ class _MedInfoState extends State<MedInfo> {
     );
   }
 
+  /// Visualization of retrieved package leaflet, and managing anchors and jump links.
   Widget buildHtml() {
     return Scrollbar(
       child: ListView(
@@ -173,6 +200,8 @@ class _MedInfoState extends State<MedInfo> {
             data: medInfoData,
             padding: EdgeInsets.all(8.0),
             onLinkTap: (url) {
+              /// Jump (autoscroll) to the corresponding anchor,
+              /// which represents a category.
               if (url.startsWith('#chapter_')) {
                 String ind = url.replaceAll('#chapter_', '');
                 int iScrollKey = int.tryParse(ind);
@@ -185,9 +214,10 @@ class _MedInfoState extends State<MedInfo> {
             },
             useRichText: false,
             customRender: (node, children) {
+              /// Iterating retrieved [medInfoData] DOM (Document Object Model).
               if (node is dom.Element) {
                 if (node.id.startsWith('chapter_') && node.id != 'chapter_-1') {
-                  //chapter
+                  /// Visualizing chapter title and applying [scrollKeys] to set anchors.
                   String id = node.id;
                   String ind = id.replaceAll('chapter_', '');
                   int iScrollKey = int.tryParse(ind);
@@ -212,7 +242,7 @@ class _MedInfoState extends State<MedInfo> {
                         )
                       ]);
                 } else if (node.id == 'chapter_-1') {
-                  //title
+                  /// Visualizing medicament title.
                   String html = node.innerHtml;
                   if (html.length > 0 && html[0] == ' ') {
                     node.innerHtml = html
@@ -229,11 +259,12 @@ class _MedInfoState extends State<MedInfo> {
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
-                      fontSize: Theme.of(context).textTheme.title.fontSize + varSize,
+                      fontSize:
+                          Theme.of(context).textTheme.title.fontSize + varSize,
                     ),
                   );
                 } else if (node.className == 'accordion') {
-                  //links group
+                  /// Visualizing category jump links group (on top).
                   return Container(
                     padding: EdgeInsets.fromLTRB(0, 5, 0, 25),
                     child: DefaultTextStyle(
@@ -247,17 +278,17 @@ class _MedInfoState extends State<MedInfo> {
                     ),
                   );
                 } else if (node.localName == 'li') {
-                  //each link from links group
+                  /// Visualizing each link from category jump links group.
                   return Container(
                     alignment: Alignment.centerLeft,
                     padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
                     child: Column(children: children),
                   );
                 } else if (node.className == 'catalogue no-bullet') {
-                  //links group subtopics (removing)
+                  /// Removing each subcategory from category jump links group.
                   node.remove();
                 } else if (node.className == 'infobox') {
-                  //content text
+                  /// Visualizing content (information) text.
                   return DefaultTextStyle(
                     child: Column(children: children),
                     style: TextStyle(
