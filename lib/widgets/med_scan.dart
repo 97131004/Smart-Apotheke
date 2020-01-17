@@ -23,7 +23,7 @@ class MedScan extends StatefulWidget {
 }
 
 class MedScanState extends State<MedScan> {
-  /// [true] when [getMeds] finishes processing medicaments.
+  /// [true] when [getMeds] finished processing medicaments.
   bool getMedsDone = false;
 
   @override
@@ -38,7 +38,7 @@ class MedScanState extends State<MedScan> {
 
     super.initState();
 
-    /// Starting medicaments processing.
+    /// Starting post-processing medicaments.
     if (widget.meds != null && widget.meds.length > 0) {
       getMeds();
     } else {
@@ -99,7 +99,7 @@ class MedScanState extends State<MedScan> {
     );
   }
 
-  /// Builds final list, includes top note, list of scanned medicaments,
+  /// Builds final list, including top note, list of scanned medicaments,
   /// buttons to do a manual medicament search or retry scan.
   Widget buildList() {
     return Scrollbar(
@@ -107,7 +107,7 @@ class MedScanState extends State<MedScan> {
         itemBuilder: (context, index) {
           int length = widget.meds.length;
           if (index == 0) {
-            //first item
+            /// Top note.
             return Container(
               width: double.infinity,
               color: Colors.blueAccent,
@@ -120,11 +120,11 @@ class MedScanState extends State<MedScan> {
             );
           }
           if (length > 0 && index >= 1 && index <= length) {
-            //med items
+            /// Medicament items.
             return MedList.buildItem(context, index, widget.meds[index - 1]);
           }
           if (length == 0 && index == length + 1) {
-            //med items
+            /// No medicament items found.
             return Column(
               children: <Widget>[
                 Padding(
@@ -136,7 +136,7 @@ class MedScanState extends State<MedScan> {
           }
           if (length > 0 && index == length + 1 ||
               length == 0 && index == length + 2) {
-            //last item
+            /// Bottom buttons.
             return Column(
               children: <Widget>[
                 SizedBox(height: 20),

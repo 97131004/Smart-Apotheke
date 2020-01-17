@@ -10,6 +10,8 @@ import 'recent.dart';
 import 'user_guide.dart';
 import 'calendar.dart';
 
+/// Default home page, that opens on each app start, except the very first time.
+/// Shows buttons for app's primary functions and a hamburger menu for further settings.
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
 
@@ -20,7 +22,10 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  /// First name will be displayed in the menu at the top.
   String firstName = '';
+
+  /// Last name will be displayed in the menu at the top.
   String lastName = '';
 
   @override
@@ -29,6 +34,7 @@ class _HomeState extends State<Home> {
     loadName();
   }
 
+  /// Loading first and last name from the [personal] settings.
   Future loadName() async {
     List<String> address = await PersonalData.getAddress();
     if (address != null) {
@@ -46,6 +52,7 @@ class _HomeState extends State<Home> {
     return SafeArea(
       child: WillPopScope(
         onWillPop: () {
+          /// Blocking back button.
           return;
         },
         child: Scaffold(
@@ -53,6 +60,8 @@ class _HomeState extends State<Home> {
             child: ListView(
               padding: EdgeInsets.zero,
               children: <Widget>[
+                /// Menu header.
+                /// Displaying first and last name.
                 DrawerHeader(
                   child: Text(
                     (firstName.length > 0 && lastName.length > 0)
@@ -64,14 +73,19 @@ class _HomeState extends State<Home> {
                     color: Theme.of(context).primaryColor,
                   ),
                 ),
+
+                /// Menu buttons.
                 ListTile(
                   title: Text('Persönliche Daten'),
                   onTap: () {
-                    //closing menu first, so it eliminates flicker for the next pop
+                    /// Closing menu first, so it eliminates flicker for the next page pop.
                     Navigator.pop(context);
                     Navigator.push(
                       context,
                       NoAnimationMaterialPageRoute(
+
+                          /// Passing [loadName] function to update first and last
+                          /// name in [home] page from within [personal] page.
                           builder: (context) => Personal(
                                 funcUpdateHome: () async {
                                   await loadName();
@@ -133,6 +147,8 @@ class _HomeState extends State<Home> {
           appBar: AppBar(
             title: Text('Smart Apotheke'),
           ),
+
+          /// Main buttons.
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -184,6 +200,7 @@ class _HomeState extends State<Home> {
     );
   }
 
+  /// Visualizing main button.
   Widget buildButton(String label, IconData icon, Function funcOnPressed) {
     return Padding(
       padding: EdgeInsets.only(left: 4, top: 4),

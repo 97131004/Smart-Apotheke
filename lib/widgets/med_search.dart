@@ -19,7 +19,7 @@ class MedSearch extends StatefulWidget {
 }
 
 class MedSearchState extends State<MedSearch> {
-  /// [true] when [plc] finishes loading first search results.
+  /// [true] when [plc] finished loading first search results.
   static bool getSearchDone = false;
   static int resultsPerPage = 8;
   static String searchValue = '';
@@ -44,7 +44,7 @@ class MedSearchState extends State<MedSearch> {
   }
 
   /// Controls the page-wise output of the search results. [pageFuture] is called
-  /// (also increases [pageIndex] by 1) when the user's scrollview reaches the bottom
+  /// (also increases [pageIndex] by 1) when user's scrollview reaches the bottom
   /// of the widget. Then, another GET-Request is done to fetch the search
   /// results from the next page.
   static PagewiseLoadController plc = PagewiseLoadController(
