@@ -11,6 +11,24 @@ import 'med_scan.dart';
 import '../util/nampr.dart';
 import '../data/med.dart';
 
+/// Page to manage the scanning of the medical prescription. User can choose whether he wants
+/// to scan an existing image from the phone's storage, or scan using the phone's camera.
+/// The user is then prompted to accept, decline or rotate the image by 90 degrees, so it
+/// appears to be horizontal (required for proper text recognition).
+///
+/// Afterwards, the scanning process begins. The scanning basically uses
+/// the cloud-based text recognition api from the machine learning kit for firebase
+/// (https://firebase.google.com/docs/ml-kit/android/recognize-text?hl=de).
+/// Since firebase is a cloud-based service, the text recognition
+/// requires an internet connection and a linked google account
+/// (https://github.com/azihsoyn/flutter_mlkit#android-integration).
+/// The linked google account and corresponding API keys are stored in
+/// [android\app\google-services.json].
+///
+/// The text recognition library then outputs all found text pieces,
+/// where we search for the medicament [pzn] ('PZN') text and parse
+/// the actual [pzn] number after it.
+
 class Scanner extends StatefulWidget {
   Scanner({Key key}) : super(key: key);
   @override
@@ -20,17 +38,24 @@ class Scanner extends StatefulWidget {
 }
 
 class _ScannerState extends State<Scanner> {
+  /// List of found medicaments (only includes [pzn]'s) to be later
+  /// passed to the [med_scan] page.
   List<Med> _medicaments;
+
+  /// Flag whether an image has been chosen from the gallery or camera.
   bool _imageChosen = false;
-  bool _imageLoaded = false;
-  final _buttonHeight = 100.0;
-  final _iconSize = 32.0;
+
+  /// Flag whether an image is currently being processed.
+  bool _imageLoading = false;
+
   Uint8List _image;
   int _rotationQuarters = 0;
 
   @override
   void initState() {
-     Helper.hasInternet().then((internet) {
+    /// Checks for internet connection. If there's no connection, a
+    /// [no_internet_alert] will be shown.
+    Helper.hasInternet().then((internet) {
       if (internet == null || !internet) {
         NoInternetAlert.show(context);
       }
@@ -42,16 +67,17 @@ class _ScannerState extends State<Scanner> {
   @override
   Widget build(BuildContext context) {
     if (!_imageChosen)
-      return _buildChosenImage();
+      return _buildMain();
     else
       return _buildPreview(_image);
   }
 
-  Widget _buildChosenImage() {
+  /// Displays the [_buildMenu] overview with the gallery and camera buttons,
+  /// and the loading bars while the image is processed.
+  Widget _buildMain() {
     return WillPopScope(
       onWillPop: () async {
-        if (!_imageLoaded) {
-          _imageChosen = false;
+        if (!_imageLoading) {
           Navigator.pop(context);
         }
         return false;
@@ -60,11 +86,12 @@ class _ScannerState extends State<Scanner> {
         appBar: AppBar(
           title: Text('Rezept scannen'),
         ),
-        body: _imageLoaded ? LoadBar.build() : _buildImage(),
+        body: _imageLoading ? LoadBar.build() : _buildMenu(),
       ),
     );
   }
 
+  /// Displays the top note.
   Widget _buildNotification() {
     return Container(
       width: double.infinity,
@@ -78,7 +105,8 @@ class _ScannerState extends State<Scanner> {
     );
   }
 
-  Widget _buildImage() {
+  /// Displays the overview with the gallery and camera buttons.
+  Widget _buildMenu() {
     return Stack(
       children: <Widget>[
         _buildNotification(),
@@ -87,74 +115,8 @@ class _ScannerState extends State<Scanner> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(left: 4, top: 4),
-                child: ButtonTheme(
-                  minWidth: MediaQuery.of(context).size.width * 0.5 - 6,
-                  height: _buttonHeight,
-                  child: RaisedButton(
-                    color: Theme.of(context).buttonColor,
-                    padding: EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Icon(
-                            Icons.folder,
-                            color: Colors.white,
-                            size: _iconSize,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: Text(
-                            "Galerie",
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    onPressed: _getImagefromGallery,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 4, top: 4),
-                child: ButtonTheme(
-                  minWidth: MediaQuery.of(context).size.width * 0.5 - 6,
-                  height: _buttonHeight,
-                  child: RaisedButton(
-                    color: Theme.of(context).buttonColor,
-                    padding: EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                            size: _iconSize,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: Text(
-                            "Kamera",
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    onPressed: _getImagefromCamera,
-                  ),
-                ),
-              ),
+              _buildButton('Galerie', Icons.folder, _getImagefromGallery),
+              _buildButton('Kamera', Icons.camera_alt, _getImagefromCamera),
             ],
           ),
         )
@@ -162,109 +124,140 @@ class _ScannerState extends State<Scanner> {
     );
   }
 
-  Widget _buildPreview(Uint8List rotateImg) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text('Vorschau'),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            _buildNotification(),
-            FittedBox(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height / 3 * 2 - 60,
-                child: RotatedBox(
-                  quarterTurns: _rotationQuarters,
-                  child: Image.memory(
-                    rotateImg,
-                    scale: 1.0,
-                    filterQuality: FilterQuality.none,
-                    alignment: Alignment.center,
-                    repeat: ImageRepeat.noRepeat,
+  /// Visualizing main button.
+  Widget _buildButton(String label, IconData icon, Function funcOnPressed) {
+    return Padding(
+      padding: EdgeInsets.only(left: 4, top: 4),
+      child: ButtonTheme(
+        minWidth: MediaQuery.of(context).size.width * 0.5 - 6,
+        height: 100.0,
+        child: RaisedButton(
+          color: Theme.of(context).buttonColor,
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 32.0,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(2.0),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.white,
                   ),
                 ),
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Column(children: <Widget>[
-                  IconButton(
-                    alignment: Alignment.topLeft,
-                    icon: Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() {
-                        _imageChosen = false;
-                      });
-                    },
-                    iconSize: 40,
-                  )
-                ]),
-                Column(children: <Widget>[
-                  IconButton(
-                    alignment: Alignment.topLeft,
-                    icon: Icon(Icons.rotate_right),
-                    onPressed: () {
-                      setState(() {
-                        if (_rotationQuarters == 3) {
-                          _rotationQuarters = 0;
-                        } else {
-                          _rotationQuarters += 1;
-                        }
-                      });
-                    },
-                    iconSize: 60,
-                  )
-                ]),
-                Column(children: <Widget>[
-                  IconButton(
-                    alignment: Alignment.topRight,
-                    icon: Icon(Icons.check),
-                    onPressed: () => _backToScanner(),
-                    iconSize: 50,
-                  )
-                ]),
-              ],
-            )
-          ],
+            ],
+          ),
+          onPressed: () {
+            if (funcOnPressed != null) funcOnPressed();
+          },
         ),
       ),
     );
   }
 
-  void _backToScanner() async {
-    ImageEditorOption option = ImageEditorOption();
-    option.addOption(RotateOption(_rotationQuarters * 90));
+  /// Displays the image preview.
+  Widget _buildPreview(Uint8List rotateImg) {
+    return WillPopScope(
+      onWillPop: () async {
+        if (!_imageLoading) {
+          setState(() {
+            _imageChosen = false;
+          });
+        }
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: Text('Vorschau'),
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              _buildNotification(),
 
-    _image =
-        await ImageEditor.editImage(image: _image, imageEditorOption: option);
-    _analyzeImage();
-    setState(() {
-      _imageLoaded = true;
-      _imageChosen = false;
-    });
-  }
-
-  Future _analyzeImage() async {
-    try {
-      FirebaseVisionTextDetector detector = FirebaseVisionTextDetector.instance;
-      var currentLabels = await detector.detectFromBinary(_image);
-      _medicaments = await _pznSearch(currentLabels);
-      _gotoMedListFound();
-    } catch (e) {
-      print(e.toString());
-    }
+              /// Needs a [SizedBox] inside a [FittedBox] and poor filter qualities in
+              /// [Image.memory] for good performance and fast rotations.
+              FittedBox(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 3 * 2 - 60,
+                  child: RotatedBox(
+                    /// [RotatedBox] has a parameter to rotate the image by [quarterTurns].
+                    quarterTurns: _rotationQuarters,
+                    child: Image.memory(
+                      rotateImg,
+                      scale: 1.0,
+                      filterQuality: FilterQuality.none,
+                      alignment: Alignment.center,
+                      repeat: ImageRepeat.noRepeat,
+                    ),
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Column(children: <Widget>[
+                    IconButton(
+                      alignment: Alignment.topLeft,
+                      icon: Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          _imageChosen = false;
+                        });
+                      },
+                      iconSize: 40,
+                    )
+                  ]),
+                  Column(children: <Widget>[
+                    IconButton(
+                      alignment: Alignment.topLeft,
+                      icon: Icon(Icons.rotate_right),
+                      onPressed: () {
+                        setState(() {
+                          /// Rotating image by the number of quarter turns.
+                          if (_rotationQuarters == 3) {
+                            _rotationQuarters = 0;
+                          } else {
+                            _rotationQuarters += 1;
+                          }
+                        });
+                      },
+                      iconSize: 60,
+                    )
+                  ]),
+                  Column(children: <Widget>[
+                    IconButton(
+                      alignment: Alignment.topRight,
+                      icon: Icon(Icons.check),
+                      onPressed: () => _processImage(),
+                      iconSize: 50,
+                    )
+                  ]),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _getImagefromGallery() async {
     try {
       var file = await ImagePicker.pickImage(source: ImageSource.gallery);
       if (file.existsSync()) {
-        //  provider = ExtendedFileImageProvider(file);
         _image = file.readAsBytesSync();
         setState(() {
           _imageChosen = true;
@@ -289,14 +282,47 @@ class _ScannerState extends State<Scanner> {
     }
   }
 
-  static Future<List<Med>> _pznSearch(List<VisionText> texts) async {
+  /// Processes the image.
+  void _processImage() async {
+    /// Refreshing UI to show loading bars.
+    setState(() {
+      _imageLoading = true;
+      _imageChosen = false;
+    });
+
+    /// Applying correct number of quarter turn rotations to the [_image].
+    ImageEditorOption option = ImageEditorOption();
+    option.addOption(RotateOption(_rotationQuarters * 90));
+    _image =
+        await ImageEditor.editImage(image: _image, imageEditorOption: option);
+
+    /// Finding all [pzn]'s in the image.
+    _analyzeImage();
+  }
+
+  /// Analyzes the image by initializing a firebase object, linking the image
+  /// and finding the [pzn] numbers.
+  Future _analyzeImage() async {
+    try {
+      FirebaseVisionTextDetector detector = FirebaseVisionTextDetector.instance;
+      var currentLabels = await detector.detectFromBinary(_image);
+      _medicaments = await _findPzn(currentLabels);
+      _gotoMedScan();
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  /// First searches for the 'PZN' text, then parses the actual [pzn] number after it.
+  /// Then stores all found [pzn]'s in a list of [med] objects (only including a [pzn]).
+  Future<List<Med>> _findPzn(List<VisionText> texts) async {
     List<Med> pznNrs = [];
     for (var item in texts) {
       String text = item.text;
       text = text.toUpperCase();
-      while (text.contains("PZN")) {
+      while (text.contains('PZN')) {
         text = text.replaceAll(':', '');
-        int pos = text.indexOf("PZN");
+        int pos = text.indexOf('PZN');
         String pznNr = '';
         int i;
         for (i = pos + 3; i <= text.length; i++) {
@@ -314,7 +340,8 @@ class _ScannerState extends State<Scanner> {
     return pznNrs;
   }
 
-  void _gotoMedListFound() {
+  /// Pushes to [med_scan] page with a list of [med]'s including the found [pzn] numbers.
+  void _gotoMedScan() {
     Navigator.push(
         context,
         NoAnimationMaterialPageRoute(
@@ -323,6 +350,6 @@ class _ScannerState extends State<Scanner> {
           ),
         ));
     _imageChosen = false;
-    _imageLoaded = false;
+    _imageLoading = false;
   }
 }

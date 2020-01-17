@@ -6,7 +6,7 @@ class PersonalData {
   static String keyPassword = 'password';
   static String keyIban = 'iban';
   static String keyadresse = 'adresse';
-  static var hasher = HashCrypt("SHA-3/512");
+  static var hasher = HashCrypt('SHA-3/512');
 
   static Future<bool> isUserDataComplete() async {
     final addr = await Helper.readDataFromsp(keyadresse);
@@ -80,11 +80,11 @@ class PersonalData {
     var iv2 = CryptKey().genDart(12);
     var encrypter3 = AesCrypt(fortunaKey, 'cbc', 'iso10126-2');
     String en = encrypter3.encrypt(text, iv2);
-    return fortunaKey + " " + iv2 + " " + en;
+    return fortunaKey + ' ' + iv2 + ' ' + en;
   }
 
   static Future<String> decrypt(String encrypted) async {
-    List<String> enc = encrypted.split(" ");
+    List<String> enc = encrypted.split(' ');
     String fortunaKey = enc[0];
     String iv2 = enc[1];
     encrypted = enc[2];

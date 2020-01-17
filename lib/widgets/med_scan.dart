@@ -11,6 +11,7 @@ import 'med_search.dart';
 /// Page after successful scanning process. Input parameter is a [List<Med> meds],
 /// which includes previously scanned medicaments. Since these only include a [pzn],
 /// some post-processing is done to get the medicament [name] and leaflet [url].
+
 class MedScan extends StatefulWidget {
   final List<Med> meds;
 
@@ -153,7 +154,7 @@ class _MedScanState extends State<MedScan> {
                       );
                     },
                     icon: Icon(Icons.edit, color: Colors.white),
-                    label: Text("Name / PZN manuell eingeben",
+                    label: Text('Name / PZN manuell eingeben',
                         style: TextStyle(color: Colors.white)),
                   ),
                 ),
@@ -165,7 +166,7 @@ class _MedScanState extends State<MedScan> {
                   child: RaisedButton.icon(
                     icon: Icon(Icons.update, color: Colors.white),
                     onPressed: () => Navigator.pop(context),
-                    label: Text("Nochmals scannen",
+                    label: Text('Nochmals scannen',
                         style: TextStyle(color: Colors.white)),
                   ),
                 ),

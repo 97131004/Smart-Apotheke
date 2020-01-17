@@ -12,6 +12,7 @@ import 'calendar.dart';
 
 /// Default home page, that opens on each app start, except the very first time.
 /// Shows buttons for app's primary functions and a hamburger menu with other settings.
+
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
 
@@ -49,153 +50,145 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: WillPopScope(
-        onWillPop: () async {
-          /// Moves app to background. No popping here, since we might be
-          /// coming from the [intro] page.
-          SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-          return false;
-        },
-        child: Scaffold(
-          drawer: Drawer(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                /// Menu header.
-                /// Displaying first and last name.
-                DrawerHeader(
-                  child: Text(
-                    (_firstName.length > 0 && _lastName.length > 0)
-                        ? _firstName + ' ' + _lastName
-                        : 'Smart Apotheke',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-
-                /// Menu buttons.
-                ListTile(
-                  title: Text('Persönliche Daten'),
-                  onTap: () {
-                    /// Popping menu first, so it eliminates flicker for the next page pop.
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      NoAnimationMaterialPageRoute(
-
-                          /// Passing [loadName] function to update first and last name
-                          /// in [home] page's menu header from within [personal] page.
-                          builder: (context) => Personal(
-                                funcUpdateHome: () async {
-                                  await _loadName();
-                                },
-                              )),
-                    );
-                  },
-                ),
-                ListTile(
-                  title: Text('User Guide'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      NoAnimationMaterialPageRoute(
-                          builder: (context) => UserGuide()),
-                    );
-                  },
-                ),
-                ListTile(
-                  title: Text('Über uns'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        NoAnimationMaterialPageRoute(
-                          builder: (context) =>
-                              Intro(showOnlyPage: IntroPage.about),
-                        ));
-                  },
-                ),
-                ListTile(
-                  title: Text('Nutzungsbedingungen'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        NoAnimationMaterialPageRoute(
-                          builder: (context) =>
-                              Intro(showOnlyPage: IntroPage.eula),
-                        ));
-                  },
-                ),
-                ListTile(
-                  title: Text('Datenschutzerklärung'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        NoAnimationMaterialPageRoute(
-                          builder: (context) =>
-                              Intro(showOnlyPage: IntroPage.privacy),
-                        ));
-                  },
-                ),
-              ],
-            ),
-          ),
-          appBar: AppBar(
-            title: Text('Smart Apotheke'),
-          ),
-
-          /// Main buttons.
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
+      child: Scaffold(
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
             children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      _buildButton("Kalender", Icons.calendar_today, () {
-                        Navigator.push(
-                          context,
-                          NoAnimationMaterialPageRoute(
-                              builder: (context) => Calendar()),
-                        );
-                      }),
-                      _buildButton("Medikament suchen", Icons.search, () {
-                        Navigator.push(
-                          context,
-                          NoAnimationMaterialPageRoute(
-                              builder: (context) => MedSearch()),
-                        );
-                      }),
-                    ],
-                  ),
-                  Row(
-                    children: <Widget>[
-                      _buildButton("Verlauf", Icons.history, () {
-                        Navigator.push(
-                          context,
-                          NoAnimationMaterialPageRoute(
-                              builder: (context) => Recent()),
-                        );
-                      }),
-                      _buildButton("Rezept scannen", Icons.camera_alt, () {
-                        Navigator.push(
-                          context,
-                          NoAnimationMaterialPageRoute(
-                              builder: (context) => Scanner()),
-                        );
-                      }),
-                    ],
-                  ),
-                ],
-              )
+              /// Menu header.
+              /// Displaying first and last name.
+              DrawerHeader(
+                child: Text(
+                  (_firstName.length > 0 && _lastName.length > 0)
+                      ? _firstName + ' ' + _lastName
+                      : 'Smart Apotheke',
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+
+              /// Menu buttons.
+              ListTile(
+                title: Text('Persönliche Daten'),
+                onTap: () {
+                  /// Popping menu first, so it eliminates flicker for the next page pop.
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    NoAnimationMaterialPageRoute(
+
+                        /// Passing [loadName] function to update first and last name
+                        /// in [home] page's menu header from within [personal] page.
+                        builder: (context) => Personal(
+                              funcUpdateHome: () async {
+                                await _loadName();
+                              },
+                            )),
+                  );
+                },
+              ),
+              ListTile(
+                title: Text('User Guide'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    NoAnimationMaterialPageRoute(
+                        builder: (context) => UserGuide()),
+                  );
+                },
+              ),
+              ListTile(
+                title: Text('Über uns'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      NoAnimationMaterialPageRoute(
+                        builder: (context) =>
+                            Intro(showOnlyPage: IntroPage.about),
+                      ));
+                },
+              ),
+              ListTile(
+                title: Text('Nutzungsbedingungen'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      NoAnimationMaterialPageRoute(
+                        builder: (context) =>
+                            Intro(showOnlyPage: IntroPage.eula),
+                      ));
+                },
+              ),
+              ListTile(
+                title: Text('Datenschutzerklärung'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      NoAnimationMaterialPageRoute(
+                        builder: (context) =>
+                            Intro(showOnlyPage: IntroPage.privacy),
+                      ));
+                },
+              ),
             ],
           ),
+        ),
+        appBar: AppBar(
+          title: Text('Smart Apotheke'),
+        ),
+
+        /// Main buttons.
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Column(
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    _buildButton('Kalender', Icons.calendar_today, () {
+                      Navigator.push(
+                        context,
+                        NoAnimationMaterialPageRoute(
+                            builder: (context) => Calendar()),
+                      );
+                    }),
+                    _buildButton('Medikament suchen', Icons.search, () {
+                      Navigator.push(
+                        context,
+                        NoAnimationMaterialPageRoute(
+                            builder: (context) => MedSearch()),
+                      );
+                    }),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    _buildButton('Verlauf', Icons.history, () {
+                      Navigator.push(
+                        context,
+                        NoAnimationMaterialPageRoute(
+                            builder: (context) => Recent()),
+                      );
+                    }),
+                    _buildButton('Rezept scannen', Icons.camera_alt, () {
+                      Navigator.push(
+                        context,
+                        NoAnimationMaterialPageRoute(
+                            builder: (context) => Scanner()),
+                      );
+                    }),
+                  ],
+                ),
+              ],
+            )
+          ],
         ),
       ),
     );

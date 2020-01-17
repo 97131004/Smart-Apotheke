@@ -12,6 +12,7 @@ import '../data/med.dart';
 /// medicament [med]. Loads the medicament information with a GET-Request from [beipackzettel.de],
 /// then parses and displays it here. You can jump (autoscroll) to certain categories by
 /// clicking on the links at the top. The user can increase and decrease the text size.
+
 class MedInfo extends StatefulWidget {
   final Med med;
 
@@ -180,7 +181,7 @@ class _MedInfoState extends State<MedInfo> {
             child: RaisedButton.icon(
               onPressed: _getMedInfoDataInit,
               icon: Icon(Icons.refresh, color: Colors.white),
-              label: Text("Nochmals versuchen",
+              label: Text('Nochmals versuchen',
                   style: TextStyle(color: Colors.white)),
             ),
           )
@@ -246,7 +247,7 @@ class _MedInfoState extends State<MedInfo> {
                   if (html.length > 0 && html[0] == ' ') {
                     node.innerHtml = html
                             .replaceAll('?', '')
-                            .replaceAll('"', "")
+                            .replaceAll('"', '')
                             .replaceAll('Patienteninformation für', '')
                             .replaceFirst(new RegExp(r"^\s+"), '') +
                         ' (PZN: ' +

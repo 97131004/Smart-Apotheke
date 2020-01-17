@@ -8,6 +8,7 @@ import 'scanner.dart';
 
 /// Page that displays a list of recently scanned or bought medicaments.
 /// Each medicament entry is drawn by [MedList.build].
+
 class Recent extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/home.dart';
 import 'widgets/intro.dart';
 
+/// Entry function for the app.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
