@@ -24,7 +24,7 @@ class MedInfo extends StatefulWidget {
 }
 
 class MedInfoState extends State<MedInfo> {
-  /// [true] when [getMedInfoData] finishes loading medicament information.
+  /// [true] when [getMedInfoData] finished loading medicament information.
   bool getMedInfoDataDone = false;
 
   /// Storing retrieved medicament information text.
@@ -39,9 +39,7 @@ class MedInfoState extends State<MedInfo> {
   double varSize = 0;
 
   bool varSizeLoaded = false;
-
-  /// Save key for [varSize]
-  String keyMedInfoTextSize = 'medInfoTextSize';
+  String saveKeyMedInfoTextSize = 'medInfoTextSize';
 
   @override
   void initState() {
@@ -214,7 +212,7 @@ class MedInfoState extends State<MedInfo> {
             },
             useRichText: false,
             customRender: (node, children) {
-              /// Iterating retrieved [medInfoData] DOM (Document Object Model).
+              /// Iterating through retrieved [medInfoData] DOM (Document Object Model).
               if (node is dom.Element) {
                 if (node.id.startsWith('chapter_') && node.id != 'chapter_-1') {
                   /// Visualizing chapter title and applying [scrollKeys] to set anchors.
@@ -308,7 +306,7 @@ class MedInfoState extends State<MedInfo> {
   }
 
   Future loadMedInfoTextSize() async {
-    String val = await Helper.readDataFromsp(keyMedInfoTextSize);
+    String val = await Helper.readDataFromsp(saveKeyMedInfoTextSize);
     if (val.isNotEmpty) {
       double size = double.tryParse(val);
       if (size != null) {
@@ -322,7 +320,7 @@ class MedInfoState extends State<MedInfo> {
 
   Future saveMedInfoTextSize() async {
     if (varSizeLoaded) {
-      await Helper.writeDatatoSp(keyMedInfoTextSize, varSize.toString());
+      await Helper.writeDatatoSp(saveKeyMedInfoTextSize, varSize.toString());
     }
   }
 }
