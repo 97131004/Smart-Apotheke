@@ -29,7 +29,7 @@ class _RecentState extends State<Recent> {
   /// Retrieving [globals.meds] list, which represents a list of recent medicaments.
   Future _getGlobalMedList() async {
     if (this.mounted) {
-      await Helper.loadGlobalMedList();
+      await Helper.globalMedListLoad();
       setState(() {});
     }
   }
@@ -125,6 +125,6 @@ class _RecentState extends State<Recent> {
     setState(() {
       globals.meds.remove(med);
     });
-    await Helper.saveGlobalMedList();
+    await Helper.globalMedListSave();
   }
 }

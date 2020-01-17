@@ -317,7 +317,8 @@ class _ScannerState extends State<Scanner> {
   }
 
   /// First searches for the 'PZN' text, then parses the actual [pzn] number after it.
-  /// Then stores all found [pzn]'s in a list of [med] objects (only including a [pzn]).
+  /// Then stores all found [pzn]'s in a list of [med] objects 
+  /// (each of them only including a [pzn] number).
   Future<List<Med>> _findPzn(List<VisionText> texts) async {
     List<Med> pznNrs = [];
     for (var item in texts) {

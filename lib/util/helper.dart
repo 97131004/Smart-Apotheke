@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 
 class Helper {
-  static String saveKeyGlobalsList = 'globalsList';
+  static final String saveKeyGlobalsList = 'globalsList';
 
   static String parseMid(String source, String delim1, String delim2,
       [int startIndex]) {
@@ -106,7 +106,7 @@ class Helper {
     globals.meds.add(m);
   }
 
-  static Future saveGlobalMedList() async {
+  static Future globalMedListSave() async {
     List<String> list = [];
     for (int i = 0; i < globals.meds.length; i++) {
       list.add(jsonEncode(globals.meds[i].toJson()));
@@ -115,7 +115,7 @@ class Helper {
     await prefs.setStringList(saveKeyGlobalsList, list);
   }
 
-  static Future loadGlobalMedList() async {
+  static Future globalMedListLoad() async {
     //disable next line to not add predefined meds from globals.dart
     //globals.meds.clear();
     SharedPreferences prefs = await SharedPreferences.getInstance();

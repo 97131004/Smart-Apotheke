@@ -79,7 +79,7 @@ class _MedScanState extends State<MedScan> {
         Helper.globalMedListAdd(widget.meds[i]);
       }
     }
-    await Helper.saveGlobalMedList();
+    await Helper.globalMedListSave();
   }
 
   /// Showing list of scanned medicaments or loading bar.

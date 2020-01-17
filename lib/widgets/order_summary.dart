@@ -13,6 +13,7 @@ import 'package:maph_group3/widgets/order_confirmation.dart';
 import 'package:maph_group3/widgets/personal.dart';
 import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import '../util/med_get.dart';
 
 /// The class gives an overview of the order the user is going to execute.
 /// This page consists of different parts:
@@ -34,7 +35,6 @@ class OrderSummary extends StatefulWidget {
 }
 
 class _OrderSummaryState extends State<OrderSummary> {
-
   // google maps controller and markers
   GoogleMapController controller;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
@@ -116,10 +116,12 @@ class _OrderSummaryState extends State<OrderSummary> {
       decoration: _getContainerDecoration(1, 5),
       child: Table(
         border: TableBorder(
-          horizontalInside: BorderSide(width: 1.0, color: Theme.of(context).splashColor),
+          horizontalInside:
+              BorderSide(width: 1.0, color: Theme.of(context).splashColor),
         ),
         columnWidths: {
-          0: FlexColumnWidth(1.0),//FixedColumnWidth(MediaQuery.of(context).size.width * 0.65),
+          0: FlexColumnWidth(
+              1.0), //FixedColumnWidth(MediaQuery.of(context).size.width * 0.65),
           1: FlexColumnWidth(0.2),
           2: FlexColumnWidth(0.3),
         },
@@ -170,12 +172,8 @@ class _OrderSummaryState extends State<OrderSummary> {
               ),
               Flexible(
                 child: Text(
-                    '\n' +
-                    widget.item.name +
-                    '\n' +
-                    widget.item.dosage +
-                    '\n',
-                    textWidthBasis: TextWidthBasis.parent,
+                  '\n' + widget.item.name + '\n' + widget.item.dosage + '\n',
+                  textWidthBasis: TextWidthBasis.parent,
                 ),
               ),
             ],
@@ -192,7 +190,7 @@ class _OrderSummaryState extends State<OrderSummary> {
   }
 
   /// Build shipping / tax  row.
-  TableRow _buildTableRowTaxAndShipping(double tax, double shippingCosts){
+  TableRow _buildTableRowTaxAndShipping(double tax, double shippingCosts) {
     return TableRow(
       children: [
         Column(
@@ -259,9 +257,8 @@ class _OrderSummaryState extends State<OrderSummary> {
         ],
         picked: _pickedPayment,
         onSelected: (String selected) => {
-          setState(() => {_pickedPayment = selected})
-        }
-    );
+              setState(() => {_pickedPayment = selected})
+            });
   }
 
   /// Build shipping options container.
@@ -291,16 +288,15 @@ class _OrderSummaryState extends State<OrderSummary> {
         ],
         picked: _pickedDelivered,
         onSelected: (String selected) => {
-          _pickedDelivered = selected,
-          if (_pickedApo == null) _findApo(selected),
-          setState(() => {
-            if (selected == 'An Apotheke liefern lassen')
-              {deliverToApo = true}
-            else
-              {deliverToApo = false}
-          })
-        }
-    );
+              _pickedDelivered = selected,
+              if (_pickedApo == null) _findApo(selected),
+              setState(() => {
+                    if (selected == 'An Apotheke liefern lassen')
+                      {deliverToApo = true}
+                    else
+                      {deliverToApo = false}
+                  })
+            });
   }
 
   /// Build billing/shipping address container.
@@ -374,7 +370,8 @@ class _OrderSummaryState extends State<OrderSummary> {
           child: IconButton(
             icon: Icon(Icons.add),
             onPressed: () => {
-              Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => Maps())),
+              Navigator.push(context,
+                  NoAnimationMaterialPageRoute(builder: (context) => Maps())),
             },
           ),
         );
@@ -396,7 +393,8 @@ class _OrderSummaryState extends State<OrderSummary> {
           label: Text('Auswahl'),
           backgroundColor: Theme.of(context).primaryColor,
           onPressed: () {
-            Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => Maps()));
+            Navigator.push(context,
+                NoAnimationMaterialPageRoute(builder: (context) => Maps()));
           },
         ),
       ),
@@ -407,7 +405,7 @@ class _OrderSummaryState extends State<OrderSummary> {
   /// earliest pick up time at the drug store.
   Widget _buildApoPickUpContainer() {
     var temp = new DateTime.now();
-    var date = new DateTime(temp.year,temp.month, temp.day, temp.hour + 2, 30);
+    var date = new DateTime(temp.year, temp.month, temp.day, temp.hour + 2, 30);
     var formatter = new DateFormat('HH:mm - dd.MM.yyyy');
     String formattedDate = formatter.format(date);
 
@@ -419,14 +417,19 @@ class _OrderSummaryState extends State<OrderSummary> {
             Icon(Icons.location_on),
             Column(
               children: <Widget>[
-                Text(_pickedApo.name, style: TextStyle(fontWeight: FontWeight.bold),),
+                Text(
+                  _pickedApo.name,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Text(_pickedApo.formattedAddress),
-                Text('Früheste Abholzeit: ' + formattedDate, style: TextStyle(color: Theme.of(context).errorColor),),
+                Text(
+                  'Früheste Abholzeit: ' + formattedDate,
+                  style: TextStyle(color: Theme.of(context).errorColor),
+                ),
               ],
             ),
           ],
-        )
-    );
+        ));
   }
 
   /// Build main address container
@@ -470,9 +473,11 @@ class _OrderSummaryState extends State<OrderSummary> {
               ],
               onSelected: (List<String> checked) => {
                     checked.forEach((it) => {
-                      if(it == 'AGBs zustimmen') { agbIsChecked = true }
-                      else { agbIsChecked = false }
-                    })
+                          if (it == 'AGBs zustimmen')
+                            {agbIsChecked = true}
+                          else
+                            {agbIsChecked = false}
+                        })
                   }),
           RaisedButton(
             onPressed: goToOrderConfirmed,
@@ -514,7 +519,8 @@ class _OrderSummaryState extends State<OrderSummary> {
     });
   }
 
-  Future<void> _buildAlertDialog(BuildContext context, String caption, String text) {
+  Future<void> _buildAlertDialog(
+      BuildContext context, String caption, String text) {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -646,7 +652,8 @@ class _OrderSummaryState extends State<OrderSummary> {
             onPressed: () => _confirmPassword(),
             child: Text(
               'Bestätigen',
-              style: TextStyle(color: Theme.of(context).backgroundColor, fontSize: 20),
+              style: TextStyle(
+                  color: Theme.of(context).backgroundColor, fontSize: 20),
             ),
           )
         ]);
@@ -656,11 +663,22 @@ class _OrderSummaryState extends State<OrderSummary> {
   /// Check if entered password is correct.
   Future _confirmPassword() async {
     if (await PersonalData.checkPassword(passwordController.text)) {
-      // add med to history
+      /// Adding medicament to [globals.meds] (recent) list and saving it.
       Med m = new Med(widget.item.name, widget.item.pzn, '', true);
+
+      /// Retrieving package leaflet for the medicament.
+      List<Med> mPzn = await MedGet.getMeds(widget.item.pzn, 0, 1);
+      if (mPzn.length > 0) {
+        m.url = mPzn[0].url;
+      }
       Helper.globalMedListAdd(m);
+      await Helper.globalMedListSave();
+
       // go to confirmed page
-      Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => OrderConfirmation()));
+      Navigator.push(
+          context,
+          NoAnimationMaterialPageRoute(
+              builder: (context) => OrderConfirmation()));
     }
   }
 
