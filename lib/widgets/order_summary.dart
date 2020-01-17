@@ -67,36 +67,43 @@ class _OrderSummaryState extends State<OrderSummary> {
   /// Build main view.
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Bestellübersicht'),
-      ),
-      body: Visibility(
-        visible: dataIsComplete,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 5.0),
-          child: Column(
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              _buildProductOverview(),
-              Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              _buildPaymentOptions(),
-              Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              _buildShippingOptions(),
-              Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              _buildConfirmationContainer(),
-              Padding(
-                padding: EdgeInsets.all(5),
-              ),
-            ],
+    return WillPopScope(
+      onWillPop: () async {
+        int count = 0;
+        Navigator.of(context).popUntil((_) => count++ >= 2);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Bestellübersicht'),
+        ),
+        body: Visibility(
+          visible: dataIsComplete,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 5.0),
+            child: Column(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(5),
+                ),
+                _buildProductOverview(),
+                Padding(
+                  padding: EdgeInsets.all(5),
+                ),
+                _buildPaymentOptions(),
+                Padding(
+                  padding: EdgeInsets.all(5),
+                ),
+                _buildShippingOptions(),
+                Padding(
+                  padding: EdgeInsets.all(5),
+                ),
+                _buildConfirmationContainer(),
+                Padding(
+                  padding: EdgeInsets.all(5),
+                ),
+              ],
+            ),
           ),
         ),
       ),
