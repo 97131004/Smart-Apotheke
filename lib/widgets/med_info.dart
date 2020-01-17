@@ -8,9 +8,9 @@ import '../util/med_get.dart';
 import '../util/load_bar.dart';
 import '../data/med.dart';
 
-/// Shows medicament information from the package leaflet. Loads the information with a
-/// GET-Request from [beipackzettel.de], then parses and displays it here. You can jump
-/// (autoscroll) to certain categories by clicking on the links at the top. Users can
+/// Page that shows medicament information from the package leaflet. Loads the information 
+/// with a GET-Request from [beipackzettel.de], then parses and displays it here. You can jump
+/// (autoscroll) to certain categories by clicking on the links at the top. The user can
 /// increase and decrease the text size.
 class MedInfo extends StatefulWidget {
   final Med med;

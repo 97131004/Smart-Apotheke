@@ -5,7 +5,7 @@ import '../util/helper.dart';
 import '../util/med_get.dart';
 import '../util/med_list.dart';
 
-/// Searches for medicament [name] or [pzn] defined by the user. Search results
+/// Page to search for a medicament [name] or [pzn] defined by the user. Search results
 /// are coming from a GET-Request to [docmorris.de], then parsed and displayed here.
 /// First loads a fixed number of results, then loads the next set of results
 /// when user scrolls further down.

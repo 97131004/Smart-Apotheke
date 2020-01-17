@@ -11,21 +11,21 @@ import 'user_guide.dart';
 import 'calendar.dart';
 
 /// Default home page, that opens on each app start, except the very first time.
-/// Shows buttons for app's primary functions and a hamburger menu for further settings.
+/// Shows buttons for app's primary functions and a hamburger menu with other settings.
 class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return _HomeState();
+    return HomeState();
   }
 }
 
-class _HomeState extends State<Home> {
-  /// First name will be displayed in the menu at the top.
+class HomeState extends State<Home> {
+  /// First name will be displayed in the menu header.
   String firstName = '';
 
-  /// Last name will be displayed in the menu at the top.
+  /// Last name will be displayed in the menu header.
   String lastName = '';
 
   @override
@@ -51,9 +51,9 @@ class _HomeState extends State<Home> {
         SystemUiOverlayStyle(statusBarColor: Theme.of(context).primaryColor));
     return SafeArea(
       child: WillPopScope(
-        onWillPop: () {
-          /// Blocking back button.
-          return;
+        onWillPop: () async {
+          SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+          return false;
         },
         child: Scaffold(
           drawer: Drawer(
@@ -78,14 +78,14 @@ class _HomeState extends State<Home> {
                 ListTile(
                   title: Text('Persönliche Daten'),
                   onTap: () {
-                    /// Closing menu first, so it eliminates flicker for the next page pop.
+                    /// Popping menu first, so it eliminates flicker for the next page pop.
                     Navigator.pop(context);
                     Navigator.push(
                       context,
                       NoAnimationMaterialPageRoute(
 
-                          /// Passing [loadName] function to update first and last
-                          /// name in [home] page from within [personal] page.
+                          /// Passing [loadName] function to update first and last name
+                          /// in [home] page's menu header from within [personal] page.
                           builder: (context) => Personal(
                                 funcUpdateHome: () async {
                                   await loadName();

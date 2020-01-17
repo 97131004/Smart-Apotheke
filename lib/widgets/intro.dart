@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'home.dart';
 
+/// Intro page that shows on the very first app start. Shows
 class Intro extends StatefulWidget {
   final IntroPage showOnlyPage;
 
@@ -89,6 +90,8 @@ class _IntroState extends State<Intro> {
           appBarText = Text('');
           curPage = IntroPage.about;
         });
+      } else if (curPage == IntroPage.about) {
+        return true;
       }
     } else {
       Navigator.pop(context);
