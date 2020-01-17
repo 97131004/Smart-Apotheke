@@ -5,6 +5,9 @@ import 'package:maph_group3/widgets/order_summary.dart';
 
 import '../data/globals.dart' as globals;
 
+/// The class gives a product overview with all details regarding the medicament.
+/// It has an input field, where the user can specify the amount of the product
+/// he wants to order and sees the price for his order.
 class ProductDetails extends StatefulWidget {
   final String searchKey;
 
@@ -29,6 +32,7 @@ class _ProductDetailsState extends State<ProductDetails> {
   void initState() {
     super.initState();
 
+    /// get the local shop item by search key
     medSearchKey = widget.searchKey;
     if(globals.items.containsKey(medSearchKey)) {
       localShopItem = globals.items[medSearchKey];
@@ -41,6 +45,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     super.dispose();
   }
 
+  /// Build the main view of the product details page.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,6 +64,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
+  /// Build the image container for the product.
   Widget buildImageContainer() {
     return Center(
       child: Container(
@@ -74,6 +80,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
+  /// Build the main part where details of the medicament are displayed.
   Widget buildMainView() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -156,6 +163,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
+  /// Build the complete order container.
   Widget buildOrderCompleteContainer() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -172,6 +180,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
+  /// Build the price input field.
   Widget _buildInputField() {
     return new Flexible(
       child: Container(
@@ -197,6 +206,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
+  /// Build container with pricing information.
   Widget _buildPricingContainer() {
     double price = ((localShopItem.priceInt * quantity) / 100);
     return new Flexible(
@@ -241,6 +251,8 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
+  /// Validate the input of the text field.
+  /// Shows alert when input field is left empty.
   void validateInputAndProceed() {
     if(textEditController.text.isNotEmpty) {
       this.localShopItem.orderQuantity = int.parse(textEditController.text);

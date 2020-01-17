@@ -3,6 +3,9 @@ import 'package:maph_group3/util/nampr.dart';
 
 import 'home.dart';
 
+/// The class confirms the order at the end of the order workflow.
+/// The user has the possibility to wether go back to Home or to go back to the
+/// shop overview page.
 class OrderConfirmation extends StatefulWidget {
 
   OrderConfirmation({Key key}) : super(key: key);
@@ -28,6 +31,7 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
     _animationController.dispose();
   }
 
+  /// Build order confirmed text and animated icon.
   @override
   Widget build(BuildContext context) {
     return new WillPopScope(
@@ -54,6 +58,7 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
     );
   }
 
+  /// Build animated icon.
   Widget _buildHomeButton() {
     return Expanded(
       child: GestureDetector(
@@ -67,6 +72,7 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
     );
   }
 
+  /// Method goes back 3 steps / pages.
   Future<bool> _onWillPop() {
     // go back to product details
     var nav = Navigator.of(context);
@@ -75,6 +81,7 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
     return nav.maybePop();
   }
 
+  /// Method goes back to Home page.
   Future<bool> _onBackToHome() {
     return Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => Home()));
   }
