@@ -12,12 +12,12 @@ import '../util/nampr.dart';
 import '../data/med.dart';
 
 /// Page to manage the scanning of the medical prescription. User can choose whether he wants
-/// to scan an existing image from the phone's storage, or scan using the phone's camera.
-/// The user is then prompted to accept, decline or rotate the image by 90 degrees, so it
-/// appears to be horizontal (required for proper text recognition).
+/// to scan an existing image from the phone's storage, or scan the image using the phone's 
+/// camera. The user is then prompted to accept, decline or rotate the image by 90 degrees, 
+/// so it appears to be horizontal (required for proper text recognition).
 ///
 /// Afterwards, the scanning process begins. The scanning basically uses
-/// the cloud-based text recognition api from the machine learning kit for firebase
+/// the cloud-based text recognition API from the machine learning kit for firebase
 /// (https://firebase.google.com/docs/ml-kit/android/recognize-text?hl=de).
 /// Since firebase is a cloud-based service, the text recognition
 /// requires an internet connection and a linked google account
@@ -48,7 +48,10 @@ class _ScannerState extends State<Scanner> {
   /// Flag whether an image is currently being processed.
   bool _imageLoading = false;
 
+  /// Storing processed image.
   Uint8List _image;
+
+  /// Storing amount of quarter turns done by the user.
   int _rotationQuarters = 0;
 
   @override
