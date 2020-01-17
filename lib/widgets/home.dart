@@ -17,41 +17,42 @@ class Home extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return HomeState();
+    return _HomeState();
   }
 }
 
-class HomeState extends State<Home> {
-  /// First name will be displayed in the menu header.
-  String firstName = '';
+class _HomeState extends State<Home> {
+  /// First name to be displayed in the menu header.
+  String _firstName = '';
 
-  /// Last name will be displayed in the menu header.
-  String lastName = '';
+  /// Last name to be displayed in the menu header.
+  String _lastName = '';
 
   @override
   void initState() {
     super.initState();
-    loadName();
+
+    _loadName();
   }
 
   /// Loading first and last name from the [personal] settings.
-  Future loadName() async {
+  Future _loadName() async {
     List<String> address = await PersonalData.getAddress();
     if (address != null) {
       setState(() {
-        firstName = address[0];
-        lastName = address[1];
+        _firstName = address[0];
+        _lastName = address[1];
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Theme.of(context).primaryColor));
     return SafeArea(
       child: WillPopScope(
         onWillPop: () async {
+          /// Moves app to background. No popping here, since we might be
+          /// coming from the [intro] page.
           SystemChannels.platform.invokeMethod('SystemNavigator.pop');
           return false;
         },
@@ -64,8 +65,8 @@ class HomeState extends State<Home> {
                 /// Displaying first and last name.
                 DrawerHeader(
                   child: Text(
-                    (firstName.length > 0 && lastName.length > 0)
-                        ? firstName + ' ' + lastName
+                    (_firstName.length > 0 && _lastName.length > 0)
+                        ? _firstName + ' ' + _lastName
                         : 'Smart Apotheke',
                     style: TextStyle(color: Colors.white, fontSize: 18),
                   ),
@@ -88,7 +89,7 @@ class HomeState extends State<Home> {
                           /// in [home] page's menu header from within [personal] page.
                           builder: (context) => Personal(
                                 funcUpdateHome: () async {
-                                  await loadName();
+                                  await _loadName();
                                 },
                               )),
                     );
@@ -157,14 +158,14 @@ class HomeState extends State<Home> {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      buildButton("Kalender", Icons.calendar_today, () {
+                      _buildButton("Kalender", Icons.calendar_today, () {
                         Navigator.push(
                           context,
                           NoAnimationMaterialPageRoute(
                               builder: (context) => Calendar()),
                         );
                       }),
-                      buildButton("Medikament suchen", Icons.search, () {
+                      _buildButton("Medikament suchen", Icons.search, () {
                         Navigator.push(
                           context,
                           NoAnimationMaterialPageRoute(
@@ -175,14 +176,14 @@ class HomeState extends State<Home> {
                   ),
                   Row(
                     children: <Widget>[
-                      buildButton("Verlauf", Icons.history, () {
+                      _buildButton("Verlauf", Icons.history, () {
                         Navigator.push(
                           context,
                           NoAnimationMaterialPageRoute(
                               builder: (context) => Recent()),
                         );
                       }),
-                      buildButton("Rezept scannen", Icons.camera_alt, () {
+                      _buildButton("Rezept scannen", Icons.camera_alt, () {
                         Navigator.push(
                           context,
                           NoAnimationMaterialPageRoute(
@@ -201,7 +202,7 @@ class HomeState extends State<Home> {
   }
 
   /// Visualizing main button.
-  Widget buildButton(String label, IconData icon, Function funcOnPressed) {
+  Widget _buildButton(String label, IconData icon, Function funcOnPressed) {
     return Padding(
       padding: EdgeInsets.only(left: 4, top: 4),
       child: ButtonTheme(

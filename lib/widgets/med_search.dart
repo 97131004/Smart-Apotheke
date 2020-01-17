@@ -14,16 +14,16 @@ class MedSearch extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return MedSearchState();
+    return _MedSearchState();
   }
 }
 
-class MedSearchState extends State<MedSearch> {
-  /// [true] when [plc] finished loading first search results.
-  static bool getSearchDone = false;
-  static int resultsPerPage = 8;
-  static String searchValue = '';
-  String lastSearchValue = '';
+class _MedSearchState extends State<MedSearch> {
+  /// [true] when [_plc] finished loading first search results.
+  static bool _getSearchDone = false;
+  static final int _resultsPerPage = 8;
+  static String _searchValue = '';
+  String _lastSearchValue = '';
 
   @override
   void initState() {
@@ -39,29 +39,29 @@ class MedSearchState extends State<MedSearch> {
 
     /// Since it's required to create a static [PagewiseLoadController], we have to reset
     /// the other static variables, that might have been changed in previous searchings.
-    getSearchDone = false;
-    searchValue = '';
+    _getSearchDone = false;
+    _searchValue = '';
   }
 
   /// Controls the page-wise output of the search results. [pageFuture] is called
   /// (also increases [pageIndex] by 1) when user's scrollview reaches the bottom
   /// of the widget. Then, another GET-Request is done to fetch the search
   /// results from the next page.
-  static PagewiseLoadController plc = PagewiseLoadController(
+  static PagewiseLoadController _plc = PagewiseLoadController(
     pageFuture: (pageIndex) async {
-      if (searchValue.length > 0) {
-        getSearchDone = true;
+      if (_searchValue.length > 0) {
+        _getSearchDone = true;
 
         /// Adding local search results on top from the [globals.meds] list.
-        MedGet.getMedsPrefix(plc, pageIndex, searchValue);
+        MedGet.getMedsPrefix(_plc, pageIndex, _searchValue);
 
         /// Adding search results from the web.
         return await MedGet.getMeds(
-            searchValue, pageIndex, resultsPerPage, true);
+            _searchValue, pageIndex, _resultsPerPage, true);
       }
       return null;
     },
-    pageSize: resultsPerPage,
+    pageSize: _resultsPerPage,
   );
 
   /// Shows a list of search results and corresponding loading bars.
@@ -78,7 +78,7 @@ class MedSearchState extends State<MedSearch> {
                 padding: EdgeInsets.all(5),
                 child: TextField(
                     autofocus: true,
-                    onSubmitted: search,
+                    onSubmitted: _search,
                     decoration: new InputDecoration(
                       hintText: 'Name / PZN',
                       prefixIcon: const Icon(
@@ -87,37 +87,39 @@ class MedSearchState extends State<MedSearch> {
                     ))),
             SizedBox(height: 10),
             Expanded(
-              child: PagewiseListView(
-                pageLoadController: plc,
-                showRetry: true,
-                itemBuilder: (context, entry, index) {
-                  if (getSearchDone) {
-                    return MedList.buildItem(context, index, entry);
-                  }
-                  return null;
-                },
-                noItemsFoundBuilder: (context) {
-                  return (searchValue.length > 0)
-                      ? Text('Keine Medikamente gefunden.')
-                      : null;
-                },
-                loadingBuilder: (context) {
-                  return (searchValue.length > 0)
-                      ? CircularProgressIndicator()
-                      : null;
-                },
-                retryBuilder: (context, callback) {
-                  return Column(
-                    children: <Widget>[
-                      Text(
-                        'Fehler beim Suchen.\n' +
-                            'Prüfen Sie Ihre Internetverbindung.\n' +
-                            'Bitte gehen Sie zurück und versuchen es erneut.',
-                        style: TextStyle(color: Theme.of(context).errorColor),
-                      ),
-                    ],
-                  );
-                },
+              child: Scrollbar(
+                child: PagewiseListView(
+                  pageLoadController: _plc,
+                  showRetry: true,
+                  itemBuilder: (context, entry, index) {
+                    if (_getSearchDone) {
+                      return MedList.buildItem(context, index, entry);
+                    }
+                    return null;
+                  },
+                  noItemsFoundBuilder: (context) {
+                    return (_searchValue.length > 0)
+                        ? Text('Keine Medikamente gefunden.')
+                        : null;
+                  },
+                  loadingBuilder: (context) {
+                    return (_searchValue.length > 0)
+                        ? CircularProgressIndicator()
+                        : null;
+                  },
+                  retryBuilder: (context, callback) {
+                    return Column(
+                      children: <Widget>[
+                        Text(
+                          'Fehler beim Suchen.\n' +
+                              'Prüfen Sie Ihre Internetverbindung.\n' +
+                              'Bitte gehen Sie zurück und versuchen es erneut.',
+                          style: TextStyle(color: Theme.of(context).errorColor),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -126,11 +128,11 @@ class MedSearchState extends State<MedSearch> {
 
   /// Starts a new medicament search if search value differs
   /// from last one and is not empty.
-  void search(String value) {
-    if (value != lastSearchValue && value.length > 0) {
-      searchValue = value;
-      lastSearchValue = value;
-      plc.reset();
+  void _search(String value) {
+    if (value != _lastSearchValue && value.length > 0) {
+      _searchValue = value;
+      _lastSearchValue = value;
+      _plc.reset();
     }
   }
 }

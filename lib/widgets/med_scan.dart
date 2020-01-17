@@ -18,13 +18,13 @@ class MedScan extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return MedScanState();
+    return _MedScanState();
   }
 }
 
-class MedScanState extends State<MedScan> {
-  /// [true] when [getMeds] finished processing medicaments.
-  bool getMedsDone = false;
+class _MedScanState extends State<MedScan> {
+  /// [true] when [_getMeds] finished processing medicaments.
+  bool _getMedsDone = false;
 
   @override
   void initState() {
@@ -40,18 +40,18 @@ class MedScanState extends State<MedScan> {
 
     /// Starting post-processing medicaments.
     if (widget.meds != null && widget.meds.length > 0) {
-      getMeds();
+      _getMeds();
     } else {
       if (this.mounted) {
         setState(() {
-          getMedsDone = true;
+          _getMedsDone = true;
         });
       }
     }
   }
 
   /// Post-processing input medicaments. Updating medicament [name] and leaflet [url].
-  Future getMeds() async {
+  Future _getMeds() async {
     for (int i = 0; i < widget.meds.length; i++) {
       String pzn = widget.meds[i].pzn;
       if (Helper.isNumber(pzn)) {
@@ -67,7 +67,7 @@ class MedScanState extends State<MedScan> {
     /// Refreshing UI.
     if (this.mounted) {
       setState(() {
-        getMedsDone = true;
+        _getMedsDone = true;
       });
     }
 
@@ -94,14 +94,14 @@ class MedScanState extends State<MedScan> {
         appBar: AppBar(
           title: Text('Gefundene Medikamente'),
         ),
-        body: getMedsDone ? buildList() : LoadBar.build(),
+        body: _getMedsDone ? _buildList() : LoadBar.build(),
       ),
     );
   }
 
   /// Builds final list, including top note, list of scanned medicaments,
   /// buttons to do a manual medicament search or retry scan.
-  Widget buildList() {
+  Widget _buildList() {
     return Scrollbar(
       child: ListView.builder(
         itemBuilder: (context, index) {

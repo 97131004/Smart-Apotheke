@@ -20,13 +20,13 @@ class Scanner extends StatefulWidget {
 }
 
 class _ScannerState extends State<Scanner> {
-  static List<Med> medicaments;
-  bool imageChosen = false;
-  bool imageLoaded = false;
-  final buttonHeight = 100.0;
-  final iconSize = 32.0;
-  Uint8List image;
-  int rot = 0;
+  List<Med> _medicaments;
+  bool _imageChosen = false;
+  bool _imageLoaded = false;
+  final _buttonHeight = 100.0;
+  final _iconSize = 32.0;
+  Uint8List _image;
+  int _rotationQuarters = 0;
 
   @override
   void initState() {
@@ -41,17 +41,17 @@ class _ScannerState extends State<Scanner> {
 
   @override
   Widget build(BuildContext context) {
-    if (!imageChosen)
-      return buildChosenImage();
+    if (!_imageChosen)
+      return _buildChosenImage();
     else
-      return buildPreview(image);
+      return _buildPreview(_image);
   }
 
-  Widget buildChosenImage() {
+  Widget _buildChosenImage() {
     return WillPopScope(
       onWillPop: () async {
-        if (!imageLoaded) {
-          imageChosen = false;
+        if (!_imageLoaded) {
+          _imageChosen = false;
           Navigator.pop(context);
         }
         return false;
@@ -60,12 +60,12 @@ class _ScannerState extends State<Scanner> {
         appBar: AppBar(
           title: Text('Rezept scannen'),
         ),
-        body: imageLoaded ? LoadBar.build() : buildImage(),
+        body: _imageLoaded ? LoadBar.build() : _buildImage(),
       ),
     );
   }
 
-  Widget buildNotification() {
+  Widget _buildNotification() {
     return Container(
       width: double.infinity,
       color: Colors.blueAccent,
@@ -78,10 +78,10 @@ class _ScannerState extends State<Scanner> {
     );
   }
 
-  Widget buildImage() {
+  Widget _buildImage() {
     return Stack(
       children: <Widget>[
-        buildNotification(),
+        _buildNotification(),
         Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -91,7 +91,7 @@ class _ScannerState extends State<Scanner> {
                 padding: EdgeInsets.only(left: 4, top: 4),
                 child: ButtonTheme(
                   minWidth: MediaQuery.of(context).size.width * 0.5 - 6,
-                  height: buttonHeight,
+                  height: _buttonHeight,
                   child: RaisedButton(
                     color: Theme.of(context).buttonColor,
                     padding: EdgeInsets.all(8.0),
@@ -103,7 +103,7 @@ class _ScannerState extends State<Scanner> {
                           child: Icon(
                             Icons.folder,
                             color: Colors.white,
-                            size: iconSize,
+                            size: _iconSize,
                           ),
                         ),
                         Padding(
@@ -117,7 +117,7 @@ class _ScannerState extends State<Scanner> {
                         ),
                       ],
                     ),
-                    onPressed: getImagefromGallery,
+                    onPressed: _getImagefromGallery,
                   ),
                 ),
               ),
@@ -125,7 +125,7 @@ class _ScannerState extends State<Scanner> {
                 padding: EdgeInsets.only(left: 4, top: 4),
                 child: ButtonTheme(
                   minWidth: MediaQuery.of(context).size.width * 0.5 - 6,
-                  height: buttonHeight,
+                  height: _buttonHeight,
                   child: RaisedButton(
                     color: Theme.of(context).buttonColor,
                     padding: EdgeInsets.all(8.0),
@@ -137,7 +137,7 @@ class _ScannerState extends State<Scanner> {
                           child: Icon(
                             Icons.camera_alt,
                             color: Colors.white,
-                            size: iconSize,
+                            size: _iconSize,
                           ),
                         ),
                         Padding(
@@ -151,7 +151,7 @@ class _ScannerState extends State<Scanner> {
                         ),
                       ],
                     ),
-                    onPressed: getImagefromCamera,
+                    onPressed: _getImagefromCamera,
                   ),
                 ),
               ),
@@ -162,7 +162,7 @@ class _ScannerState extends State<Scanner> {
     );
   }
 
-  Widget buildPreview(Uint8List rotateImg) {
+  Widget _buildPreview(Uint8List rotateImg) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -171,13 +171,13 @@ class _ScannerState extends State<Scanner> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            buildNotification(),
+            _buildNotification(),
             FittedBox(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height / 3 * 2 - 60,
                 child: RotatedBox(
-                  quarterTurns: rot,
+                  quarterTurns: _rotationQuarters,
                   child: Image.memory(
                     rotateImg,
                     scale: 1.0,
@@ -198,7 +198,7 @@ class _ScannerState extends State<Scanner> {
                     icon: Icon(Icons.clear),
                     onPressed: () {
                       setState(() {
-                        imageChosen = false;
+                        _imageChosen = false;
                       });
                     },
                     iconSize: 40,
@@ -210,10 +210,10 @@ class _ScannerState extends State<Scanner> {
                     icon: Icon(Icons.rotate_right),
                     onPressed: () {
                       setState(() {
-                        if (rot == 3) {
-                          rot = 0;
+                        if (_rotationQuarters == 3) {
+                          _rotationQuarters = 0;
                         } else {
-                          rot += 1;
+                          _rotationQuarters += 1;
                         }
                       });
                     },
@@ -224,7 +224,7 @@ class _ScannerState extends State<Scanner> {
                   IconButton(
                     alignment: Alignment.topRight,
                     icon: Icon(Icons.check),
-                    onPressed: () => backToScanner(),
+                    onPressed: () => _backToScanner(),
                     iconSize: 50,
                   )
                 ]),
@@ -236,38 +236,38 @@ class _ScannerState extends State<Scanner> {
     );
   }
 
-  void backToScanner() async {
+  void _backToScanner() async {
     ImageEditorOption option = ImageEditorOption();
-    option.addOption(RotateOption(rot * 90));
+    option.addOption(RotateOption(_rotationQuarters * 90));
 
-    image =
-        await ImageEditor.editImage(image: image, imageEditorOption: option);
-    analyzeImage();
+    _image =
+        await ImageEditor.editImage(image: _image, imageEditorOption: option);
+    _analyzeImage();
     setState(() {
-      imageLoaded = true;
-      imageChosen = false;
+      _imageLoaded = true;
+      _imageChosen = false;
     });
   }
 
-  Future analyzeImage() async {
+  Future _analyzeImage() async {
     try {
       FirebaseVisionTextDetector detector = FirebaseVisionTextDetector.instance;
-      var currentLabels = await detector.detectFromBinary(image);
-      medicaments = await pznSearch(currentLabels);
-      gotoMedListFound();
+      var currentLabels = await detector.detectFromBinary(_image);
+      _medicaments = await _pznSearch(currentLabels);
+      _gotoMedListFound();
     } catch (e) {
       print(e.toString());
     }
   }
 
-  void getImagefromGallery() async {
+  void _getImagefromGallery() async {
     try {
       var file = await ImagePicker.pickImage(source: ImageSource.gallery);
       if (file.existsSync()) {
         //  provider = ExtendedFileImageProvider(file);
-        image = file.readAsBytesSync();
+        _image = file.readAsBytesSync();
         setState(() {
-          imageChosen = true;
+          _imageChosen = true;
         });
       }
     } catch (e) {
@@ -275,13 +275,13 @@ class _ScannerState extends State<Scanner> {
     }
   }
 
-  void getImagefromCamera() async {
+  void _getImagefromCamera() async {
     try {
       var file = await ImagePicker.pickImage(source: ImageSource.camera);
       if (file.existsSync()) {
-        image = file.readAsBytesSync();
+        _image = file.readAsBytesSync();
         setState(() {
-          imageChosen = true;
+          _imageChosen = true;
         });
       }
     } catch (e) {
@@ -289,7 +289,7 @@ class _ScannerState extends State<Scanner> {
     }
   }
 
-  static Future<List<Med>> pznSearch(List<VisionText> texts) async {
+  static Future<List<Med>> _pznSearch(List<VisionText> texts) async {
     List<Med> pznNrs = [];
     for (var item in texts) {
       String text = item.text;
@@ -314,15 +314,15 @@ class _ScannerState extends State<Scanner> {
     return pznNrs;
   }
 
-  void gotoMedListFound() {
+  void _gotoMedListFound() {
     Navigator.push(
         context,
         NoAnimationMaterialPageRoute(
           builder: (context) => MedScan(
-            meds: medicaments,
+            meds: _medicaments,
           ),
         ));
-    imageChosen = false;
-    imageLoaded = false;
+    _imageChosen = false;
+    _imageLoaded = false;
   }
 }

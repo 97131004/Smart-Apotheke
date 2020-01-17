@@ -8,10 +8,10 @@ import '../util/med_get.dart';
 import '../util/load_bar.dart';
 import '../data/med.dart';
 
-/// Page that shows medicament information from the package leaflet. Loads the information 
-/// with a GET-Request from [beipackzettel.de], then parses and displays it here. You can jump
-/// (autoscroll) to certain categories by clicking on the links at the top. The user can
-/// increase and decrease the text size.
+/// Page that shows medicament information from the package leaflet. Input parameter is a
+/// medicament [med]. Loads the medicament information with a GET-Request from [beipackzettel.de],
+/// then parses and displays it here. You can jump (autoscroll) to certain categories by
+/// clicking on the links at the top. The user can increase and decrease the text size.
 class MedInfo extends StatefulWidget {
   final Med med;
 
@@ -19,27 +19,28 @@ class MedInfo extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return MedInfoState();
+    return _MedInfoState();
   }
 }
 
-class MedInfoState extends State<MedInfo> {
-  /// [true] when [getMedInfoData] finished loading medicament information.
-  bool getMedInfoDataDone = false;
+class _MedInfoState extends State<MedInfo> {
+  final String _saveKeyMedInfoTextSize = 'medInfoTextSize';
+
+  /// [true] when [_getMedInfoData] finished loading medicament information.
+  bool _getMedInfoDataDone = false;
 
   /// Storing retrieved medicament information text.
-  String medInfoData = '';
+  String _medInfoData = '';
 
   /// List of keys which represent the anchors to jump to.
-  List<GlobalKey> scrollKeys;
+  List<GlobalKey> _scrollKeys;
 
-  ScrollController scrollController;
+  ScrollController _scrollController;
 
   /// Dynamic size variable, that is added to the corresponding text sizes.
-  double varSize = 0;
+  double _varSize = 0;
 
-  bool varSizeLoaded = false;
-  String saveKeyMedInfoTextSize = 'medInfoTextSize';
+  bool _varSizeLoaded = false;
 
   @override
   void initState() {
@@ -53,51 +54,51 @@ class MedInfoState extends State<MedInfo> {
 
     super.initState();
 
-    scrollController = ScrollController();
-    getMedInfoDataInit();
+    _scrollController = ScrollController();
+    _getMedInfoDataInit();
   }
 
   /// Retrieving medicament information.
-  void getMedInfoDataInit() {
+  void _getMedInfoDataInit() {
     setState(() {
-      getMedInfoDataDone = false;
+      _getMedInfoDataDone = false;
     });
     if (widget.med.url.length > 0) {
-      getMedInfoData();
+      _getMedInfoData();
     } else {
       /// Empty [medInfoData] shows error note.
-      medInfoData = '';
+      _medInfoData = '';
       setState(() {
-        getMedInfoDataDone = true;
+        _getMedInfoDataDone = true;
       });
     }
   }
 
   /// Retrieving medicament information from web and generating correct amount
   /// of anchors depending on page's category count.
-  Future getMedInfoData() async {
+  Future _getMedInfoData() async {
     String resp = await MedGet.getMedInfoData(widget.med);
 
     if (resp != null && resp.length > 0) {
-      medInfoData = resp;
-      int chapterCount = '#chapter'.allMatches(medInfoData).length;
+      _medInfoData = resp;
+      int chapterCount = '#chapter'.allMatches(_medInfoData).length;
 
-      scrollKeys = new List<GlobalKey>();
+      _scrollKeys = new List<GlobalKey>();
       for (int i = 0; i < chapterCount; i++) {
-        scrollKeys.add(new GlobalKey());
+        _scrollKeys.add(new GlobalKey());
       }
     } else {
       /// Empty [medInfoData] shows error note.
-      medInfoData = '';
+      _medInfoData = '';
     }
 
-    if (medInfoData.length > 0) {
-      loadMedInfoTextSize();
+    if (_medInfoData.length > 0) {
+      _loadMedInfoTextSize();
     }
 
     if (this.mounted) {
       setState(() {
-        getMedInfoDataDone = true;
+        _getMedInfoDataDone = true;
       });
     }
   }
@@ -106,7 +107,7 @@ class MedInfoState extends State<MedInfo> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        saveMedInfoTextSize();
+        _saveMedInfoTextSize();
         Navigator.pop(context);
         return false;
       },
@@ -114,16 +115,16 @@ class MedInfoState extends State<MedInfo> {
         appBar: AppBar(
           title: Text(widget.med.name),
           actions: <Widget>[
-            if (getMedInfoDataDone && medInfoData.length > 0)
+            if (_getMedInfoDataDone && _medInfoData.length > 0)
               Row(
                 children: <Widget>[
                   IconButton(
                     icon: Icon(Icons.zoom_in),
                     onPressed: () {
                       /// Increasing text size.
-                      if (varSize < 6) {
+                      if (_varSize < 6) {
                         setState(() {
-                          varSize += 1;
+                          _varSize += 1;
                         });
                       }
                     },
@@ -132,9 +133,9 @@ class MedInfoState extends State<MedInfo> {
                     icon: Icon(Icons.zoom_out),
                     onPressed: () {
                       /// Decreasing text size.
-                      if (varSize > 0) {
+                      if (_varSize > 0) {
                         setState(() {
-                          varSize -= 1;
+                          _varSize -= 1;
                         });
                       }
                     },
@@ -143,17 +144,17 @@ class MedInfoState extends State<MedInfo> {
               )
           ],
         ),
-        body: getMedInfoDataDone
-            ? ((medInfoData.length > 0) ? buildHtml() : buildNotFound())
+        body: _getMedInfoDataDone
+            ? ((_medInfoData.length > 0) ? _buildHtml() : _buildNotFound())
             : LoadBar.build(),
         floatingActionButton: Visibility(
-          visible: (getMedInfoDataDone && medInfoData.length > 0),
+          visible: (_getMedInfoDataDone && _medInfoData.length > 0),
           child: FloatingActionButton(
             foregroundColor: Colors.white,
             child: Icon(Icons.arrow_upward),
 
             /// Jumping to the very top on floating button press.
-            onPressed: () => scrollController.jumpTo(0),
+            onPressed: () => _scrollController.jumpTo(0),
           ),
         ),
       ),
@@ -161,7 +162,7 @@ class MedInfoState extends State<MedInfo> {
   }
 
   /// Visualization on no package leaflet found.
-  Widget buildNotFound() {
+  Widget _buildNotFound() {
     return Center(
       child: Column(
         children: <Widget>[
@@ -177,7 +178,7 @@ class MedInfoState extends State<MedInfo> {
             minWidth: MediaQuery.of(context).size.width * 0.75,
             height: 50.0,
             child: RaisedButton.icon(
-              onPressed: getMedInfoDataInit,
+              onPressed: _getMedInfoDataInit,
               icon: Icon(Icons.refresh, color: Colors.white),
               label: Text("Nochmals versuchen",
                   style: TextStyle(color: Colors.white)),
@@ -189,13 +190,13 @@ class MedInfoState extends State<MedInfo> {
   }
 
   /// Visualization of retrieved package leaflet, and managing anchors and jump links.
-  Widget buildHtml() {
+  Widget _buildHtml() {
     return Scrollbar(
       child: ListView(
-        controller: scrollController,
+        controller: _scrollController,
         children: <Widget>[
           Html(
-            data: medInfoData,
+            data: _medInfoData,
             padding: EdgeInsets.all(8.0),
             onLinkTap: (url) {
               /// Jump (autoscroll) to the corresponding anchor,
@@ -204,9 +205,9 @@ class MedInfoState extends State<MedInfo> {
                 String ind = url.replaceAll('#chapter_', '');
                 int iScrollKey = int.tryParse(ind);
                 iScrollKey = iScrollKey - 1;
-                if (iScrollKey >= 0 && iScrollKey < scrollKeys.length) {
+                if (iScrollKey >= 0 && iScrollKey < _scrollKeys.length) {
                   Scrollable.ensureVisible(
-                      scrollKeys[iScrollKey].currentContext);
+                      _scrollKeys[iScrollKey].currentContext);
                 }
               }
             },
@@ -220,12 +221,12 @@ class MedInfoState extends State<MedInfo> {
                   String ind = id.replaceAll('chapter_', '');
                   int iScrollKey = int.tryParse(ind);
                   iScrollKey = iScrollKey - 1;
-                  if (!(iScrollKey >= 0 && iScrollKey < scrollKeys.length)) {
+                  if (!(iScrollKey >= 0 && iScrollKey < _scrollKeys.length)) {
                     iScrollKey = null;
                   }
                   return Column(
-                      key: (scrollKeys != null && iScrollKey != null)
-                          ? scrollKeys[iScrollKey]
+                      key: (_scrollKeys != null && iScrollKey != null)
+                          ? _scrollKeys[iScrollKey]
                           : null,
                       children: <Widget>[
                         DefaultTextStyle(
@@ -235,7 +236,7 @@ class MedInfoState extends State<MedInfo> {
                             fontWeight: FontWeight.bold,
                             fontSize:
                                 Theme.of(context).textTheme.body2.fontSize +
-                                    varSize,
+                                    _varSize,
                           ),
                         )
                       ]);
@@ -258,7 +259,7 @@ class MedInfoState extends State<MedInfo> {
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
                       fontSize:
-                          Theme.of(context).textTheme.title.fontSize + varSize,
+                          Theme.of(context).textTheme.title.fontSize + _varSize,
                     ),
                   );
                 } else if (node.className == 'accordion') {
@@ -271,7 +272,7 @@ class MedInfoState extends State<MedInfo> {
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
                         fontSize: Theme.of(context).textTheme.body2.fontSize +
-                            varSize,
+                            _varSize,
                       ),
                     ),
                   );
@@ -292,7 +293,7 @@ class MedInfoState extends State<MedInfo> {
                     style: TextStyle(
                       color: Colors.black,
                       fontSize:
-                          Theme.of(context).textTheme.body2.fontSize + varSize,
+                          Theme.of(context).textTheme.body2.fontSize + _varSize,
                     ),
                   );
                 }
@@ -305,22 +306,22 @@ class MedInfoState extends State<MedInfo> {
     );
   }
 
-  Future loadMedInfoTextSize() async {
-    String val = await Helper.readDataFromsp(saveKeyMedInfoTextSize);
+  Future _loadMedInfoTextSize() async {
+    String val = await Helper.readDataFromsp(_saveKeyMedInfoTextSize);
     if (val.isNotEmpty) {
       double size = double.tryParse(val);
       if (size != null) {
         setState(() {
-          varSize = size;
+          _varSize = size;
         });
-        varSizeLoaded = true;
+        _varSizeLoaded = true;
       }
     }
   }
 
-  Future saveMedInfoTextSize() async {
-    if (varSizeLoaded) {
-      await Helper.writeDatatoSp(saveKeyMedInfoTextSize, varSize.toString());
+  Future _saveMedInfoTextSize() async {
+    if (_varSizeLoaded) {
+      await Helper.writeDatatoSp(_saveKeyMedInfoTextSize, _varSize.toString());
     }
   }
 }
