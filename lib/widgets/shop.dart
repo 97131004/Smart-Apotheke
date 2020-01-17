@@ -11,7 +11,19 @@ import '../data/globals.dart' as globals;
 import '../data/med.dart';
 import 'maps.dart';
 
+/// The class displays medicaments that can be ordered in-app or external on a
+/// merchants website. In the current state of the app, the external shop
+/// results are parsed from the vendors website due to pricing of the API access.
+/// Current vendors are [DocMorris.com] and [MedPex.de]
+/// Medicaments that can be ordered in-app, come from our database, that
+/// currently implemented as a static array.
+/// The medicament that comes from our database (so which we have in stock right
+/// now) will always be displayed as the first entry of the list and is
+/// highlighted.
+/// Medicaments can be sorted by price, while medicaments from our database
+/// will always be on top of the list.
 class Shop extends StatefulWidget {
+  /// pass the med object from previous page
   final Med med;
 
   Shop({Key key, @required this.med}) : super(key: key);
@@ -28,22 +40,27 @@ class _ShopState extends State<Shop> {
   static final String cPriceSort = 'Keine Sortierung';
 
   String shoppingInfo;
+  /// will be set to [true] when fetching the shop info from web is done
   bool shoppingInfoLoaded = false;
   String sorting = cPriceSort;
 
   String medSearchKey = '';
   ShopItem localShopItem;
 
+  /// future list of medicaments from external vendors
   Future<List<ShopItem>> itemList;
 
   @override
   void initState() {
+    /// check if internet connection is available
     Helper.hasInternet().then((internet) {
       if (internet == null || !internet) {
         NoInternetAlert.show(context);
       }
     });
 
+    /// set the search key for search on vendors website
+    /// set our local medicament if it is available
     if (widget.med != null) {
       medSearchKey = widget.med.name;
       if (globals.items.containsKey(widget.med.pzn)) {
@@ -52,11 +69,13 @@ class _ShopState extends State<Shop> {
       }
     }
 
+    /// gather shop data
     getShopData(medSearchKey);
 
     super.initState();
   }
 
+  /// Build the shopping list with internal and external items.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,18 +105,19 @@ class _ShopState extends State<Shop> {
               visible: (localShopItem != null),
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-                child: buildCard(),
+                child: _buildCard(),
               ),
             ),
             Expanded(
                 child: Padding(
               padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-              child: buildListView(medSearchKey),
+              child: _buildListView(medSearchKey),
             )),
           ],
         ));
   }
 
+  /// Build the widget for the sorting drop down menu.
   Widget _buildDropDownMenu() {
     return DropdownButton<String>(
       value: sorting,
@@ -126,7 +146,8 @@ class _ShopState extends State<Shop> {
     );
   }
 
-  Widget buildCard() {
+  /// Build list item container for the local medicament if it is in db.
+  Widget _buildCard() {
     if (localShopItem != null) {
       return Card(
         shape: RoundedRectangleBorder(
@@ -151,6 +172,7 @@ class _ShopState extends State<Shop> {
     }
   }
 
+  /// Build list tile for own product.
   ListTile buildListTileOwnProd() {
     return ListTile(
         contentPadding: EdgeInsets.all(10),
@@ -191,7 +213,8 @@ class _ShopState extends State<Shop> {
         ));
   }
 
-  Widget buildListView(String searchKey) {
+  /// Build list view for vendors items.
+  Widget _buildListView(String searchKey) {
     return FutureBuilder<List<ShopItem>>(
         future: itemList,
         builder: (context, snapshot) {
@@ -252,6 +275,7 @@ class _ShopState extends State<Shop> {
         });
   }
 
+  /// Build search button for drug store search (this is currently not used).
   Widget buildLocalSearchButton() {
     return Center(
         child: Padding(
@@ -279,6 +303,8 @@ class _ShopState extends State<Shop> {
     ));
   }
 
+  /// This method gathers the shop item data from the vendors.
+  /// First it will parse the data for each shop and then merge lists.
   Future<void> getShopData(String name) async {
     var dmList = await getDocMorrisList(name);
     var mpList = await getMedPexList(name);
@@ -289,6 +315,9 @@ class _ShopState extends State<Shop> {
     }
   }
 
+  /// Send HTML-Request to vendors website and parse the dom model.
+  /// Returns a list of ShopItem.
+  /// Vendor: [DocMorris.com]
   Future<List<ShopItem>> getDocMorrisList(String name) async {
     String urlDocMorris = 'https://www.docmorris.de/search?query=' + name;
     String htmlDocMorris = await Helper.fetchHTML(urlDocMorris);
@@ -297,6 +326,9 @@ class _ShopState extends State<Shop> {
     return listDocMorris;
   }
 
+  /// Send HTML-Request to vendors website and parse the dom model.
+  /// Returns a list of ShopItem.
+  /// Vendor: [MedPex.de]
   Future<List<ShopItem>> getMedPexList(String name) async {
     String urlMedpex = 'https://www.medpex.de/search.do?q=' + name;
     String htmlMedpex = await Helper.fetchHTML(urlMedpex);
@@ -305,6 +337,8 @@ class _ShopState extends State<Shop> {
     return listMedPex;
   }
 
+  /// Launches an in-app browser with the url to the requested medicament.
+  /// Users can order the medicament from there.
   Future launchUrl(ShopItem item) async {
     String url;
     if (item.merchant == 'Medpex') {
