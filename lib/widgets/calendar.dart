@@ -304,7 +304,7 @@ class _CalendarState extends State<Calendar> {
         removeNotification(year, month, day, list_value.indexOf(string_remove),
             day_event_index_inner);
         _selectedEvents.removeAt(list_value
-            .indexOf(string_remove)); //remove with value of item in list
+            .indexOf(string_remove)); //remove with index of item in list
       }
     }
     setState(() {
