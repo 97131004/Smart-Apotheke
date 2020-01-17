@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:maph_group3/util/personal_data.dart';
 import 'package:maph_group3/widgets/intro.dart';
 import '../util/nampr.dart';

@@ -76,8 +76,6 @@ class _IntroState extends State<Intro> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Theme.of(context).primaryColor));
     return WillPopScope(
       onWillPop: _handleWillPop,
       child: Scaffold(

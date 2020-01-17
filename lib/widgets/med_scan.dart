@@ -55,7 +55,7 @@ class _MedScanState extends State<MedScan> {
   Future _getMeds() async {
     for (int i = 0; i < widget.meds.length; i++) {
       String pzn = widget.meds[i].pzn;
-      if (Helper.isNumber(pzn)) {
+      if (Helper.isInteger(pzn)) {
         /// Getting remaining data based on [pzn]. Searching on page 1,
         /// since result is expected to be singular.
         List<Med> med = await MedGet.getMeds(pzn, 0, 1);

@@ -331,10 +331,10 @@ class _ScannerState extends State<Scanner> {
         int i;
         for (i = pos + 3; i <= text.length; i++) {
           String acuChar = text[i];
-          if ((!Helper.isNumeric(acuChar) && !(acuChar == ' ')) ||
+          if ((!Helper.isInteger(acuChar) && !(acuChar == ' ')) ||
               (acuChar == '\n')) {
             break;
-          } else if (Helper.isNumeric(acuChar)) pznNr += acuChar;
+          } else if (Helper.isInteger(acuChar)) pznNr += acuChar;
           if (pznNr.length == 8) break;
         }
         pznNrs.add(Med('', pznNr));
