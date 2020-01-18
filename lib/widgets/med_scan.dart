@@ -55,7 +55,7 @@ class _MedScanState extends State<MedScan> {
   Future _getMeds() async {
     for (int i = 0; i < widget.meds.length; i++) {
       String pzn = widget.meds[i].pzn;
-      if (Helper.isInteger(pzn)) {
+      if (Helper.isPureInteger(pzn)) {
         /// Getting remaining data based on [pzn]. Searching on page 1,
         /// since result is expected to be singular.
         List<Med> med = await MedGet.getMeds(pzn, 0, 1);
@@ -72,14 +72,14 @@ class _MedScanState extends State<MedScan> {
       });
     }
 
-    /// Adding scanned medicaments to [globals.meds] list and saving it.
+    /// Adding scanned medicaments to [globals.recentMeds] list and saving it.
     for (int i = 0; i < widget.meds.length; i++) {
       /// Skipping those, to which no medicament [name] could be found.
       if (widget.meds[i].name.length > 0) {
-        Helper.globalMedListAdd(widget.meds[i]);
+        Helper.recentMedsAdd(widget.meds[i]);
       }
     }
-    await Helper.globalMedListSave();
+    await Helper.recentMedsSave();
   }
 
   /// Showing list of scanned medicaments or loading bar.

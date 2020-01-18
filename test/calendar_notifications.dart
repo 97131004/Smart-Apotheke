@@ -1,5 +1,5 @@
 import 'package:maph_group3/widgets/calendar.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 void main() {
