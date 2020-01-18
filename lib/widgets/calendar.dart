@@ -485,7 +485,7 @@ class _CalendarState extends State<Calendar> {
                             setState(() {
                               _controller.setSelectedDay(beginDate);
                               for (int i = 0;
-                                  i <= int.parse(day_duration.text);
+                                  i < int.parse(day_duration.text);
                                   i++) {
                                 DateTime nextDay =
                                     beginDate.add(new Duration(days: i));
