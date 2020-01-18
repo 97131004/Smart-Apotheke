@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:maph_group3/data/med.dart';
+import '../data/med.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
@@ -18,6 +18,8 @@ class Helper {
   /// Parses middle string from input string [source] between [delim1] and [delim2].
   static String parseMid(String source, String delim1, String delim2,
       [int startIndex]) {
+    if (source.length <= 0 ||
+        (startIndex != null && startIndex > source.length - 1)) return '';
     int iDelim1 = source.indexOf(delim1, (startIndex != null) ? startIndex : 0);
     int iDelim2 = source.indexOf(delim2, iDelim1 + delim1.length);
     if (iDelim1 != -1 && iDelim2 != -1) {
@@ -26,8 +28,8 @@ class Helper {
     return '';
   }
 
-  /// Checks whether input string [s] is an integer.
-  static bool isInteger(String s) {
+  /// Checks whether input string [s] is a pure integer (only includes numbers 0 to 9).
+  static bool isPureInteger(String s) {
     /// Filtering for numbers 0 to 9, leaving out + and - signs.
     for (int i = 0; i < s.length; i++) {
       if (!(s[i].codeUnitAt(0) >= 48 && s[i].codeUnitAt(0) <= 57)) {

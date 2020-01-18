@@ -188,8 +188,9 @@ class _ScannerState extends State<Scanner> {
             children: <Widget>[
               _buildNotification(),
 
-              /// Needs a [SizedBox] inside a [FittedBox] and poor filter qualities in
-              /// [Image.memory] for good performance and fast rotations.
+              /// Needs a [RotatedBox] inside a [SizedBox] within a [FittedBox] and 
+              /// poor filter qualities in [Image.memory] for good performance and 
+              /// fast rotations.
               FittedBox(
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width,
@@ -331,10 +332,10 @@ class _ScannerState extends State<Scanner> {
         int i;
         for (i = pos + 3; i <= text.length; i++) {
           String acuChar = text[i];
-          if ((!Helper.isInteger(acuChar) && !(acuChar == ' ')) ||
+          if ((!Helper.isPureInteger(acuChar) && !(acuChar == ' ')) ||
               (acuChar == '\n')) {
             break;
-          } else if (Helper.isInteger(acuChar)) pznNr += acuChar;
+          } else if (Helper.isPureInteger(acuChar)) pznNr += acuChar;
           if (pznNr.length == 8) break;
         }
         pznNrs.add(Med('', pznNr));
