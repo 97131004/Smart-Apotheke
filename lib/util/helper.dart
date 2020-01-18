@@ -28,19 +28,13 @@ class Helper {
 
   /// Checks whether input string [s] is an integer.
   static bool isInteger(String s) {
-    //dont use isNumeric(), it accepts - and + signs
+    /// Filtering for numbers 0 to 9, leaving out + and - signs.
     for (int i = 0; i < s.length; i++) {
       if (!(s[i].codeUnitAt(0) >= 48 && s[i].codeUnitAt(0) <= 57)) {
         return false;
       }
     }
     return true;
-    /*
-    if (s == null) {
-      return false;
-    }
-    return double.tryParse(s) != null;
-    */
   }
 
   /// Retrieves local path to application documents directory.
