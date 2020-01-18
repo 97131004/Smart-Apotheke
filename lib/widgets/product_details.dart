@@ -184,7 +184,8 @@ class _ProductDetailsState extends State<ProductDetails> {
   Widget _buildInputField() {
     return new Flexible(
       child: Container(
-        padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+        width: MediaQuery.of(context).size.width/6,
+        //padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
         child: TextField(
           keyboardType: TextInputType.number,
           controller: textEditController,
@@ -211,7 +212,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     double price = ((localShopItem.priceInt * quantity) / 100);
     return new Flexible(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -219,9 +220,7 @@ class _ProductDetailsState extends State<ProductDetails> {
               Flexible(
                 child: Text('Gesamtpreis:', style: TextStyle(fontWeight: FontWeight.bold),),
               ),
-              Flexible(
-                child: Text(price.toString() + ' €', style: TextStyle(fontWeight: FontWeight.bold),),
-              ),
+              Text(price.toString() + ' €', style: TextStyle(fontWeight: FontWeight.bold),),
             ],
           ),
           Row(
@@ -230,9 +229,7 @@ class _ProductDetailsState extends State<ProductDetails> {
               Flexible(
                 child: Text('Stückpreis:'),
               ),
-              Flexible(
-                child: Text(localShopItem.price),
-              ),
+              Text(localShopItem.price),
             ],
           ),
           Row(
@@ -241,9 +238,7 @@ class _ProductDetailsState extends State<ProductDetails> {
               Flexible(
                 child: Text('UVP*:'),
               ),
-              Flexible(
-                  child: Text(localShopItem.crossedOutPrice, style: TextStyle(color: Theme.of(context).errorColor, decoration: TextDecoration.lineThrough,),)
-              ),
+              Text(localShopItem.crossedOutPrice, style: TextStyle(color: Theme.of(context).errorColor, decoration: TextDecoration.lineThrough,),),
             ],
           ),
         ],

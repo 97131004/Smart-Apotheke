@@ -77,35 +77,45 @@ class _OrderSummaryState extends State<OrderSummary> {
         appBar: AppBar(
           title: Text('Bestellübersicht'),
         ),
-        body: Visibility(
-          visible: dataIsComplete,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 5.0),
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.all(5),
-                ),
-                _buildProductOverview(),
-                Padding(
-                  padding: EdgeInsets.all(5),
-                ),
-                _buildPaymentOptions(),
-                Padding(
-                  padding: EdgeInsets.all(5),
-                ),
-                _buildShippingOptions(),
-                Padding(
-                  padding: EdgeInsets.all(5),
-                ),
-                _buildConfirmationContainer(),
-                Padding(
-                  padding: EdgeInsets.all(5),
-                ),
-              ],
+        body: Stack(
+          children: <Widget>[
+            Visibility(
+              visible: !dataIsComplete,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
             ),
-          ),
-        ),
+            Visibility(
+              visible: dataIsComplete,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 5.0),
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.all(5),
+                    ),
+                    _buildProductOverview(),
+                    Padding(
+                      padding: EdgeInsets.all(5),
+                    ),
+                    _buildPaymentOptions(),
+                    Padding(
+                      padding: EdgeInsets.all(5),
+                    ),
+                    _buildShippingOptions(),
+                    Padding(
+                      padding: EdgeInsets.all(5),
+                    ),
+                    _buildConfirmationContainer(),
+                    Padding(
+                      padding: EdgeInsets.all(5),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        )
       ),
     );
   }
@@ -479,11 +489,10 @@ class _OrderSummaryState extends State<OrderSummary> {
                 'Ich bin damit einverstanden, dass...',
               ],
               onSelected: (List<String> checked) => {
+                    agbIsChecked = false,
                     checked.forEach((it) => {
                           if (it == 'AGBs zustimmen')
                             {agbIsChecked = true}
-                          else
-                            {agbIsChecked = false}
                         })
                   }),
           RaisedButton(
@@ -670,6 +679,13 @@ class _OrderSummaryState extends State<OrderSummary> {
   /// Check if entered password is correct.
   Future _confirmPassword() async {
     if (await PersonalData.checkPassword(passwordController.text)) {
+
+      Navigator.pop(context);
+
+      setState(() {
+        dataIsComplete = false;
+      });
+
       /// Adding medicament to [globals.meds] (recent) list and saving it.
       Med m = new Med(widget.item.name, widget.item.pzn, '', true);
 
@@ -678,6 +694,7 @@ class _OrderSummaryState extends State<OrderSummary> {
       if (mPzn.length > 0) {
         m.url = mPzn[0].url;
       }
+
       Helper.globalMedListAdd(m);
       await Helper.globalMedListSave();
 
@@ -685,7 +702,9 @@ class _OrderSummaryState extends State<OrderSummary> {
       Navigator.push(
           context,
           NoAnimationMaterialPageRoute(
-              builder: (context) => OrderConfirmation()));
+              builder: (context) => OrderConfirmation()
+          )
+      );
     }
   }
 
