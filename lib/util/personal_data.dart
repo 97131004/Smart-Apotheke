@@ -3,19 +3,19 @@ import 'package:steel_crypt/steel_crypt.dart';
 import '../util/helper.dart';
 
 class PersonalData {
-  static String keyPassword = 'password';
-  static String keyIban = 'iban';
-  static String keyadresse = 'adresse';
+  static final String saveKeyPassword = 'password';
+  static final String saveKeyIban = 'iban';
+  static final String saveKeyAddress = 'address';
   static var hasher = HashCrypt('SHA-3/512');
 
   static Future<bool> isUserDataComplete() async {
-    final addr = await Helper.readDataFromsp(keyadresse);
-    final iban = await Helper.readDataFromsp(keyIban);
+    final addr = await Helper.readDataFromsp(saveKeyAddress);
+    final iban = await Helper.readDataFromsp(saveKeyIban);
     return addr != '' && iban != '';
   }
 
   static Future<bool> passwordExists() async {
-    final value = await Helper.readDataFromsp(keyPassword);
+    final value = await Helper.readDataFromsp(saveKeyPassword);
     //print('read: $value');
     if (value != '') return true;
     return false;
@@ -23,11 +23,11 @@ class PersonalData {
 
   static Future setPassword(String password) async {
     String hash = hasher.hash(password);
-    Helper.writeDatatoSp(keyPassword, hash);
+    Helper.writeDatatoSp(saveKeyPassword, hash);
   }
 
   static Future<bool> checkPassword(String password) async {
-    final value = await Helper.readDataFromsp(keyPassword);
+    final value = await Helper.readDataFromsp(saveKeyPassword);
     if (value != '') return hasher.checkhash(password, value);
     return false;
   }
@@ -43,7 +43,7 @@ class PersonalData {
   static Future<bool> changeIban(String iban, String password) async {
     if (await checkPassword(password)) {
       iban = await encrypt(iban);
-      Helper.writeDatatoSp(keyIban, iban);
+      Helper.writeDatatoSp(saveKeyIban, iban);
       return true;
     }
     return false;
@@ -54,14 +54,14 @@ class PersonalData {
     if (await checkPassword(password)) {
       String _adresse = adresse.join('?').toString();
       _adresse = await encrypt(_adresse);
-      Helper.writeDatatoSp(keyadresse, _adresse);
+      Helper.writeDatatoSp(saveKeyAddress, _adresse);
       return true;
     }
     return false;
   }
 
   static Future<String> getIban() async {
-    String ibanencrypted = await Helper.readDataFromsp(keyIban);
+    String ibanencrypted = await Helper.readDataFromsp(saveKeyIban);
     if (ibanencrypted.isNotEmpty)
       return decrypt(ibanencrypted);
     else
@@ -69,7 +69,7 @@ class PersonalData {
   }
 
   static Future<List<String>> getAddress() async {
-    String adresseencrypted = await Helper.readDataFromsp(keyadresse);
+    String adresseencrypted = await Helper.readDataFromsp(saveKeyAddress);
     if (adresseencrypted.isNotEmpty)
       return (await decrypt(adresseencrypted)).split('?');
     return null;

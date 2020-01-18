@@ -1,6 +1,7 @@
-// https://stackoverflow.com/a/53503738
-
 import 'package:flutter/material.dart';
+
+/// Navigates to other pages without any animations 
+/// (https://stackoverflow.com/a/53503738).
 
 class NoAnimationMaterialPageRoute<T> extends MaterialPageRoute<T> {
   NoAnimationMaterialPageRoute({

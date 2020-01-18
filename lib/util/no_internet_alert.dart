@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'helper.dart';
 
+/// Shows a blocking modal alert box with an unavailable internet connection message.
+/// This alert box cannot be dismissed. The back button is disabled. The alert box can 
+/// only be dismissed after the user establishes a working internet connection.
+
 class NoInternetAlert {
   static void show(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Color(0xFF000000).withOpacity(0)));
     showDialog(
       barrierDismissible: false,
       context: context,

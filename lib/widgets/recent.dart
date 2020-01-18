@@ -120,7 +120,7 @@ class _RecentState extends State<Recent> {
     );
   }
 
-  /// Removes medicament entry from the [globals.meds] list and saves the change.
+  /// Removes medicament entry from the [globals.meds] list and saves it.
   void _medItemDelete(Med med) async {
     setState(() {
       globals.meds.remove(med);

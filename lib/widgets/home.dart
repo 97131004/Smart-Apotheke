@@ -55,7 +55,7 @@ class _HomeState extends State<Home> {
             padding: EdgeInsets.zero,
             children: <Widget>[
               /// Menu header.
-              /// Displaying first and last name.
+              /// Displays first and last name.
               DrawerHeader(
                 child: Text(
                   (_firstName.length > 0 && _lastName.length > 0)
