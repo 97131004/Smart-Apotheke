@@ -5,7 +5,7 @@ import '../widgets/med_info.dart';
 import '../data/med.dart';
 import 'nampr.dart';
 
-/// Functions to visualize a list of [med] objects universally.
+/// Functions to visualize a list of [med] objects across multiple pages of the app.
 /// Uses an [ExpansionTile] to display the [name] and [pzn] of the medicament.
 /// After opening the tile, you get access to the package leaflet, order and
 /// remove entry buttons.

@@ -29,16 +29,14 @@ class Maps extends StatefulWidget {
 class _MapsState extends State<Maps> {
 
   /// Maps controller
-  GoogleMapController controller;
+  GoogleMapController _controller;
   /// global maps to buffer markers
-  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-  Map<String, PlacesSearchResult> foundPlaces = <String, PlacesSearchResult>{};
-  PlacesSearchResult tabbedPlace;
-
-  var previousMarkerId;
+  Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
+  Map<String, PlacesSearchResult> _foundPlaces = <String, PlacesSearchResult>{};
+  PlacesSearchResult _tabbedPlace;
 
   /// when markerIsTabbed is [true], container with details appears
-  bool markerIsTabbed = false;
+  bool _markerIsTabbed = false;
 
   @override
   void initState() {
@@ -108,7 +106,7 @@ class _MapsState extends State<Maps> {
         initialCameraPosition: MapsHelper.getInitialPosition(),
         mapType: MapType.normal,
         onMapCreated: _onMapCreated,
-        markers: Set<Marker>.of(markers.values),
+        markers: Set<Marker>.of(_markers.values),
       ),
     );
   }
@@ -116,7 +114,7 @@ class _MapsState extends State<Maps> {
   /// Build the details container.
   Widget _buildContainer() {
     return Visibility(
-        visible: markerIsTabbed,
+        visible: _markerIsTabbed,
         child:Align(
           alignment: Alignment.bottomLeft,
           child: Container(
@@ -185,10 +183,10 @@ class _MapsState extends State<Maps> {
     String name = '';
     String addr = '';
     String open = '';
-    if(tabbedPlace != null) {
-      name = tabbedPlace.name != null ? tabbedPlace.name : '';
-      addr = tabbedPlace.formattedAddress != null ? tabbedPlace.formattedAddress : '';
-      open = tabbedPlace.openingHours != null ? MapsHelper.getOpenString(tabbedPlace) : '';
+    if(_tabbedPlace != null) {
+      name = _tabbedPlace.name != null ? _tabbedPlace.name : '';
+      addr = _tabbedPlace.formattedAddress != null ? _tabbedPlace.formattedAddress : '';
+      open = _tabbedPlace.openingHours != null ? MapsHelper.getOpenString(_tabbedPlace) : '';
     }
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -228,7 +226,7 @@ class _MapsState extends State<Maps> {
               IconButton(
                 icon: Icon(Icons.check_circle),
                 tooltip: 'Apotheke auswählen',
-                onPressed: () => Navigator.pop(context, tabbedPlace),
+                onPressed: () => Navigator.pop(context, _tabbedPlace),
               ),
               IconButton(
                 icon: Icon(Icons.call),
@@ -283,8 +281,8 @@ class _MapsState extends State<Maps> {
     setState(() {
       if (result.status == 'OK') {
         result.results.forEach((f){
-          if(!foundPlaces.containsKey(f.id)) {
-            foundPlaces[f.id] = f;
+          if(!_foundPlaces.containsKey(f.id)) {
+            _foundPlaces[f.id] = f;
           }
           addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
         });
@@ -296,11 +294,11 @@ class _MapsState extends State<Maps> {
   /// drug stores nearby will be searched and added to the markers list.
   /// Shows an error message on failure.
   Future _onMapCreated(GoogleMapController mapsController) async {
-    controller = mapsController;
+    _controller = mapsController;
 
     // move to current location
     var location = await MapsHelper.getCurrentLocation();
-    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+    _controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
       target: LatLng(location.latitude, location.longitude),
       zoom: 14.0,
     )));
@@ -313,8 +311,8 @@ class _MapsState extends State<Maps> {
     setState(() {
       if (result.status == 'OK') {
         result.results.forEach((f){
-          if(!foundPlaces.containsKey(f.id)) {
-            foundPlaces[f.id] = f;
+          if(!_foundPlaces.containsKey(f.id)) {
+            _foundPlaces[f.id] = f;
           }
           addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
         });
@@ -338,7 +336,7 @@ class _MapsState extends State<Maps> {
         ? MediaQuery.of(context).devicePixelRatio
         : 1.0;
 
-    var coords = await controller.getLatLng(ScreenCoordinate(
+    var coords = await _controller.getLatLng(ScreenCoordinate(
       x: (context.size.width * devicePixelRatio) ~/ 2.0,
       y: (context.size.height * devicePixelRatio) ~/ 4.0,
     ));
@@ -377,8 +375,8 @@ class _MapsState extends State<Maps> {
     if(marker != null) {
       setState(() {
         // adding a new marker to map
-        if(!markers.containsKey(markerId)) {
-          markers[markerId] = marker;
+        if(!_markers.containsKey(markerId)) {
+          _markers[markerId] = marker;
         }
       });
     }
@@ -387,8 +385,8 @@ class _MapsState extends State<Maps> {
   /// Update when marker is tabbed.
   Future _onMarkerTapped(id) async {
     setState(() {
-      markerIsTabbed = true;
-      tabbedPlace = foundPlaces[id];
+      _markerIsTabbed = true;
+      _tabbedPlace = _foundPlaces[id];
     });
   }
 

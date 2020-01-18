@@ -26,10 +26,10 @@ class _RecentState extends State<Recent> {
     _getGlobalMedList();
   }
 
-  /// Retrieving [globals.meds] list, which represents a list of recent medicaments.
+  /// Retrieving [globals.recentMeds] list, which represents a list of recent medicaments.
   Future _getGlobalMedList() async {
     if (this.mounted) {
-      await Helper.globalMedListLoad();
+      await Helper.recentMedsLoad();
       setState(() {});
     }
   }
@@ -40,12 +40,12 @@ class _RecentState extends State<Recent> {
       appBar: AppBar(
         title: Text('Verlauf'),
       ),
-      body: (globals.meds.length > 0)
+      body: (globals.recentMeds.length > 0)
           ? MedList.build(
               context,
 
               /// Displays list in reverse, so we will see the latest medicament on top.
-              globals.meds.reversed.toList(),
+              globals.recentMeds.reversed.toList(),
               true,
               _medItemOnSwipe,
               _medItemOnButtonDelete,
@@ -120,11 +120,11 @@ class _RecentState extends State<Recent> {
     );
   }
 
-  /// Removes medicament entry from the [globals.meds] list and saves it.
+  /// Removes medicament entry from the [globals.recentMeds] list and saves it.
   void _medItemDelete(Med med) async {
     setState(() {
-      globals.meds.remove(med);
+      globals.recentMeds.remove(med);
     });
-    await Helper.globalMedListSave();
+    await Helper.recentMedsSave();
   }
 }

@@ -39,16 +39,17 @@ class _ShopState extends State<Shop> {
   static final String cPriceDSC = 'Preis absteigend';
   static final String cPriceSort = 'Keine Sortierung';
 
-  String shoppingInfo;
-  /// will be set to [true] when fetching the shop info from web is done
-  bool shoppingInfoLoaded = false;
-  String sorting = cPriceSort;
+  /// String holds current sorting direction
+  String _sorting = cPriceSort;
 
-  String medSearchKey = '';
-  ShopItem localShopItem;
+  /// search key given by previous page
+  String _medSearchKey = '';
+
+  /// current local shop item that is from our db
+  ShopItem _localShopItem;
 
   /// future list of medicaments from external vendors
-  Future<List<ShopItem>> itemList;
+  Future<List<ShopItem>> _itemList;
 
   @override
   void initState() {
@@ -62,15 +63,15 @@ class _ShopState extends State<Shop> {
     /// set the search key for search on vendors website
     /// set our local medicament if it is available
     if (widget.med != null) {
-      medSearchKey = widget.med.name;
+      _medSearchKey = widget.med.name;
       if (globals.items.containsKey(widget.med.pzn)) {
-        localShopItem = globals.items[widget.med.pzn];
-        medSearchKey = localShopItem.searchKey;
+        _localShopItem = globals.items[widget.med.pzn];
+        _medSearchKey = _localShopItem.searchKey;
       }
     }
 
     /// gather shop data
-    getShopData(medSearchKey);
+    getShopData(_medSearchKey);
 
     super.initState();
   }
@@ -92,7 +93,7 @@ class _ShopState extends State<Shop> {
                   padding: EdgeInsets.all(10),
                 ),
                 Flexible(
-                  child: Text('Ergebnisliste für ' + medSearchKey),
+                  child: Text('Ergebnisliste für ' + _medSearchKey),
                 ),
                 Spacer(),
                 _buildDropDownMenu(),
@@ -102,7 +103,7 @@ class _ShopState extends State<Shop> {
               ],
             ),
             Visibility(
-              visible: (localShopItem != null),
+              visible: (_localShopItem != null),
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
                 child: _buildCard(),
@@ -111,7 +112,7 @@ class _ShopState extends State<Shop> {
             Expanded(
                 child: Padding(
               padding: EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-              child: _buildListView(medSearchKey),
+              child: _buildListView(_medSearchKey),
             )),
           ],
         ));
@@ -120,7 +121,7 @@ class _ShopState extends State<Shop> {
   /// Build the widget for the sorting drop down menu.
   Widget _buildDropDownMenu() {
     return DropdownButton<String>(
-      value: sorting,
+      value: _sorting,
       icon: Icon(Icons.sort),
       iconSize: 18,
       elevation: 16,
@@ -133,7 +134,7 @@ class _ShopState extends State<Shop> {
       ),
       onChanged: (String newValue) {
         setState(() {
-          sorting = newValue;
+          _sorting = newValue;
         });
       },
       items: <String>[cPriceSort, cPriceASC, cPriceDSC]
@@ -148,7 +149,7 @@ class _ShopState extends State<Shop> {
 
   /// Build list item container for the local medicament if it is in db.
   Widget _buildCard() {
-    if (localShopItem != null) {
+    if (_localShopItem != null) {
       return Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15.0),
@@ -156,7 +157,7 @@ class _ShopState extends State<Shop> {
         child: Container(
             decoration: new BoxDecoration(
               borderRadius: new BorderRadius.circular(5),
-              border: Border.all(color: Theme.of(context).splashColor),
+              //border: Border.all(color: Theme.of(context).splashColor),
               gradient: LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
@@ -181,34 +182,33 @@ class _ShopState extends State<Shop> {
                   context,
                   NoAnimationMaterialPageRoute(
                       builder: (context) =>
-                          ProductDetails(searchKey: this.localShopItem.pzn))),
+                          ProductDetails(searchKey: this._localShopItem.pzn))),
             },
         leading: Image.asset('assets/dummy_med.png'),
-        title: Text(localShopItem.name),
+        title: Text(_localShopItem.name),
         subtitle: Text(
-            localShopItem.dosage +
+            _localShopItem.dosage +
                 '\n' +
-                localShopItem.brand +
+                _localShopItem.brand +
                 '\n\n' +
-                localShopItem.merchant,
+                _localShopItem.merchant,
             style: TextStyle(fontSize: 12)),
         trailing: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             Flexible(
               child: Text(
-                'In-App bestellen!',
+                'In-App bestellen!\n',
                 style: TextStyle(color: Theme.of(context).errorColor),
               ),
             ),
-            Column(children: <Widget>[
-              Text(localShopItem.price,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              Text(localShopItem.crossedOutPrice,
-                  style: TextStyle(
-                      color: Theme.of(context).errorColor,
-                      decoration: TextDecoration.lineThrough)),
-              Text(localShopItem.pricePerUnit),
-            ]),
+            Text(_localShopItem.price,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            /*Text(localShopItem.crossedOutPrice,
+                style: TextStyle(
+                    color: Theme.of(context).errorColor,
+                    decoration: TextDecoration.lineThrough)),*/
+            Text(_localShopItem.pricePerUnit),
           ],
         ));
   }
@@ -216,17 +216,17 @@ class _ShopState extends State<Shop> {
   /// Build list view for vendors items.
   Widget _buildListView(String searchKey) {
     return FutureBuilder<List<ShopItem>>(
-        future: itemList,
+        future: _itemList,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(child: LoadBar.build());
           }
 
           snapshot.data.sort((a, b) {
-            if (sorting == cPriceASC) {
+            if (_sorting == cPriceASC) {
               return a.compareTo(b);
             }
-            if (sorting == cPriceDSC) {
+            if (_sorting == cPriceDSC) {
               return b.compareTo(a);
             }
             return 0;
@@ -252,22 +252,24 @@ class _ShopState extends State<Shop> {
                           style: TextStyle(fontSize: 12)),
                       trailing: Container(
                           child: Column(
-                        children: <Widget>[
-                          Text(
-                            item.price ?? '-',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18),
-                          ),
-                          if (item.crossedOutPrice != null)
-                            Text(
-                              item.crossedOutPrice,
-                              style: TextStyle(
-                                  color: Theme.of(context).errorColor,
-                                  decoration: TextDecoration.lineThrough),
-                            ),
-                          Text(item.pricePerUnit ?? ''),
-                        ],
-                      )),
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              Text(
+                                item.price ?? '-',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 18),
+                                ),
+                              if (item.crossedOutPrice != null)
+                                Text(
+                                  item.crossedOutPrice,
+                                  style: TextStyle(
+                                    color: Theme.of(context).errorColor,
+                                    decoration: TextDecoration.lineThrough),
+                                ),
+                              Text(item.pricePerUnit ?? ''),
+                            ],
+                          )
+                      ),
                       isThreeLine: true,
                     )))
                 .toList(),
@@ -310,7 +312,7 @@ class _ShopState extends State<Shop> {
     var mpList = await getMedPexList(name);
     if (this.mounted) {
       setState(() {
-        itemList = ShopListParser.mergeLists(dmList, mpList);
+        _itemList = ShopListParser.mergeLists(dmList, mpList);
       });
     }
   }

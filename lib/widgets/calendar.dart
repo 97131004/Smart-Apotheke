@@ -383,7 +383,7 @@ class _CalendarState extends State<Calendar> {
                             });
                           },
                           hint: Text('Medikament'),
-                          items: meds.map<DropdownMenuItem<String>>((Med med) {
+                          items: recentMeds.map<DropdownMenuItem<String>>((Med med) {
                             return DropdownMenuItem<String>(
                               value: med.name,
                               child: Text(med.name),

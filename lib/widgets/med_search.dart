@@ -53,7 +53,7 @@ class _MedSearchState extends State<MedSearch> {
       if (_searchValue.length > 0) {
         _getSearchDone = true;
 
-        /// Adding local search results on top from the [globals.meds] list.
+        /// Adding local search results on top from the [globals.recentMeds] list.
         MedGet.getMedsPrefix(_plc, pageIndex, _searchValue);
 
         /// Adding search results from the web.
