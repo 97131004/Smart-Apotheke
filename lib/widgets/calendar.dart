@@ -35,7 +35,7 @@ class _CalendarState extends State<Calendar> {
   List<int> selectedTimes;
   String _eventController;
   SharedPreferences prefs;
-  String selectedMed;
+  //String selectedMed;
 
   // variables are in the calendar form
   TextEditingController day_duration = new TextEditingController();
@@ -48,9 +48,9 @@ class _CalendarState extends State<Calendar> {
   void initState() {
     super.initState();
     _events = {};
-    _selectedEvents = [];
     initPrefs();
-    selectedTimes = [];
+    _selectedEvents = [];
+    selectedTimes = [9, 17];
     _eventController = "";
   }
 
@@ -177,6 +177,20 @@ class _CalendarState extends State<Calendar> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Kalender'),
+        actions: <Widget>[
+          FlatButton(
+            child: Text(
+              'Heute',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            onPressed: () {
+              setState(() {
+                _controller.setFocusedDay(DateTime.now());
+                _controller.setSelectedDay(DateTime.now(), runCallback: true);
+              });
+            },
+          )
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -207,7 +221,6 @@ class _CalendarState extends State<Calendar> {
               onDaySelected: (date, events) {
                 setState(() {
                   _selectedEvents = events;
-                  ;
                 });
               },
               onVisibleDaysChanged: _onVisibleDaysChanged,
@@ -356,12 +369,27 @@ class _CalendarState extends State<Calendar> {
     return timesWidget;
   }
 
-  _onAddButtonClick() {}
   var beginDate;
+  _getMedListForEventBox(List<Med> meds) {
+    var medlist = meds.map<DropdownMenuItem<String>>((Med med) {
+      return DropdownMenuItem<String>(
+        value: med.name,
+        child: Text(med.name),
+      );
+    }).toList();
+    medlist.add(DropdownMenuItem<String>(
+      value: 'Benutzereingabe...',
+      child: Text('Benutzereingabe...'),
+    ));
+    return medlist;
+  }
 
   _showAddDialog() {
+    List<Med> medList = [];
+    medList.addAll(recentMeds);
     beginDate = _controller.selectedDay;
     bool isdatepicker = false;
+    String actualSelectMed;
     showDialog(
         context: context,
         builder: (context) => AlertDialog(content: StatefulBuilder(
@@ -372,23 +400,65 @@ class _CalendarState extends State<Calendar> {
                       child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       DropdownButton<String>(
-                          value: selectedMed,
+                          value: actualSelectMed,
                           isExpanded: true,
                           onChanged: (String value) {
-                            setState(() {
-                              selectedMed = value;
-                            });
+                            if (value == 'Benutzereingabe...') {
+                              TextEditingController usermed =
+                                  TextEditingController();
+                              showDialog(
+                                      builder: (context) => AlertDialog(
+                                            content: Form(
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  Row(
+                                                    children: <Widget>[
+                                                      Flexible(
+                                                          child: TextFormField(
+                                                        decoration:
+                                                            InputDecoration(
+                                                                labelText:
+                                                                    'Medikament:'),
+                                                        controller: usermed,
+                                                      )),
+                                                      IconButton(
+                                                        icon: Icon(
+                                                          Icons.check,
+                                                          size: 40,
+                                                        ),
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            medList.add(Med(usermed.text,''));
+                                                          });
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                      )
+                                                    ],
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                      context: context)
+                                  .then((_) {
+                                setState(() {
+                                  actualSelectMed = usermed.text;
+                                });
+                              });
+                            } else
+                              setState(() {
+                                actualSelectMed = value;
+                              });
                           },
                           hint: Text('Medikament'),
-                          items: recentMeds.map<DropdownMenuItem<String>>((Med med) {
-                            return DropdownMenuItem<String>(
-                              value: med.name,
-                              child: Text(med.name),
-                            );
-                          }).toList()),
+                          items: _getMedListForEventBox(medList)),
                       SizedBox(height: 20),
                       InkWell(
                         child: Row(
@@ -433,7 +503,7 @@ class _CalendarState extends State<Calendar> {
                           return null;
                         },
                         decoration: InputDecoration(
-                            labelText: 'Einnahmedauer* (in Tagen)'),
+                            labelText: 'Einnahmedauer (in Tagen)*'),
                         keyboardType: TextInputType.number,
                         controller: day_duration,
                       ),
@@ -445,8 +515,7 @@ class _CalendarState extends State<Calendar> {
                           }
                           return null;
                         },
-                        decoration: InputDecoration(
-                            labelText: 'Dosierung * (Einnahmen/Tag)'),
+                        decoration: InputDecoration(labelText: 'Dosierung*'),
                         controller: dosage,
                       ),
                       SizedBox(height: 20),
@@ -477,7 +546,7 @@ class _CalendarState extends State<Calendar> {
                           if (_formKey.currentState.validate()) {
                             _formKey.currentState.save();
 
-                            _eventController = selectedMed +
+                            _eventController = actualSelectMed +
                                 "\nDosierung: " +
                                 dosage.text +
                                 "\nNote: " +
