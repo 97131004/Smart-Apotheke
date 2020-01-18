@@ -6,8 +6,8 @@ import '../data/med.dart';
 import 'helper.dart';
 
 /// Functions to retrieve, handle and parse lists of medicaments from websites like 
-/// [docmorris.de] (to get the [name] or [pzn] from [name] or [pzn]) and 
-/// [beipackzettel.de] (to get the package leaflet [url]).
+/// [docmorris.de] (to get the [name] or [pzn] based on [name] or [pzn]) and 
+/// [beipackzettel.de] (to get the package leaflet [url] based on [pzn]).
 
 class MedGet {
   /// First sends a GET-Request with a search query to [docmorris.de]

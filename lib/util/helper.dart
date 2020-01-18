@@ -96,7 +96,7 @@ class Helper {
     return false;
   }
 
-  /// Fetches html from an [url] and returns its response data on success, or null on failure. 
+  /// Fetches html from an [url] and returns its response data on success, or null on failure.
   static Future<String> fetchHTML(String url) async {
     final response = await http.get(url);
     if (response.statusCode == 200)
@@ -105,7 +105,7 @@ class Helper {
       return null;
   }
 
-  /// Adds a new medicament [med] to the [globals.meds] list as the latest entry. 
+  /// Adds a new medicament [med] to the [globals.meds] list as the latest entry.
   /// Removes duplicates.
   static void globalMedListAdd(Med m) {
     globals.meds.removeWhere((item) => item.pzn == m.pzn);
@@ -117,19 +117,24 @@ class Helper {
   static Future globalMedListSave() async {
     List<String> list = [];
     for (int i = 0; i < globals.meds.length; i++) {
+      /// Encoding each [med] object to a json string representation.
       list.add(jsonEncode(globals.meds[i].toJson()));
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    /// Saving [List<Med>] as a [List<String>], where each medicament is a json string.
     await prefs.setStringList(saveKeyGlobalsList, list);
   }
 
   /// Loads [globals.meds] list from android's shared preferences.
   static Future globalMedListLoad() async {
-    /// Enable next line to not add predefined [med]'s from the [globals.meds] list.
-    /// globals.meds.clear();
+    // Enable next line to not add predefined med's from the globals.meds list.
+    // globals.meds.clear();
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> list = (prefs.getStringList(saveKeyGlobalsList) ?? List<String>());
+    List<String> list =
+        (prefs.getStringList(saveKeyGlobalsList) ?? List<String>());
     for (int i = 0; i < list.length; i++) {
+      /// Decoding each json string to a [med] object.
       Med m = Med.fromJson(jsonDecode(list[i]));
       globalMedListAdd(m);
     }
