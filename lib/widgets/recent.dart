@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:maph_group3/util/helper.dart';
-import 'package:maph_group3/util/load_bar.dart';
 import '../util/med_list.dart';
 import '../data/globals.dart' as globals;
 import 'package:maph_group3/data/med.dart';
 import '../util/nampr.dart';
 import 'scanner.dart';
 
+/// Page that displays a list of recently scanned or bought medicaments.
+/// Each medicament entry is drawn by [MedList.build].
 class Recent extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -15,17 +16,17 @@ class Recent extends StatefulWidget {
 }
 
 class _RecentState extends State<Recent> {
-  bool getGlobalMedListDone = false;
-  List<Med> medList = [];
   _RecentState();
 
   @override
   void initState() {
     super.initState();
-    getGlobalMedList();
+
+    _getGlobalMedList();
   }
 
-  Future getGlobalMedList() async {
+  /// Retrieving [globals.meds] list, which represents a list of recent medicaments.
+  Future _getGlobalMedList() async {
     if (this.mounted) {
       await Helper.loadGlobalMedList();
       setState(() {});
@@ -41,10 +42,12 @@ class _RecentState extends State<Recent> {
       body: (globals.meds.length > 0)
           ? MedList.build(
               context,
-              globals.meds,
+
+              /// Displays list in reverse, so we will see the latest medicament on top.
+              globals.meds.reversed.toList(),
               true,
-              medItemOnSwipe,
-              medItemOnButtonDelete,
+              _medItemOnSwipe,
+              _medItemOnButtonDelete,
             )
           : Center(
               child: Padding(
@@ -69,11 +72,13 @@ class _RecentState extends State<Recent> {
     );
   }
 
-  void medItemOnSwipe(Med med) {
-    medItemDelete(med);
+  /// Deletes medicament entry on swipe.
+  void _medItemOnSwipe(Med med) {
+    _medItemDelete(med);
   }
 
-  void medItemOnButtonDelete(Med med) {
+  /// Deletes medicament entry on alert box confirmation.
+  void _medItemOnButtonDelete(Med med) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -104,7 +109,7 @@ class _RecentState extends State<Recent> {
             FlatButton(
               child: Text("Ja"),
               onPressed: () {
-                medItemDelete(med);
+                _medItemDelete(med);
                 Navigator.pop(context);
               },
             ),
@@ -114,7 +119,8 @@ class _RecentState extends State<Recent> {
     );
   }
 
-  void medItemDelete(Med med) async {
+  /// Removes medicament entry from the [globals.meds] list and saves the change.
+  void _medItemDelete(Med med) async {
     setState(() {
       globals.meds.remove(med);
     });

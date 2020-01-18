@@ -1,14 +1,14 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_pagewise/flutter_pagewise.dart';
-
 import '../data/globals.dart' as globals;
 import '../data/med.dart';
 import 'helper.dart';
 
 class MedGet {
   static Future<List<Med>> getMeds(
-      String searchValue, int pageIndex, int pageCount) async {
+      String searchValue, int pageIndex, int resultsPerPage,
+      [bool isMedSearch = false]) async {
     List<Med> list = new List<Med>();
 
     try {
@@ -17,7 +17,7 @@ class MedGet {
           '"&page=' +
           pageIndex.toString() +
           '&resultsPerPage=' +
-          pageCount.toString());
+          resultsPerPage.toString());
       //print(resp.body);
 
       if (resp.statusCode == HttpStatus.ok) {
@@ -34,6 +34,8 @@ class MedGet {
           if (index == pzns.length - 1) return list;
 
           while (true) {
+            if (isMedSearch && isMedInGlobalsList(pzns[index])) break;
+
             searchIndex =
                 html.indexOf('<span class="link name">', searchIndex + 1);
             if (searchIndex == -1) break;
@@ -54,13 +56,15 @@ class MedGet {
             }
           }
         } else if (pzns.length == 1) {
-          //single-page
-          String medName =
-              Helper.parseMid(html, '<h1 itemprop="name">', '</h1>');
-          Med m = new Med(medName, pzns[0]);
-          await MedGet.getMedInfo(m);
-          if (m.name.length > 0 && m.pzn != '00000000') {
-            list.add(m);
+          if (!(isMedSearch && isMedInGlobalsList(pzns[0]))) {
+            //single-page
+            String medName =
+                Helper.parseMid(html, '<h1 itemprop="name">', '</h1>');
+            Med m = new Med(medName, pzns[0]);
+            await MedGet.getMedInfo(m);
+            if (m.name.length > 0 && m.pzn != '00000000') {
+              list.add(m);
+            }
           }
         }
       }
@@ -71,6 +75,15 @@ class MedGet {
     return list;
   }
 
+  static bool isMedInGlobalsList(String pzn) {
+    //do not add items that already exist in our recent med list
+    return (globals.meds
+            .where((item) => item.pzn.toLowerCase().contains(pzn.toLowerCase()))
+            .toList()
+            .length !=
+        0);
+  }
+
   static void getMedsPrefix(
       PagewiseLoadController plc, int pageIndex, String searchValue) {
     if (pageIndex == 0 && searchValue.length > 0) {
@@ -79,11 +92,12 @@ class MedGet {
       //adding local search results on top
       List<Med> localMedsFound = globals.meds
           .where((item) =>
-              item.name.toLowerCase().contains(searchValue.toLowerCase()))
+              item.name.toLowerCase().contains(searchValue.toLowerCase()) ||
+              item.pzn.toLowerCase().contains(searchValue.toLowerCase()))
           .toList();
 
       for (var i = 0; i < localMedsFound.length; i++) {
-        plc.loadedItems.insert(i, localMedsFound[i]);
+        plc.loadedItems.insert(0, localMedsFound[i]);
       }
     }
   }

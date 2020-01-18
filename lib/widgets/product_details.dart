@@ -5,6 +5,9 @@ import 'package:maph_group3/widgets/order_summary.dart';
 
 import '../data/globals.dart' as globals;
 
+/// The class gives a product overview with all details regarding the medicament.
+/// It has an input field, where the user can specify the amount of the product
+/// he wants to order and sees the price for his order.
 class ProductDetails extends StatefulWidget {
   final String searchKey;
 
@@ -29,6 +32,7 @@ class _ProductDetailsState extends State<ProductDetails> {
   void initState() {
     super.initState();
 
+    /// get the local shop item by search key
     medSearchKey = widget.searchKey;
     if(globals.items.containsKey(medSearchKey)) {
       localShopItem = globals.items[medSearchKey];
@@ -41,6 +45,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     super.dispose();
   }
 
+  /// Build the main view of the product details page.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,6 +64,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
+  /// Build the image container for the product.
   Widget buildImageContainer() {
     return Center(
       child: Container(
@@ -74,13 +80,14 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
+  /// Build the main part where details of the medicament are displayed.
   Widget buildMainView() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Container(
           padding: EdgeInsets.all(10),
-          child: Text(localShopItem.name, style: TextStyle(fontSize: 30),),
+          child: Center(child: Text(localShopItem.name, style: TextStyle(fontSize: 30),),),
         ),
         Container(
           child: Column(
@@ -146,8 +153,8 @@ class _ProductDetailsState extends State<ProductDetails> {
                 Container(
                   alignment: Alignment.bottomLeft,
                   child: localShopItem.onlyAvailableOnPrescription?
-                  Icon(Icons.block, color: Theme.of(context).errorColor,) :
-                  Icon(Icons.check_circle_outline, color: Theme.of(context).primaryColor,),
+                  Icon(Icons.block, color: Colors.red,) :
+                  Icon(Icons.check_circle_outline, color: Colors.green,),
                 ),
               ],
             ),
@@ -156,22 +163,24 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
+  /// Build the complete order container.
   Widget buildOrderCompleteContainer() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         _buildPricingContainer(),
         _buildInputField(),
         new Flexible(
           child: RaisedButton(
             onPressed: validateInputAndProceed,
-            child: Text("Bestellen", style: TextStyle(color: Theme.of(context).primaryColor),),
+            child: Text("Bestellen", style: TextStyle(color: Theme.of(context).backgroundColor),),
           ),
         ),
       ],
     );
   }
 
+  /// Build the price input field.
   Widget _buildInputField() {
     return new Flexible(
       child: Container(
@@ -197,6 +206,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
+  /// Build container with pricing information.
   Widget _buildPricingContainer() {
     double price = ((localShopItem.priceInt * quantity) / 100);
     return new Flexible(
@@ -241,6 +251,8 @@ class _ProductDetailsState extends State<ProductDetails> {
     );
   }
 
+  /// Validate the input of the text field.
+  /// Shows alert when input field is left empty.
   void validateInputAndProceed() {
     if(textEditController.text.isNotEmpty) {
       this.localShopItem.orderQuantity = int.parse(textEditController.text);

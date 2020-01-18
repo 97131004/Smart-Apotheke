@@ -3,6 +3,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
+import 'package:maph_group3/data/med.dart';
+import 'package:maph_group3/util/helper.dart';
 import 'package:maph_group3/util/nampr.dart';
 import 'package:maph_group3/util/personal_data.dart';
 import 'package:maph_group3/util/shop_items.dart';
@@ -12,6 +14,14 @@ import 'package:maph_group3/widgets/personal.dart';
 import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+/// The class gives an overview of the order the user is going to execute.
+/// This page consists of different parts:
+///   1. Product overview: Name, amount and price of medicament, including
+///      tax and shipping (these values can change based on shipping options)
+///   2. Payment options
+///   3. Shipping options: Users can decide wether to ship the medicaments by
+///      mail or to collect it at a selected drug store.
+///   4. Confirmation of the order
 class OrderSummary extends StatefulWidget {
   final ShopItem item;
 
@@ -33,6 +43,7 @@ class _OrderSummaryState extends State<OrderSummary> {
   PlacesSearchResult currentMarker;
   PlacesSearchResult _pickedApo;
 
+  /// used to load hidden / not yet loaded widgets depending on input
   bool agbIsChecked = false;
   bool dataIsComplete = false;
   bool visibilityShippingCosts = false;
@@ -53,6 +64,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     getShippingAddress();
   }
 
+  /// Build main view.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,6 +103,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
+  /// Build product overview as a table.
   Widget _buildProductOverview() {
     double shippingCosts = deliverToApo ? 0 : 2.99;
     double grossPrice =
@@ -120,6 +133,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
+  /// Build table header.
   TableRow _buildTableRowHeader() {
     return TableRow(
       children: [
@@ -139,6 +153,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
+  /// Build product row.
   TableRow _buildTableRowProduct(double netPrice) {
     return TableRow(
       children: [
@@ -176,6 +191,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
+  /// Build shipping / tax  row.
   TableRow _buildTableRowTaxAndShipping(double tax, double shippingCosts){
     return TableRow(
       children: [
@@ -202,6 +218,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
+  /// Build gross price row.
   TableRow _buildGrossPrice(double grossPrice) {
     return TableRow(
       children: [
@@ -217,6 +234,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
+  /// Build payment options container.
   Widget _buildPaymentOptions() {
     return new Container(
       padding: EdgeInsets.all(3),
@@ -230,6 +248,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
+  /// Build radio button group for payment options.
   RadioButtonGroup _buildRadioButtonGroupPayment() {
     return RadioButtonGroup(
         activeColor: Theme.of(context).primaryColor,
@@ -245,6 +264,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
+  /// Build shipping options container.
   Widget _buildShippingOptions() {
     return new Container(
       padding: EdgeInsets.all(3),
@@ -261,6 +281,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
+  /// Build radio button group for shipping options.
   RadioButtonGroup _buildRadioButtonGroupShipping() {
     return RadioButtonGroup(
         activeColor: Theme.of(context).primaryColor,
@@ -282,14 +303,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
-  _findApo(String selected) async {
-    var result = await Navigator.push(
-        context, NoAnimationMaterialPageRoute(builder: (context) => Maps()));
-    if (result != null) {
-      _pickedApo = result;
-    }
-  }
-
+  /// Build billing/shipping address container.
   Widget _buildBillingAdress() {
     String address =
         shippingAddress != '' ? shippingAddress : 'Lieferadresse fehlt!';
@@ -326,6 +340,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     }
   }
 
+  /// Build google maps container for maps view in shipping options.
   Widget _buildGooglemapsContainer() {
     if (_pickedApo != null) {
       return Visibility(
@@ -369,6 +384,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     }
   }
 
+  /// Build search drug store button.
   Widget _buildSearchApoButton() {
     return Positioned(
       right: 10.0,
@@ -387,6 +403,8 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
+  /// Build pick up at drug store container, that displays the address and the
+  /// earliest pick up time at the drug store.
   Widget _buildApoPickUpContainer() {
     var temp = new DateTime.now();
     var date = new DateTime(temp.year,temp.month, temp.day, temp.hour + 2, 30);
@@ -411,7 +429,8 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
-  _buildApoAddressContainer() {
+  /// Build main address container
+  Widget _buildApoAddressContainer() {
     if (markerIsTabbed) {
       return Container(
           child: Row(
@@ -434,6 +453,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     }
   }
 
+  /// Build confirmation of order container.
   Widget _buildConfirmationContainer() {
     return new Container(
       padding: EdgeInsets.all(3),
@@ -458,7 +478,7 @@ class _OrderSummaryState extends State<OrderSummary> {
             onPressed: goToOrderConfirmed,
             child: Text(
               'Zahlungspflichtig bestellen',
-              style: TextStyle(color: Theme.of(context).primaryColor),
+              style: TextStyle(color: Theme.of(context).backgroundColor),
             ),
           ),
         ],
@@ -476,7 +496,9 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
-  _checkData() async {
+  /// Check if user data is incomplete.
+  /// If the user data is missing, open Personal page, else set dataIsComplete to [true].
+  void _checkData() async {
     if (!(await PersonalData.isUserDataComplete())) {
       SchedulerBinding.instance.addPostFrameCallback((_) async {
         await _buildAlertDialog(context, 'Daten unvollständig',
@@ -512,6 +534,16 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
+  /// Opens GoogleMaps page to search for a drug store.
+  void _findApo(String selected) async {
+    var result = await Navigator.push(
+        context, NoAnimationMaterialPageRoute(builder: (context) => Maps()));
+    if (result != null) {
+      _pickedApo = result;
+    }
+  }
+
+  /// Set marker when map is created.
   Future _onMapCreated(GoogleMapController mapsController) async {
     controller = mapsController;
 
@@ -532,6 +564,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     }
   }
 
+  /// Add marker to places list.
   void addMarker(var id, LatLng latlng,
       {PlacesSearchResult place, double colorDescriptor}) {
     final MarkerId markerId = MarkerId(id);
@@ -550,7 +583,7 @@ class _OrderSummaryState extends State<OrderSummary> {
             : 'Momentan geschlossen';
       }
       if (colorDescriptor == null) {
-        colorDescriptor = BitmapDescriptor.hueGreen;
+        colorDescriptor = BitmapDescriptor.hueRose;
       }
       marker = Marker(
         markerId: markerId,
@@ -573,13 +606,16 @@ class _OrderSummaryState extends State<OrderSummary> {
     }
   }
 
-  _onMarkerTapped(id) {
+  /// Set marker tapped to [true]
+  void _onMarkerTapped(id) {
     setState(() {
       currentMarker = foundPlaces[id];
       markerIsTabbed = true;
     });
   }
 
+  /// Confirm order
+  /// If AGB's are not checked raise alert message.
   Future<void> goToOrderConfirmed() async {
     if (agbIsChecked) {
       var alert = createAlert(context);
@@ -591,6 +627,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     }
   }
 
+  /// Create password confirmation dialog.
   Alert createAlert(BuildContext context) {
     var alert = Alert(
         context: context,
@@ -616,15 +653,20 @@ class _OrderSummaryState extends State<OrderSummary> {
     return alert;
   }
 
+  /// Check if entered password is correct.
   Future _confirmPassword() async {
     if (await PersonalData.checkPassword(passwordController.text)) {
+      // add med to history
+      Med m = new Med(widget.item.name, widget.item.pzn, '', true);
+      Helper.globalMedListAdd(m);
       // go to confirmed page
       Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => OrderConfirmation()));
     }
   }
 
+  /// Build shipping address string.
   Future<String> getShippingAddress() async {
-    List<String> adresse = await PersonalData.getadresse();
+    List<String> adresse = await PersonalData.getAddress();
     if (adresse != null)
       setState(() {
         shippingAddress = adresse[0] +

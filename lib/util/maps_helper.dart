@@ -4,16 +4,21 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:location/location.dart' as LocationManager;
 
+/// The class provides methods to handle google maps.
 class MapsHelper {
+  /// Private google maps api key
   //static String kGoogleApiKey = "AIzaSyAP2X_vG7-hXWunjAhzOyAj7BGwYOTSbU4";
   static String kGoogleApiKey = "AIzaSyAFYotTBY_YeedSjlrOTXsVB7EKx79zR3U";
   static GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: kGoogleApiKey);
 
+  /// Default camera location is Berlin
   static final CameraPosition _berlin = CameraPosition(
     target: LatLng(52.521918, 13.413215),
     zoom: 10.0,
   );
 
+  /// The function searches for places nearby for a given search key and a radius.
+  /// Returns a future map of key and [PlaceSearchResult].
   static Future<Map<String, PlacesSearchResult>> findNearbyPlaces(LatLng currentLocation, String searchKey, num radius) async {
     final loc = Location(currentLocation.latitude, currentLocation.longitude);
     final result = await _places.searchByText(searchKey, location: loc, radius: 200);
@@ -31,6 +36,7 @@ class MapsHelper {
     }
   }
 
+  /// The function returns a string if place is open or not.
   static String getOpenString(PlacesSearchResult result) {
     if(result.openingHours != null) {
       if(result.openingHours.openNow != null) {
@@ -43,10 +49,13 @@ class MapsHelper {
     }
   }
 
+  /// Builds string to obtain photo of google maps place.
   static String buildPhotoURL(String photoReference) {
     return 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=$kGoogleApiKey';
   }
 
+  /// The function returns the current location.
+  /// Returns future of [LatLng]
   static Future<LatLng> getCurrentLocation() async {
     final location = LocationManager.Location();
     try {
@@ -59,6 +68,7 @@ class MapsHelper {
     }
   }
 
+  /// The function launces map in app.
   static Future<void> openMap(double latitude, double longitude) async {
     String googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
     if (await canLaunch(googleUrl)) {
@@ -68,14 +78,17 @@ class MapsHelper {
     }
   }
 
+  /// Returns initial position as [CameraPosition]
   static CameraPosition getInitialPosition() {
     return _berlin;
   }
 
+  /// Returns API Key. SHould be stored in application properties due to abuse.
   static String getApiKey() {
     return kGoogleApiKey;
   }
 
+  /// Retruns [GoogleMapsPlaces] instance.
   static GoogleMapsPlaces getGoogleMapsPlaces() {
     return _places;
   }

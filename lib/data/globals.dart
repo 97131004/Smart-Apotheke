@@ -24,6 +24,7 @@ List<Med> meds = [
       true),
 ];
 
+/// Static medicaments --> this should be outsourced to database.
 Map<String, ShopItem> items = {
   '10019638': new ShopItem('Ibu Lysin ratiopharm 684mg Filmtabletten',
       '10019638', 'ratiopharm Gmbh', '20 Filmtabletten', '', 'assets/dummy_med.png', '3,39 €', '4,99 €',
@@ -50,4 +51,16 @@ Map<String, ShopItem> items = {
           'sogenannten Triglyzeriden, im Blut. Außerdem erhöht es die Werte von „gutem" HDL-Cholesterin. '
           'Das Präparat gehört zu der Klasse der als „Statine" bezeichneten Arzneimittel.',
       'simvastin', true), // Simvastin
+  '01088942': new ShopItem('Vertigoheel', '01088942', 'Biologische Heilmittel Heel GmbH', '30ml (N1)', '',
+      'assets/dummy_med.png', '13,99 €', '15,99 €', '0,10 €', 'MAPH_group3', 'Natürliche Arzneimittel wie '
+        'Vertigoheel können helfen, Schwindelbeschwerden zu verbessern. Vertigoheel ist das meistverwendete '
+        'Arzneimittel gegen Schwindelbeschwerden in Deutschland. Es enthält 4 Inhaltsstoffe (zum Beispiel '
+        'Anamirta cocculus oder Conium maculatum), die sich gegenseitig in ihrer Wirkung ergänzen. Die '
+        'Wirksamkeit wurde in Studien nachgewiesen. Dabei macht Vertigoheel nicht müde, die volle '
+        'Konzentrationsfähigkeit bleibt erhalten. Da keine Neben- oder Wechselwirkungen bekannt sind, '
+        'ist auch eine längerfristige Anwendung möglich.',
+      'vertigoheel', false),
+  '10108112': new ShopItem('Omeprazol 20mg', '10108112', '1A Pharma GmbH', '100 Stück, N3', '',
+      'assets/dummy_med.png', '19,50 €', '', '0,19 €', 'MAPH_group3', 'Keine Beschreibung verfügbar.',
+      'omeprazol', true),
 };

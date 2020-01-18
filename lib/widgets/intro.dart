@@ -1,19 +1,22 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:maph_group3/util/helper.dart';
 import 'package:maph_group3/util/nampr.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:maph_group3/util/personal_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import 'home.dart';
 
+/// Intro page is shown on the very first app start. Includes subpages for
+/// information about the app, privacy policy, eula and initial password prompt.
+/// Switches subpages by changing the [_curPage] variable. Input parameter [showOnlyPage]
+/// defines which of the subpages should be shown (called from the [home] page).
 class Intro extends StatefulWidget {
-  final bool showOnlyEula;
+  final IntroPage showOnlyPage;
 
-  Intro({Key key, @required this.showOnlyEula}) : super(key: key);
+  Intro({Key key, this.showOnlyPage}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -21,28 +24,51 @@ class Intro extends StatefulWidget {
   }
 }
 
-enum Page { title, eula, pass }
+enum IntroPage { about, privacy, eula, pass }
 
 class _IntroState extends State<Intro> {
-  Page curPage = Page.title;
-  String eulaHtml = '';
-  String eulaPath = 'assets/files/privacy_policy.html';
-  bool eulaChecked = false;
-  String passHintText = '\u2022\u2022\u2022';
-  TextEditingController newPass = new TextEditingController();
-  TextEditingController newPassConfirm = new TextEditingController();
-  String passStatus = '';
-  var appBarText = Text('');
-  String keyFirstrun = 'firstRun';
+  /// Currently active subpage.
+  IntroPage _curPage = IntroPage.about;
+
+  String _appBarTitle = '';
+
+  /// Used to change [_appBarTitle] on demand.
+  final String _privacyTitle = 'Datenschutzerklärung';
+  final String _privacyPath = 'assets/files/privacy_policy.html';
+
+  /// Used to change [_appBarTitle] on demand.
+  final String _eulaTitle = 'Nutzungsbedingungen';
+  final String _eulaPath = 'assets/files/eula.html';
+
+  final String _passHintText = '\u2022\u2022\u2022';
+  final String _saveKeyFirstRun = 'firstRun';
+
+  /// Storing retrieved privacy policy html.
+  String _privacyHtml = '';
+
+  /// Storing retrieved eula html.
+  String _eulaHtml = '';
+
+  bool _agreementChecked = false;
+
+  TextEditingController _newPass = new TextEditingController();
+  TextEditingController _newPassConfirm = new TextEditingController();
+
+  /// Error text on wrongly entered password.
+  String _passStatus = '';
 
   @override
   void initState() {
     super.initState();
-    loadEula();
 
-    if (widget.showOnlyEula != null && widget.showOnlyEula) {
+    _loadEulaPrivacy();
+
+    if (widget.showOnlyPage != null) {
       setState(() {
-        curPage = Page.eula;
+        _curPage = widget.showOnlyPage;
+        if (widget.showOnlyPage == IntroPage.about) {
+          _appBarTitle = 'Über uns';
+        }
       });
     }
   }
@@ -52,26 +78,44 @@ class _IntroState extends State<Intro> {
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(statusBarColor: Theme.of(context).primaryColor));
     return WillPopScope(
-      onWillPop: handleWillPop,
+      onWillPop: _handleWillPop,
       child: Scaffold(
           appBar: AppBar(
-            title: appBarText,
+            title: Text(_appBarTitle),
+            leading: (widget.showOnlyPage == null &&
+                    (_curPage == IntroPage.eula ||
+                        _curPage == IntroPage.privacy))
+                ? IconButton(
+                    icon: Icon(Icons.arrow_back),
+                    onPressed: _handleWillPop,
+                  )
+                : null,
           ),
-          body: (curPage == Page.title)
-              ? buildTitle()
-              : (curPage == Page.eula)
-                  ? buildEula()
-                  : (curPage == Page.pass) ? buildPass() : buildTitle()),
+
+          /// Showing corresponding subpage.
+          body: (_curPage == IntroPage.about)
+              ? _buildAbout()
+              : (_curPage == IntroPage.privacy)
+                  ? _buildEulaPrivacy(false)
+                  : (_curPage == IntroPage.eula)
+                      ? _buildEulaPrivacy(true)
+                      : (_curPage == IntroPage.pass)
+                          ? _buildPass()
+                          : _buildAbout()),
     );
   }
 
-  Future<bool> handleWillPop() async {
-    if (widget.showOnlyEula == null || !widget.showOnlyEula) {
-      if (curPage == Page.eula) {
+  /// Handles back button.
+  Future<bool> _handleWillPop() async {
+    if (widget.showOnlyPage == null) {
+      if (_curPage == IntroPage.privacy || _curPage == IntroPage.eula) {
         setState(() {
-          appBarText = Text('');
-          curPage = Page.title;
+          _appBarTitle = '';
+          _curPage = IntroPage.about;
         });
+      } else if (_curPage == IntroPage.about) {
+        /// Moves app to background.
+        return true;
       }
     } else {
       Navigator.pop(context);
@@ -79,7 +123,8 @@ class _IntroState extends State<Intro> {
     return false;
   }
 
-  Widget buildTitle() {
+  /// Displays information about the app, its developers and agreement checkbox.
+  Widget _buildAbout() {
     return Stack(
       children: <Widget>[
         Padding(
@@ -95,7 +140,8 @@ class _IntroState extends State<Intro> {
                   )),
               SizedBox(height: 15),
               Text(
-                  'Mobile Applications for Public Health\nWS 2019 / 2020\nGruppe 3\n\n' +
+                  'Hochschule für Technik und Wirtschaft Berlin\n' +
+                      'Mobile Anwendungen im Gesundheitswesen\nWS 2019 / 2020\nGruppe 3\n\n' +
                       'Albert Pavlov\nAnge Toko\nMichael Franz\nPhuong Pham\nVan Tinh Chu',
                   style: TextStyle(
                     fontSize: 16,
@@ -103,81 +149,102 @@ class _IntroState extends State<Intro> {
             ],
           ),
         ),
-        Padding(
-            padding: EdgeInsets.only(bottom: 15),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Theme(
-                    data: ThemeData(highlightColor: Colors.white),
-                    child: CheckboxListTile(
-                      title: RichText(
-                          text: TextSpan(children: <TextSpan>[
-                        TextSpan(
-                          text: "Ich habe die ",
-                          style: TextStyle(
-                            color: Colors.black,
+        if (!(widget.showOnlyPage != null &&
+            widget.showOnlyPage == IntroPage.about))
+          Padding(
+              padding: EdgeInsets.only(bottom: 15),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    Theme(
+                      data: ThemeData(highlightColor: Colors.white),
+                      child: CheckboxListTile(
+                        title: RichText(
+                            text: TextSpan(children: <TextSpan>[
+                          TextSpan(
+                              text: "Ich stimme den ",
+                              style: Theme.of(context).textTheme.body1),
+                          TextSpan(
+                            text: _eulaTitle,
+                            style: TextStyle(
+                              fontSize:
+                                  Theme.of(context).textTheme.body1.fontSize,
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                setState(() {
+                                  _appBarTitle = _eulaTitle;
+                                  _curPage = IntroPage.eula;
+                                });
+                              },
                           ),
-                        ),
-                        TextSpan(
-                          text: 'Datenschutzerklärung',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline,
+                          TextSpan(
+                              text: " und der ",
+                              style: Theme.of(context).textTheme.body1),
+                          TextSpan(
+                            text: _privacyTitle,
+                            style: TextStyle(
+                              fontSize:
+                                  Theme.of(context).textTheme.body1.fontSize,
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                setState(() {
+                                  _appBarTitle = _privacyTitle;
+                                  _curPage = IntroPage.privacy;
+                                });
+                              },
                           ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              setState(() {
-                                appBarText = Text('Datenschutzerklärung');
-                                curPage = Page.eula;
-                              });
-                            },
-                        ),
-                        TextSpan(
-                          text: " durchgelesen und stimme ihr zu.",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                      ])),
-                      value: eulaChecked,
-                      onChanged: (bool value) {
-                        setState(() {
-                          eulaChecked = value;
-                        });
-                        if (eulaChecked) {
-                          Future.delayed(Duration(milliseconds: 300), () {
-                            setState(() {
-                              appBarText = Text('Passwort setzen');
-                              curPage = Page.pass;
-                            });
+                          TextSpan(
+                              text: " zu.",
+                              style: Theme.of(context).textTheme.body1),
+                        ])),
+                        value: _agreementChecked,
+                        onChanged: (bool value) {
+                          setState(() {
+                            _agreementChecked = value;
                           });
-                        }
-                      },
-                      controlAffinity: ListTileControlAffinity.leading,
-                    ),
-                  )
-                ]))
+                          if (_agreementChecked) {
+                            /// Pushing to [home] page after checkbox check.
+                            Future.delayed(Duration(milliseconds: 300), () {
+                              setState(() {
+                                _appBarTitle = 'Passwort setzen';
+                                _curPage = IntroPage.pass;
+                              });
+                            });
+                          }
+                        },
+                        controlAffinity: ListTileControlAffinity.leading,
+                      ),
+                    )
+                  ]))
       ],
     );
   }
 
-  void loadEula() async {
-    eulaHtml = await rootBundle.loadString(eulaPath);
+  /// Loading eula and privacy policy from html files.
+  void _loadEulaPrivacy() async {
+    _privacyHtml = await rootBundle.loadString(_privacyPath);
+    _eulaHtml = await rootBundle.loadString(_eulaPath);
     setState(() {});
   }
 
-  Widget buildEula() {
+  /// Displays eula and privacy policy.
+  Widget _buildEulaPrivacy([bool eula = true]) {
     setState(() {
-      appBarText = Text('Datenschutzerklärung');
+      _appBarTitle = (eula ? _eulaTitle : _privacyTitle);
     });
     return Scrollbar(
       child: ListView(
         children: <Widget>[
           Html(
-            data: eulaHtml,
+            data: (eula ? _eulaHtml : _privacyHtml),
             padding: EdgeInsets.all(8.0),
             useRichText: true,
             onLinkTap: (url) async {
@@ -186,7 +253,6 @@ class _IntroState extends State<Intro> {
               } else {
                 print('Could not launch $url');
               }
-              print(url);
             },
           )
         ],
@@ -194,7 +260,8 @@ class _IntroState extends State<Intro> {
     );
   }
 
-  Widget buildPass() {
+  /// Displays initial password prompt.
+  Widget _buildPass() {
     return Scrollbar(
         child: ListView(
       children: <Widget>[
@@ -217,15 +284,15 @@ class _IntroState extends State<Intro> {
               Text('Neues Passwort:'),
               TextField(
                 obscureText: true,
-                controller: newPass,
-                decoration: InputDecoration(hintText: passHintText),
+                controller: _newPass,
+                decoration: InputDecoration(hintText: _passHintText),
               ),
               SizedBox(height: 20),
               Text('Neues Passwort wiederholen:'),
               TextField(
                 obscureText: true,
-                controller: newPassConfirm,
-                decoration: InputDecoration(hintText: passHintText),
+                controller: _newPassConfirm,
+                decoration: InputDecoration(hintText: _passHintText),
               ),
               SizedBox(height: 20),
               ButtonTheme(
@@ -235,7 +302,7 @@ class _IntroState extends State<Intro> {
                 child: RaisedButton.icon(
                   textColor: Colors.white,
                   icon: Icon(Icons.save),
-                  onPressed: onPressedSavePassButton,
+                  onPressed: _onPressedSavePassButton,
                   label: Text("Speichern"),
                 ),
               ),
@@ -243,7 +310,7 @@ class _IntroState extends State<Intro> {
                 height: 20,
               ),
               Text(
-                passStatus,
+                _passStatus,
                 style: TextStyle(color: Theme.of(context).errorColor),
               )
             ],
@@ -253,28 +320,23 @@ class _IntroState extends State<Intro> {
     ));
   }
 
-  void onPressedSavePassButton() async {
-    if (newPass.text == newPassConfirm.text && newPass.text.length > 0) {
-      await PersonalData.setpassword(newPass.text);
+  /// Saves password, shows toast note, saves [_saveKeyFirstRun] flag ([intro] page
+  /// is completed at this point and should not be opened on next app start),
+  /// then pushes to [home] page.
+  void _onPressedSavePassButton() async {
+    if (_newPass.text == _newPassConfirm.text && _newPass.text.length > 0) {
+      await PersonalData.setPassword(_newPass.text);
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(keyFirstrun, false);
-      Fluttertoast.showToast(
-        msg: 'Passwortänderung erfolgreich!',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Theme.of(context).primaryColor,
-        textColor: Colors.white,
-        timeInSecForIos: 1,
-        fontSize: 15,
-      );
+      await prefs.setBool(_saveKeyFirstRun, false);
+      Helper.showToast(context, 'Passwortänderung erfolgreich.');
       Navigator.push(
         context,
         NoAnimationMaterialPageRoute(builder: (context) => Home()),
       );
     } else {
       setState(() {
-        passStatus =
-            'Passwörter müssen übereinstimmen, und dürfen nicht leer sein!';
+        _passStatus =
+            'Passwörter müssen übereinstimmen, und dürfen nicht leer sein.';
       });
     }
   }

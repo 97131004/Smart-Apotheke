@@ -156,6 +156,7 @@ class _CalendarState extends State<Calendar> {
       for (int i = 0; i < time.length; i++) {
         int hour = time[i];
         int id = generator_id_notification(year, month, day, event_index, hour);
+        print(id);
         await flutterLocalNotificationsPlugin.showDailyAtTime(
             id,
             'Medikamente: $text',
@@ -482,14 +483,12 @@ class _CalendarState extends State<Calendar> {
                                 "\nNote: " +
                                 note.text;
                             setState(() {
-                              print(beginDate);
                               _controller.setSelectedDay(beginDate);
                               for (int i = 0;
                                   i <= int.parse(day_duration.text);
                                   i++) {
                                 DateTime nextDay =
                                     beginDate.add(new Duration(days: i));
-                                print(_events[nextDay]);
                                 if (_events[nextDay] != null) {
                                   _events[nextDay].add(_eventController);
                                 } else {

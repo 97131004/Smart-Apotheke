@@ -1,16 +1,16 @@
 import 'dart:convert';
-
+import 'package:flutter/material.dart';
 import 'package:maph_group3/data/med.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import '../data/globals.dart' as globals;
-
 import 'package:http/http.dart' as http;
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Helper {
-  static String keyGlobalsList = 'globalsList';
+  static String saveKeyGlobalsList = 'globalsList';
 
   static String parseMid(String source, String delim1, String delim2,
       [int startIndex]) {
@@ -103,7 +103,7 @@ class Helper {
   static void globalMedListAdd(Med m) {
     globals.meds.removeWhere((item) => item.pzn == m.pzn);
     m.isHistory = true;
-    globals.meds.insert(0, m);
+    globals.meds.add(m);
   }
 
   static Future saveGlobalMedList() async {
@@ -112,17 +112,29 @@ class Helper {
       list.add(jsonEncode(globals.meds[i].toJson()));
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(keyGlobalsList, list);
+    await prefs.setStringList(saveKeyGlobalsList, list);
   }
 
   static Future loadGlobalMedList() async {
     //disable next line to not add predefined meds from globals.dart
     //globals.meds.clear();
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> list = (prefs.getStringList(keyGlobalsList) ?? List<String>());
+    List<String> list = (prefs.getStringList(saveKeyGlobalsList) ?? List<String>());
     for (int i = 0; i < list.length; i++) {
       Med m = Med.fromJson(jsonDecode(list[i]));
-     globalMedListAdd(m);
+      globalMedListAdd(m);
     }
+  }
+
+  static void showToast(BuildContext context, String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Theme.of(context).primaryColor,
+      textColor: Colors.white,
+      timeInSecForIos: 1,
+      fontSize: 15,
+    );
   }
 }

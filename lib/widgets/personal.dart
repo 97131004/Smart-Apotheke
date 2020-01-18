@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart';
-
+import 'package:maph_group3/util/helper.dart';
 import 'package:maph_group3/util/personal_data.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
+/// Page to change personal information, such as first and last name,
+/// IBAN, address and password. Input parameter is the function [funcUpdateHome] that
+/// updates the name on the [home] page.
 class Personal extends StatefulWidget {
-  Personal({Key key}) : super(key: key);
+  final Function funcUpdateHome;
+
+  Personal({Key key, this.funcUpdateHome}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -14,72 +17,87 @@ class Personal extends StatefulWidget {
   }
 }
 
-enum Page { home, iban, pass, addr }
+enum PersonalPage { home, iban, pass, address }
 
 class _PersonalState extends State<Personal> {
-  Page curPage = Page.home;
-  String passHintText = '\u2022\u2022\u2022';
-  String status = '';
-  String lasofIban = '--';
-  TextEditingController oldp = new TextEditingController();
-  TextEditingController newp = new TextEditingController();
-  TextEditingController newpW = new TextEditingController();
-  TextEditingController fname = new TextEditingController();
-  TextEditingController name = new TextEditingController();
-  TextEditingController street = new TextEditingController();
-  TextEditingController postcode = new TextEditingController();
-  TextEditingController city = new TextEditingController();
+  final String _passHintText = '\u2022\u2022\u2022';
+
+  /// Currently active subpage.
+  PersonalPage _curPage = PersonalPage.home;
+
+  /// Shows the current update status as text, e.g. error or hint messages.
+  String _status = '';
+
+  /// Shows the last 2 numbers of the IBAN. Setting the default text here,
+  /// if no IBAN exists yet.
+  String _lastOfIban = '−−';
+
+  TextEditingController _oldPass = new TextEditingController();
+  TextEditingController _newPass = new TextEditingController();
+  TextEditingController _newPassConfirm = new TextEditingController();
+  TextEditingController _firstName = new TextEditingController();
+  TextEditingController _lastName = new TextEditingController();
+  TextEditingController _street = new TextEditingController();
+  TextEditingController _postalCode = new TextEditingController();
+  TextEditingController _city = new TextEditingController();
+  TextEditingController _iban = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    getcurrentdata();
   }
 
-  Future getcurrentdata() async {
+  /// Retrieving IBAN and address data.
+  Future _getIbanAdressData() async {
     String iban = await PersonalData.getIban();
     if (iban != '') {
       setState(() {
-        lasofIban = iban.substring(
-            iban.length - 3 < 0 ? 0 : iban.length - 3, iban.length);
+        _lastOfIban = iban.substring(
+            iban.length - 2 < 0 ? 0 : iban.length - 2, iban.length);
       });
     }
-    List<String> adresse = await PersonalData.getadresse();
-    if (adresse != null)
+    List<String> address = await PersonalData.getAddress();
+    if (address != null) {
       setState(() {
-        fname.text = adresse[0];
-        name.text = adresse[1];
-        street.text = adresse[2];
-        postcode.text = adresse[3];
-        city.text = adresse[4];
+        _firstName.text = address[0];
+        _lastName.text = address[1];
+        _street.text = address[2];
+        _postalCode.text = address[3];
+        _city.text = address[4];
       });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: handleWillPop, //back to home page, skipping scanner
+      onWillPop: _handleWillPop, //back to home page, skipping scanner
       child: Scaffold(
         appBar: AppBar(
           title: Text('Persönliche Daten'),
         ),
-        body: ListView(
-          children: <Widget>[
-            if (curPage == Page.home)
-              buildHome()
-            else if (curPage == Page.iban)
-              buildIban()
-            else if (curPage == Page.addr)
-              buildAddr()
-            else if (curPage == Page.pass)
-              buildPass()
-          ],
+
+        /// Showing corresponding subpage.
+        body: Scrollbar(
+          child: ListView(
+            children: <Widget>[
+              if (_curPage == PersonalPage.home)
+                _buildHome()
+              else if (_curPage == PersonalPage.iban)
+                _buildIban()
+              else if (_curPage == PersonalPage.address)
+                _buildAddress()
+              else if (_curPage == PersonalPage.pass)
+                _buildPass()
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget buildSaveButton(Function onPressedFunc) {
+  /// Displays the save button.
+  Widget _buildSaveButton(Function onPressedFunc) {
     return ButtonTheme(
       buttonColor: Theme.of(context).accentColor,
       minWidth: double.infinity,
@@ -93,122 +111,134 @@ class _PersonalState extends State<Personal> {
     );
   }
 
-  void showToast(String msg) {
-    Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Theme.of(context).primaryColor,
-      textColor: Colors.white,
-      timeInSecForIos: 1,
-      fontSize: 15,
-    );
+  void _showToast(String msg) {
+    Helper.showToast(context, msg);
   }
 
-  void onPressedSavePassButton() async {
-    bool isdone = false;
-    if (newp.text == newpW.text && newp.text.length > 0) {
-      isdone = await PersonalData.resetPassword(oldp.text, newp.text);
-      if (isdone) {
-        showToast('Passwortänderung erfolgreich!');
-        handleWillPop();
+  /// Sets and saves the password.
+  void _onPressedSavePassButton() async {
+    bool isDone = false;
+    if (_newPass.text == _newPassConfirm.text && _newPass.text.length > 0) {
+      isDone = await PersonalData.resetPassword(_oldPass.text, _newPass.text);
+      if (isDone) {
+        _showToast('Passwortänderung erfolgreich.');
+        _handleWillPop();
         setState(() {
-          newp.clear();
-          newpW.clear();
-          oldp.clear();
-          status = '';
+          _newPass.clear();
+          _newPassConfirm.clear();
+          _oldPass.clear();
+          _status = '';
         });
       }
     }
-    if (!isdone) {
+    if (!isDone) {
       setState(() {
-        newp.clear();
-        newpW.clear();
-        oldp.clear();
-        status =
-            'Passwortänderung fehlgeschlagen. Versuchen Sie bitte nochmal!';
+        _newPass.clear();
+        _newPassConfirm.clear();
+        _oldPass.clear();
+        _status =
+            'Passwortänderung fehlgeschlagen. Versuchen Sie es bitte nochmal.';
       });
     }
   }
 
-  void onPressedSaveIbanButton() async {
-    if (ibancontroller.text.isNotEmpty) {
-      String iban = ibancontroller.text;
-      if (await PersonalData.changeIban(iban, newp.text)) {
-        handleWillPop();
-        showToast('Änderung von IBAN erfolgreich!');
-        String iban = await PersonalData.getIban();
-        print(iban);
+  /// Sets and saves the IBAN.
+  void _onPressedSaveIbanButton() async {
+    if (_iban.text.isNotEmpty) {
+      String ibanGet = _iban.text;
+      if (await PersonalData.changeIban(ibanGet, _newPass.text)) {
+        _handleWillPop();
+        _showToast('Änderung der IBAN erfolgreich.');
+        String ibanStr = await PersonalData.getIban();
+        print(ibanStr);
         setState(() {
-          newp.clear();
-          lasofIban = iban.substring(
-              iban.length - 3 < 0 ? 0 : iban.length - 3, iban.length);
-          ibancontroller.clear();
-          status = '';
+          _newPass.clear();
+          _lastOfIban = ibanStr.substring(
+              ibanStr.length - 2 < 0 ? 0 : ibanStr.length - 2, ibanStr.length);
+          _iban.clear();
+          _status = '';
         });
       } else {
         setState(() {
-          newp.clear();
-          status = 'Passwort falsch. Versuchen Sie bitte nochmal!';
+          _newPass.clear();
+          _status = 'Passwort ist falsch. Versuchen Sie es bitte nochmal.';
         });
       }
     } else {
       setState(() {
-        status = 'Geben Sie bitte IBAN ein!';
+        _status = 'Geben Sie bitte eine IBAN ein.';
       });
     }
   }
 
-  void onPressedSaveAdresseButton() async {
-    if (fname.text.isEmpty ||
-        name.text.isEmpty ||
-        street.text.isEmpty ||
-        postcode.text.isEmpty ||
-        city.text.isEmpty) {
+  /// Sets and saves the name and address.
+  void _onPressedSaveAddressButton() async {
+    if (_firstName.text.isEmpty ||
+        _lastName.text.isEmpty ||
+        _street.text.isEmpty ||
+        _postalCode.text.isEmpty ||
+        _city.text.isEmpty) {
       setState(() {
-        status = "Bitte alle Felder ausfüllen";
+        _status = "Bitte alle Felder ausfüllen.";
       });
     } else {
       List<String> adresse = [
-        fname.text,
-        name.text,
-        street.text,
-        postcode.text,
-        city.text
+        _firstName.text,
+        _lastName.text,
+        _street.text,
+        _postalCode.text,
+        _city.text
       ];
-      if (await PersonalData.changeadresse(adresse, newp.text)) {
-        showToast('Änderung von Adresse erfolgreich!');
+      if (await PersonalData.changeAddress(adresse, _newPass.text)) {
+        _showToast('Änderung der Adresse erfolgreich.');
+        if (widget.funcUpdateHome != null) {
+          widget.funcUpdateHome();
+        }
         setState(() {
-          newp.clear();
-          status = '';
+          _newPass.clear();
+          _status = '';
         });
-        handleWillPop();
+        _handleWillPop();
       } else {
         setState(() {
-          newp.clear();
-          status = 'Passwort falsch. Versuchen Sie bitte nochmal!';
+          _newPass.clear();
+          _status = 'Passwort ist falsch. Versuchen Sie es bitte nochmal.';
         });
       }
     }
   }
 
-  Future<bool> handleWillPop() async {
-    switch (curPage) {
-      case Page.home:
+  /// Handles back button.
+  Future<bool> _handleWillPop() async {
+    /// Emptying all the text boxes, so no older values persist on next push.
+    _status = '';
+    _newPass.clear();
+    _newPassConfirm.clear();
+    _oldPass.clear();
+    _firstName.clear();
+    _lastName.clear();
+    _street.clear();
+    _postalCode.clear();
+    _city.clear();
+    _iban.clear();
+
+    switch (_curPage) {
+      case PersonalPage.home:
         Navigator.pop(context);
         break;
-      case Page.pass:
-      case Page.iban:
-      case Page.addr:
+      case PersonalPage.pass:
+      case PersonalPage.iban:
+      case PersonalPage.address:
         setState(() {
-          curPage = Page.home;
+          _curPage = PersonalPage.home;
         });
         break;
     }
     return false;
   }
 
-  Widget buildHome() {
+  /// Displays the overview subpage, which connects all the other subpage.
+  Widget _buildHome() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -217,8 +247,9 @@ class _PersonalState extends State<Personal> {
           title: Text('IBAN ändern'),
           trailing: Icon(Icons.keyboard_arrow_right),
           onTap: () {
+            _getIbanAdressData();
             setState(() {
-              curPage = Page.iban;
+              _curPage = PersonalPage.iban;
             });
           },
         ),
@@ -226,8 +257,9 @@ class _PersonalState extends State<Personal> {
           title: Text('Name und Adresse ändern'),
           trailing: Icon(Icons.keyboard_arrow_right),
           onTap: () {
+            _getIbanAdressData();
             setState(() {
-              curPage = Page.addr;
+              _curPage = PersonalPage.address;
             });
           },
         ),
@@ -236,7 +268,7 @@ class _PersonalState extends State<Personal> {
           trailing: Icon(Icons.keyboard_arrow_right),
           onTap: () {
             setState(() {
-              curPage = Page.pass;
+              _curPage = PersonalPage.pass;
             });
           },
         ),
@@ -244,34 +276,35 @@ class _PersonalState extends State<Personal> {
     );
   }
 
-  TextEditingController ibancontroller = TextEditingController();
-  Widget buildIban() {
+  /// Displays the IBAN subpage.
+  Widget _buildIban() {
     return Padding(
       padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Text('Aktuelle IBAN endet auf ' + lasofIban),
+          Text('Aktuelle IBAN endet auf ' + _lastOfIban),
           SizedBox(height: 20),
-          Text('Neue IBAN:'),
+          Text('Neue IBAN: *'),
           TextField(
-            controller: ibancontroller,
+            controller: _iban,
             decoration:
                 InputDecoration(hintText: 'XXXX XXXX XXXX XXXX XXXX XX'),
+            keyboardType: TextInputType.number,
           ),
           SizedBox(height: 20),
-          Text('Zur Bestätigung aktuelles Passwort eingeben:'),
+          Text('Zur Bestätigung aktuelles Passwort eingeben: *'),
           TextField(
-            controller: newp,
+            controller: _newPass,
             obscureText: true,
-            decoration: InputDecoration(hintText: passHintText),
+            decoration: InputDecoration(hintText: _passHintText),
           ),
           SizedBox(height: 20),
-          buildSaveButton(() => onPressedSaveIbanButton()),
+          _buildSaveButton(() => _onPressedSaveIbanButton()),
           SizedBox(height: 20),
           Text(
-            status,
+            _status,
             style: TextStyle(color: Theme.of(context).errorColor),
           )
         ],
@@ -279,55 +312,56 @@ class _PersonalState extends State<Personal> {
     );
   }
 
-  Widget buildAddr() {
+  /// Displays the name and address subpage.
+  Widget _buildAddress() {
     return Padding(
       padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Text('Vorname:'),
+          Text('Vorname: *'),
           TextField(
-            controller: fname,
+            controller: _firstName,
             decoration: InputDecoration(hintText: 'Max'),
           ),
           SizedBox(height: 20),
-          Text('Name:'),
+          Text('Name: *'),
           TextField(
-            controller: name,
+            controller: _lastName,
             decoration: InputDecoration(hintText: 'Mustermann'),
           ),
           SizedBox(height: 20),
-          Text('Straße:'),
+          Text('Straße: *'),
           TextField(
-            controller: street,
+            controller: _street,
             decoration: InputDecoration(hintText: 'Musterstr. 123'),
           ),
           SizedBox(height: 20),
-          Text('Postleitzahl:'),
+          Text('Postleitzahl: *'),
           TextField(
             keyboardType: TextInputType.number,
-            controller: postcode,
+            controller: _postalCode,
             decoration: InputDecoration(hintText: '12345'),
           ),
           SizedBox(height: 20),
-          Text('Stadt:'),
+          Text('Stadt: *'),
           TextField(
-            controller: city,
+            controller: _city,
             decoration: InputDecoration(hintText: 'Musterstadt'),
           ),
           SizedBox(height: 20),
-          Text('Zur Bestätigung aktuelles Passwort eingeben:'),
+          Text('Zur Bestätigung aktuelles Passwort eingeben: *'),
           TextField(
-            controller: newp,
+            controller: _newPass,
             obscureText: true,
-            decoration: InputDecoration(hintText: passHintText),
+            decoration: InputDecoration(hintText: _passHintText),
           ),
           SizedBox(height: 20),
-          buildSaveButton(() => onPressedSaveAdresseButton()),
+          _buildSaveButton(() => _onPressedSaveAddressButton()),
           SizedBox(height: 20),
           Text(
-            status,
+            _status,
             style: TextStyle(color: Theme.of(context).errorColor),
           )
         ],
@@ -335,40 +369,41 @@ class _PersonalState extends State<Personal> {
     );
   }
 
-  Widget buildPass() {
+  /// Displays the password subpage.
+  Widget _buildPass() {
     return Padding(
       padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Text('Aktuelles Passwort:'),
+          Text('Aktuelles Passwort: *'),
           TextField(
             obscureText: true,
-            controller: oldp,
-            decoration: InputDecoration(hintText: passHintText),
+            controller: _oldPass,
+            decoration: InputDecoration(hintText: _passHintText),
           ),
           SizedBox(height: 20),
-          Text('Neues Passwort:'),
+          Text('Neues Passwort: *'),
           TextField(
             obscureText: true,
-            controller: newp,
-            decoration: InputDecoration(hintText: passHintText),
+            controller: _newPass,
+            decoration: InputDecoration(hintText: _passHintText),
           ),
           SizedBox(height: 20),
-          Text('Neues Passwort wiederholen:'),
+          Text('Neues Passwort wiederholen: *'),
           TextField(
             obscureText: true,
-            controller: newpW,
-            decoration: InputDecoration(hintText: passHintText),
+            controller: _newPassConfirm,
+            decoration: InputDecoration(hintText: _passHintText),
           ),
           SizedBox(height: 20),
-          buildSaveButton(() => onPressedSavePassButton()),
+          _buildSaveButton(() => _onPressedSavePassButton()),
           SizedBox(
             height: 20,
           ),
           Text(
-            status,
+            _status,
             style: TextStyle(color: Theme.of(context).errorColor),
           )
         ],

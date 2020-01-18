@@ -8,7 +8,9 @@ import '../util/med_get.dart';
 import '../data/med.dart';
 import 'med_search.dart';
 
-/// Seite nach einem abgeschlossenen Scanvorgang
+/// Page after successful scanning process. Input parameter is a [List<Med> meds],
+/// which includes previously scanned medicaments. Since these only include a [pzn],
+/// some post-processing is done to get the medicament [name] and leaflet [url].
 class MedScan extends StatefulWidget {
   final List<Med> meds;
 
@@ -16,16 +18,18 @@ class MedScan extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return MedScanState();
+    return _MedScanState();
   }
 }
 
-class MedScanState extends State<MedScan> {
-  /// [getMedsDone] ist true, wenn alle Medikamente geladen wurden
-  bool getMedsDone = false;
+class _MedScanState extends State<MedScan> {
+  /// [true] when [_getMeds] finished processing medicaments.
+  bool _getMedsDone = false;
 
   @override
   void initState() {
+    /// Checks for internet connection. If there's no connection, a
+    /// [no_internet_alert] will be shown.
     Helper.hasInternet().then((internet) {
       if (internet == null || !internet) {
         NoInternetAlert.show(context);
@@ -34,43 +38,55 @@ class MedScanState extends State<MedScan> {
 
     super.initState();
 
+    /// Starting post-processing medicaments.
     if (widget.meds != null && widget.meds.length > 0) {
-      getMeds();
+      _getMeds();
     } else {
       if (this.mounted) {
         setState(() {
-          getMedsDone = true;
+          _getMedsDone = true;
         });
       }
     }
   }
 
-  Future getMeds() async {
+  /// Post-processing input medicaments. Updating medicament [name] and leaflet [url].
+  Future _getMeds() async {
     for (int i = 0; i < widget.meds.length; i++) {
       String pzn = widget.meds[i].pzn;
       if (Helper.isNumber(pzn)) {
+        /// Getting remaining data based on [pzn]. Searching on page 1,
+        /// since result is expected to be singular.
         List<Med> med = await MedGet.getMeds(pzn, 0, 1);
         if (med.length > 0) {
           widget.meds[i] = med[0];
         }
       }
     }
+
+    /// Refreshing UI.
     if (this.mounted) {
       setState(() {
-        getMedsDone = true;
+        _getMedsDone = true;
       });
-      for (int i = 0; i < widget.meds.length; i++) {
+    }
+
+    /// Adding scanned medicaments to [globals.meds] list and saving it.
+    for (int i = 0; i < widget.meds.length; i++) {
+      /// Skipping those, to which no medicament [name] could be found.
+      if (widget.meds[i].name.length > 0) {
         Helper.globalMedListAdd(widget.meds[i]);
       }
-      await Helper.saveGlobalMedList();
     }
+    await Helper.saveGlobalMedList();
   }
 
+  /// Showing list of scanned medicaments or loading bar.
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        //back to home page, skipping scanner
+        /// Returning [true] to go back to home page, skipping scanner page.
         Navigator.pop(context);
         return true;
       },
@@ -78,18 +94,20 @@ class MedScanState extends State<MedScan> {
         appBar: AppBar(
           title: Text('Gefundene Medikamente'),
         ),
-        body: getMedsDone ? buildList() : LoadBar.build(),
+        body: _getMedsDone ? _buildList() : LoadBar.build(),
       ),
     );
   }
 
-  Widget buildList() {
+  /// Builds final list, including top note, list of scanned medicaments,
+  /// buttons to do a manual medicament search or retry scan.
+  Widget _buildList() {
     return Scrollbar(
       child: ListView.builder(
         itemBuilder: (context, index) {
           int length = widget.meds.length;
           if (index == 0) {
-            //first item
+            /// Top note.
             return Container(
               width: double.infinity,
               color: Colors.blueAccent,
@@ -102,11 +120,11 @@ class MedScanState extends State<MedScan> {
             );
           }
           if (length > 0 && index >= 1 && index <= length) {
-            //med items
+            /// Medicament items.
             return MedList.buildItem(context, index, widget.meds[index - 1]);
           }
           if (length == 0 && index == length + 1) {
-            //med items
+            /// No medicament items found.
             return Column(
               children: <Widget>[
                 Padding(
@@ -118,7 +136,7 @@ class MedScanState extends State<MedScan> {
           }
           if (length > 0 && index == length + 1 ||
               length == 0 && index == length + 2) {
-            //last item
+            /// Bottom buttons.
             return Column(
               children: <Widget>[
                 SizedBox(height: 20),
