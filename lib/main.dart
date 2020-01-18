@@ -8,7 +8,8 @@ import 'widgets/intro.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  /// Checking whether this app start is the first one.
+  /// Checking whether this app start is the first one based on a first 
+  /// run variable saved into android's shared preferences.
   final String saveKeyFirstRun = 'firstRun';
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool firstRun = (prefs.getBool(saveKeyFirstRun) == null ||

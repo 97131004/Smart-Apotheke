@@ -685,7 +685,7 @@ class _OrderSummaryState extends State<OrderSummary> {
         _dataIsComplete = false;
       });
 
-      /// Adding medicament to [globals.meds] (recent) list and saving it.
+      /// Adding medicament to [globals.recentMeds] (recent) list and saving it.
       Med m = new Med(widget.item.name, widget.item.pzn, '', true);
 
       /// Retrieving package leaflet for the medicament.
@@ -694,8 +694,8 @@ class _OrderSummaryState extends State<OrderSummary> {
         m.url = mPzn[0].url;
       }
 
-      Helper.globalMedListAdd(m);
-      await Helper.globalMedListSave();
+      Helper.recentMedsAdd(m);
+      await Helper.recentMedsSave();
 
       // go to confirmed page
       Navigator.push(

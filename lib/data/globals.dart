@@ -7,7 +7,7 @@ import 'med.dart';
 
 /// List of recently scanned or ordered medicaments (also includes some predefined
 /// dummy medicaments). This list should be later outsourced to a database.
-List<Med> meds = [
+List<Med> recentMeds = [
   Med(
       'Ibu Lysin ratiopharm 684mg Filmtabletten',
       '10019638',

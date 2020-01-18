@@ -16,7 +16,7 @@ class MedGet {
   /// to search on [beipackzettel.de] with [getMedInfo] to acquire the package leaflet [url],
   /// then returns a list of found [med]'s. [isMedSearch] is true if search is done in
   /// [med_search], so it will skip returning entries that are already in the local
-  /// [globals.meds] list; those are shown with the [getMedsPrefix] function.
+  /// [globals.recentMeds] list; those are shown with the [getMedsPrefix] function.
   static Future<List<Med>> getMeds(
       String searchValue, int pageIndex, int resultsPerPage,
       [bool isMedSearch = false]) async {
@@ -44,8 +44,8 @@ class MedGet {
           if (index == pzns.length - 1) return list;
 
           while (true) {
-            /// Break if medicament is already in local [globals.meds] list.
-            if (isMedSearch && isMedInGlobalsList(pzns[index])) break;
+            /// Break if medicament is already in local [globals.recentMeds] list.
+            if (isMedSearch && isMedInRecentMedsList(pzns[index])) break;
 
             searchIndex =
                 html.indexOf('<span class="link name">', searchIndex + 1);
@@ -69,7 +69,7 @@ class MedGet {
           }
         } else if (pzns.length == 1) {
           /// Single-page results.
-          if (!(isMedSearch && isMedInGlobalsList(pzns[0]))) {
+          if (!(isMedSearch && isMedInRecentMedsList(pzns[0]))) {
             String medName =
                 Helper.parseMid(html, '<h1 itemprop="name">', '</h1>');
             Med m = new Med(medName, pzns[0]);
@@ -89,21 +89,21 @@ class MedGet {
     return list;
   }
 
-  /// Returns whether a [med] with a certain [pzn] is found in the [globals.meds] list.
-  static bool isMedInGlobalsList(String pzn) {
-    return (globals.meds
+  /// Returns whether a [med] with a certain [pzn] is found in the [globals.recentMeds] list.
+  static bool isMedInRecentMedsList(String pzn) {
+    return (globals.recentMeds
             .where((item) => item.pzn.toLowerCase().contains(pzn.toLowerCase()))
             .toList()
             .length !=
         0);
   }
 
-  /// Adds local search results from the [globals.meds] list (based on [name] or [pzn])
+  /// Adds local search results from the [globals.recentMeds] list (based on [name] or [pzn])
   /// to the [plc] in [med_search].
   static void getMedsPrefix(
       PagewiseLoadController plc, int pageIndex, String searchValue) {
     if (pageIndex == 0 && searchValue.length > 0) {
-      List<Med> localMedsFound = globals.meds
+      List<Med> localMedsFound = globals.recentMeds
           .where((item) =>
               item.name.toLowerCase().contains(searchValue.toLowerCase()) ||
               item.pzn.toLowerCase().contains(searchValue.toLowerCase()))

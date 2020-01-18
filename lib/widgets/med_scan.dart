@@ -72,14 +72,14 @@ class _MedScanState extends State<MedScan> {
       });
     }
 
-    /// Adding scanned medicaments to [globals.meds] list and saving it.
+    /// Adding scanned medicaments to [globals.recentMeds] list and saving it.
     for (int i = 0; i < widget.meds.length; i++) {
       /// Skipping those, to which no medicament [name] could be found.
       if (widget.meds[i].name.length > 0) {
-        Helper.globalMedListAdd(widget.meds[i]);
+        Helper.recentMedsAdd(widget.meds[i]);
       }
     }
-    await Helper.globalMedListSave();
+    await Helper.recentMedsSave();
   }
 
   /// Showing list of scanned medicaments or loading bar.
