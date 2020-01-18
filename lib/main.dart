@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/home.dart';
 import 'widgets/intro.dart';
 
+/// Entry function for the app.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -33,7 +34,6 @@ void main() async {
         buttonColor: Colors.redAccent,
         splashColor: Colors.black54,
         errorColor: Colors.red,
-        highlightColor: Colors.grey[800],
         textTheme: TextTheme(
           headline: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
           title: TextStyle(fontSize: 20.0),

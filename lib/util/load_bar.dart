@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+/// Universal loading bar.
+
 class LoadBar {
   static Widget build() {
     return Container(

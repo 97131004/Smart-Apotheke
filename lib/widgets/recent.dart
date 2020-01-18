@@ -8,6 +8,7 @@ import 'scanner.dart';
 
 /// Page that displays a list of recently scanned or bought medicaments.
 /// Each medicament entry is drawn by [MedList.build].
+
 class Recent extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -28,7 +29,7 @@ class _RecentState extends State<Recent> {
   /// Retrieving [globals.meds] list, which represents a list of recent medicaments.
   Future _getGlobalMedList() async {
     if (this.mounted) {
-      await Helper.loadGlobalMedList();
+      await Helper.globalMedListLoad();
       setState(() {});
     }
   }
@@ -119,11 +120,11 @@ class _RecentState extends State<Recent> {
     );
   }
 
-  /// Removes medicament entry from the [globals.meds] list and saves the change.
+  /// Removes medicament entry from the [globals.meds] list and saves it.
   void _medItemDelete(Med med) async {
     setState(() {
       globals.meds.remove(med);
     });
-    await Helper.saveGlobalMedList();
+    await Helper.globalMedListSave();
   }
 }

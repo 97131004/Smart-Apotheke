@@ -13,6 +13,7 @@ import 'home.dart';
 /// information about the app, privacy policy, eula and initial password prompt.
 /// Switches subpages by changing the [_curPage] variable. Input parameter [showOnlyPage]
 /// defines which of the subpages should be shown (called from the [home] page).
+
 class Intro extends StatefulWidget {
   final IntroPage showOnlyPage;
 
@@ -75,8 +76,6 @@ class _IntroState extends State<Intro> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Theme.of(context).primaryColor));
     return WillPopScope(
       onWillPop: _handleWillPop,
       child: Scaffold(
@@ -164,7 +163,7 @@ class _IntroState extends State<Intro> {
                         title: RichText(
                             text: TextSpan(children: <TextSpan>[
                           TextSpan(
-                              text: "Ich stimme den ",
+                              text: 'Ich stimme den ',
                               style: Theme.of(context).textTheme.body1),
                           TextSpan(
                             text: _eulaTitle,
@@ -183,7 +182,7 @@ class _IntroState extends State<Intro> {
                               },
                           ),
                           TextSpan(
-                              text: " und der ",
+                              text: ' und der ',
                               style: Theme.of(context).textTheme.body1),
                           TextSpan(
                             text: _privacyTitle,
@@ -202,7 +201,7 @@ class _IntroState extends State<Intro> {
                               },
                           ),
                           TextSpan(
-                              text: " zu.",
+                              text: ' zu.',
                               style: Theme.of(context).textTheme.body1),
                         ])),
                         value: _agreementChecked,
@@ -303,7 +302,7 @@ class _IntroState extends State<Intro> {
                   textColor: Colors.white,
                   icon: Icon(Icons.save),
                   onPressed: _onPressedSavePassButton,
-                  label: Text("Speichern"),
+                  label: Text('Speichern'),
                 ),
               ),
               SizedBox(
@@ -329,7 +328,10 @@ class _IntroState extends State<Intro> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_saveKeyFirstRun, false);
       Helper.showToast(context, 'Passwortänderung erfolgreich.');
-      Navigator.push(
+
+      /// [Navigator.pushReplacement] replaces the current [intro] page with the [home] page.
+      /// This way, pressing the back button from the [home] page won't go to the [intro] page.
+      Navigator.pushReplacement(
         context,
         NoAnimationMaterialPageRoute(builder: (context) => Home()),
       );

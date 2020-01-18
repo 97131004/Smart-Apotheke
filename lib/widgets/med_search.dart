@@ -9,6 +9,7 @@ import '../util/med_list.dart';
 /// are coming from a GET-Request to [docmorris.de], then parsed and displayed here.
 /// First loads a fixed number of results, then loads the next set of results
 /// when user scrolls further down.
+
 class MedSearch extends StatefulWidget {
   MedSearch({Key key}) : super(key: key);
 

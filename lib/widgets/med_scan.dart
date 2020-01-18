@@ -11,6 +11,7 @@ import 'med_search.dart';
 /// Page after successful scanning process. Input parameter is a [List<Med> meds],
 /// which includes previously scanned medicaments. Since these only include a [pzn],
 /// some post-processing is done to get the medicament [name] and leaflet [url].
+
 class MedScan extends StatefulWidget {
   final List<Med> meds;
 
@@ -54,7 +55,7 @@ class _MedScanState extends State<MedScan> {
   Future _getMeds() async {
     for (int i = 0; i < widget.meds.length; i++) {
       String pzn = widget.meds[i].pzn;
-      if (Helper.isNumber(pzn)) {
+      if (Helper.isInteger(pzn)) {
         /// Getting remaining data based on [pzn]. Searching on page 1,
         /// since result is expected to be singular.
         List<Med> med = await MedGet.getMeds(pzn, 0, 1);
@@ -78,7 +79,7 @@ class _MedScanState extends State<MedScan> {
         Helper.globalMedListAdd(widget.meds[i]);
       }
     }
-    await Helper.saveGlobalMedList();
+    await Helper.globalMedListSave();
   }
 
   /// Showing list of scanned medicaments or loading bar.
@@ -153,7 +154,7 @@ class _MedScanState extends State<MedScan> {
                       );
                     },
                     icon: Icon(Icons.edit, color: Colors.white),
-                    label: Text("Name / PZN manuell eingeben",
+                    label: Text('Name / PZN manuell eingeben',
                         style: TextStyle(color: Colors.white)),
                   ),
                 ),
@@ -165,7 +166,7 @@ class _MedScanState extends State<MedScan> {
                   child: RaisedButton.icon(
                     icon: Icon(Icons.update, color: Colors.white),
                     onPressed: () => Navigator.pop(context),
-                    label: Text("Nochmals scannen",
+                    label: Text('Nochmals scannen',
                         style: TextStyle(color: Colors.white)),
                   ),
                 ),

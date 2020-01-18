@@ -6,6 +6,7 @@ import 'package:maph_group3/util/personal_data.dart';
 /// Page to change personal information, such as first and last name,
 /// IBAN, address and password. Input parameter is the function [funcUpdateHome] that
 /// updates the name on the [home] page.
+
 class Personal extends StatefulWidget {
   final Function funcUpdateHome;
 
