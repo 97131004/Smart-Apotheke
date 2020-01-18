@@ -20,28 +20,28 @@ class ProductDetails extends StatefulWidget {
 }
 
 class _ProductDetailsState extends State<ProductDetails> {
-  // search key and shop item
-  String medSearchKey;
-  ShopItem localShopItem;
+  /// search key and local shop item
+  String _medSearchKey;
+  ShopItem _localShopItem;
 
-  int quantity = 1;
+  int _quantity = 1;
 
-  final textEditController = TextEditingController();
+  final TextEditingController _textEditController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
 
     /// get the local shop item by search key
-    medSearchKey = widget.searchKey;
-    if(globals.items.containsKey(medSearchKey)) {
-      localShopItem = globals.items[medSearchKey];
+    _medSearchKey = widget.searchKey;
+    if(globals.items.containsKey(_medSearchKey)) {
+      _localShopItem = globals.items[_medSearchKey];
     }
   }
 
   @override
   void dispose(){
-    textEditController.dispose();
+    _textEditController.dispose();
     super.dispose();
   }
 
@@ -75,7 +75,7 @@ class _ProductDetailsState extends State<ProductDetails> {
           border: Border.all(color: Theme.of(context).splashColor),
         ),
         padding: EdgeInsets.all(15),
-        child: Image.asset(localShopItem.image),
+        child: Image.asset(_localShopItem.image),
       ),
     );
   }
@@ -87,7 +87,7 @@ class _ProductDetailsState extends State<ProductDetails> {
       children: <Widget>[
         Container(
           padding: EdgeInsets.all(10),
-          child: Center(child: Text(localShopItem.name, style: TextStyle(fontSize: 30),),),
+          child: Center(child: Text(_localShopItem.name, style: TextStyle(fontSize: 30),),),
         ),
         Container(
           child: Column(
@@ -100,7 +100,7 @@ class _ProductDetailsState extends State<ProductDetails> {
               ),
               Container(
                 padding: EdgeInsets.all(10),
-                child: Text(localShopItem.desc),
+                child: Text(_localShopItem.desc),
               ),
               Divider(),
               Container(
@@ -132,19 +132,19 @@ class _ProductDetailsState extends State<ProductDetails> {
             TableRow(
               children: [
                 Text("Hersteller", style: TextStyle(fontWeight: FontWeight.bold),),
-                Text(localShopItem.brand),
+                Text(_localShopItem.brand),
               ],
             ),
             TableRow(
               children: [
                 Text("\nDosierung", style: TextStyle(fontWeight: FontWeight.bold),),
-                Text("\n" + localShopItem.dosage),
+                Text("\n" + _localShopItem.dosage),
               ],
             ),
             TableRow(
               children: [
                 Text("\nPZN", style: TextStyle(fontWeight: FontWeight.bold),),
-                Text("\n" + localShopItem.pzn),
+                Text("\n" + _localShopItem.pzn),
               ],
             ),
             TableRow(
@@ -152,7 +152,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                 Text("\nRezeptfrei", style: TextStyle(fontWeight: FontWeight.bold),),
                 Container(
                   alignment: Alignment.bottomLeft,
-                  child: localShopItem.onlyAvailableOnPrescription?
+                  child: _localShopItem.onlyAvailableOnPrescription?
                   Icon(Icons.block, color: Colors.red,) :
                   Icon(Icons.check_circle_outline, color: Colors.green,),
                 ),
@@ -188,7 +188,7 @@ class _ProductDetailsState extends State<ProductDetails> {
         //padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
         child: TextField(
           keyboardType: TextInputType.number,
-          controller: textEditController,
+          controller: _textEditController,
           decoration: new InputDecoration(
               border: OutlineInputBorder(
                   borderSide: BorderSide(color: Theme.of(context).splashColor)
@@ -199,7 +199,7 @@ class _ProductDetailsState extends State<ProductDetails> {
           ),
           onChanged: (String value) => {
             setState(() => {
-              quantity = int.parse(value)
+              _quantity = int.parse(value)
             }),
           },
         ),
@@ -209,7 +209,7 @@ class _ProductDetailsState extends State<ProductDetails> {
 
   /// Build container with pricing information.
   Widget _buildPricingContainer() {
-    double price = ((localShopItem.priceInt * quantity) / 100);
+    double price = ((_localShopItem.priceInt * _quantity) / 100);
     return new Flexible(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -229,7 +229,7 @@ class _ProductDetailsState extends State<ProductDetails> {
               Flexible(
                 child: Text('Stückpreis:'),
               ),
-              Text(localShopItem.price),
+              Text(_localShopItem.price),
             ],
           ),
           Row(
@@ -238,7 +238,7 @@ class _ProductDetailsState extends State<ProductDetails> {
               Flexible(
                 child: Text('UVP*:'),
               ),
-              Text(localShopItem.crossedOutPrice, style: TextStyle(color: Theme.of(context).errorColor, decoration: TextDecoration.lineThrough,),),
+              Text(_localShopItem.crossedOutPrice, style: TextStyle(color: Theme.of(context).errorColor, decoration: TextDecoration.lineThrough,),),
             ],
           ),
         ],
@@ -249,9 +249,9 @@ class _ProductDetailsState extends State<ProductDetails> {
   /// Validate the input of the text field.
   /// Shows alert when input field is left empty.
   void validateInputAndProceed() {
-    if(textEditController.text.isNotEmpty) {
-      this.localShopItem.orderQuantity = int.parse(textEditController.text);
-      Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => OrderSummary(item: this.localShopItem)));
+    if(_textEditController.text.isNotEmpty) {
+      this._localShopItem.orderQuantity = int.parse(_textEditController.text);
+      Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => OrderSummary(item: this._localShopItem)));
     } else {
       showDialog(
         context: context,

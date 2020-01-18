@@ -35,27 +35,27 @@ class OrderSummary extends StatefulWidget {
 }
 
 class _OrderSummaryState extends State<OrderSummary> {
-  // google maps controller and markers
-  GoogleMapController controller;
-  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-  Map<String, PlacesSearchResult> foundPlaces = <String, PlacesSearchResult>{};
+  /// google maps controller and markers
+  GoogleMapController _controller;
+  Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
+  Map<String, PlacesSearchResult> _foundPlaces = <String, PlacesSearchResult>{};
 
-  PlacesSearchResult currentMarker;
+  PlacesSearchResult _currentMarker;
   PlacesSearchResult _pickedApo;
 
   /// used to load hidden / not yet loaded widgets depending on input
-  bool agbIsChecked = false;
-  bool dataIsComplete = false;
-  bool visibilityShippingCosts = false;
-  bool deliverToApo = false;
-  bool markerIsTabbed = false;
-  bool isLoaded = false;
+  bool _agbIsChecked = false;
+  bool _dataIsComplete = false;
+  bool _deliverToApo = false;
+  bool _markerIsTabbed = false;
 
-  String shippingAddress = '';
+  String _shippingAddress = '';
+
+  /// used to remember current state of radio group boxes
   String _pickedDelivered = 'Nach Hause liefern lassen ( + 2.99 € )';
   String _pickedPayment = 'Lastschrift';
 
-  TextEditingController passwordController = new TextEditingController();
+  final TextEditingController _passwordController = new TextEditingController();
 
   @override
   initState() {
@@ -80,13 +80,13 @@ class _OrderSummaryState extends State<OrderSummary> {
         body: Stack(
           children: <Widget>[
             Visibility(
-              visible: !dataIsComplete,
+              visible: !_dataIsComplete,
               child: Center(
                 child: CircularProgressIndicator(),
               ),
             ),
             Visibility(
-              visible: dataIsComplete,
+              visible: _dataIsComplete,
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 5.0),
                 child: Column(
@@ -122,7 +122,7 @@ class _OrderSummaryState extends State<OrderSummary> {
 
   /// Build product overview as a table.
   Widget _buildProductOverview() {
-    double shippingCosts = deliverToApo ? 0 : 2.99;
+    double shippingCosts = _deliverToApo ? 0 : 2.99;
     double grossPrice =
         ((widget.item.priceInt * widget.item.orderQuantity) / 100) +
             shippingCosts;
@@ -309,9 +309,9 @@ class _OrderSummaryState extends State<OrderSummary> {
               if (_pickedApo == null) _findApo(selected),
               setState(() => {
                     if (selected == 'An Apotheke liefern lassen')
-                      {deliverToApo = true}
+                      {_deliverToApo = true}
                     else
-                      {deliverToApo = false}
+                      {_deliverToApo = false}
                   })
             });
   }
@@ -319,8 +319,8 @@ class _OrderSummaryState extends State<OrderSummary> {
   /// Build billing/shipping address container.
   Widget _buildBillingAdress() {
     String address =
-        shippingAddress != '' ? shippingAddress : 'Lieferadresse fehlt!';
-    if (!deliverToApo) {
+        _shippingAddress != '' ? _shippingAddress : 'Lieferadresse fehlt!';
+    if (!_deliverToApo) {
       return Container(
           alignment: Alignment.centerLeft,
           padding: EdgeInsets.all(10),
@@ -357,7 +357,7 @@ class _OrderSummaryState extends State<OrderSummary> {
   Widget _buildGooglemapsContainer() {
     if (_pickedApo != null) {
       return Visibility(
-        visible: deliverToApo,
+        visible: _deliverToApo,
         child: Column(
           children: <Widget>[
             Container(
@@ -371,7 +371,7 @@ class _OrderSummaryState extends State<OrderSummary> {
                           target: LatLng(52.45654549, 13.52600992)),
                       mapType: MapType.normal,
                       onMapCreated: _onMapCreated,
-                      markers: Set<Marker>.of(markers.values),
+                      markers: Set<Marker>.of(_markers.values),
                       //onTap: MapsHelper.openMap(currentMarker.geometry.location.lat, currentMarker.geometry.location.lng),
                     ),
                     _buildSearchApoButton(),
@@ -382,7 +382,7 @@ class _OrderSummaryState extends State<OrderSummary> {
         ),
       );
     } else {
-      if (deliverToApo) {
+      if (_deliverToApo) {
         return Container(
           child: IconButton(
             icon: Icon(Icons.add),
@@ -451,16 +451,16 @@ class _OrderSummaryState extends State<OrderSummary> {
 
   /// Build main address container
   Widget _buildApoAddressContainer() {
-    if (markerIsTabbed) {
+    if (_markerIsTabbed) {
       return Container(
           child: Row(
         children: <Widget>[
           Column(
             children: <Widget>[
               Flexible(
-                child: Text(currentMarker.name),
+                child: Text(_currentMarker.name),
               ),
-              Flexible(child: Text(currentMarker.formattedAddress)),
+              Flexible(child: Text(_currentMarker.formattedAddress)),
             ],
           ),
         ],
@@ -489,10 +489,10 @@ class _OrderSummaryState extends State<OrderSummary> {
                 'Ich bin damit einverstanden, dass...',
               ],
               onSelected: (List<String> checked) => {
-                    agbIsChecked = false,
+                    _agbIsChecked = false,
                     checked.forEach((it) => {
                           if (it == 'AGBs zustimmen')
-                            {agbIsChecked = true}
+                            {_agbIsChecked = true}
                         })
                   }),
           RaisedButton(
@@ -531,7 +531,7 @@ class _OrderSummaryState extends State<OrderSummary> {
       });
     }
     setState(() {
-      dataIsComplete = true;
+      _dataIsComplete = true;
     });
   }
 
@@ -567,21 +567,20 @@ class _OrderSummaryState extends State<OrderSummary> {
 
   /// Set marker when map is created.
   Future _onMapCreated(GoogleMapController mapsController) async {
-    controller = mapsController;
+    _controller = mapsController;
 
     if (_pickedApo != null) {
       final loc = LatLng(
           _pickedApo.geometry.location.lat, _pickedApo.geometry.location.lng);
       // final loc = Location(_pickedApo.geometry.location.lat, _pickedApo.geometry.location.lng);
 
-      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+      _controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target: loc,
         zoom: 14.0,
       )));
 
       setState(() {
         addMarker(_pickedApo.id, loc, place: _pickedApo);
-        isLoaded = true;
       });
     }
   }
@@ -621,8 +620,8 @@ class _OrderSummaryState extends State<OrderSummary> {
     if (marker != null) {
       setState(() {
         // adding a new marker to map
-        if (!markers.containsKey(markerId)) {
-          markers[markerId] = marker;
+        if (!_markers.containsKey(markerId)) {
+          _markers[markerId] = marker;
         }
       });
     }
@@ -631,15 +630,15 @@ class _OrderSummaryState extends State<OrderSummary> {
   /// Set marker tapped to [true]
   void _onMarkerTapped(id) {
     setState(() {
-      currentMarker = foundPlaces[id];
-      markerIsTabbed = true;
+      _currentMarker = _foundPlaces[id];
+      _markerIsTabbed = true;
     });
   }
 
   /// Confirm order
   /// If AGB's are not checked raise alert message.
   Future<void> goToOrderConfirmed() async {
-    if (agbIsChecked) {
+    if (_agbIsChecked) {
       var alert = createAlert(context);
       alert.show();
     } else {
@@ -655,7 +654,7 @@ class _OrderSummaryState extends State<OrderSummary> {
         context: context,
         title: 'Bestellung mit Passwort bestätigen.',
         content: TextField(
-          controller: passwordController,
+          controller: _passwordController,
           obscureText: true,
           decoration: InputDecoration(
             icon: Icon(Icons.lock),
@@ -678,12 +677,12 @@ class _OrderSummaryState extends State<OrderSummary> {
 
   /// Check if entered password is correct.
   Future _confirmPassword() async {
-    if (await PersonalData.checkPassword(passwordController.text)) {
+    if (await PersonalData.checkPassword(_passwordController.text)) {
 
       Navigator.pop(context);
 
       setState(() {
-        dataIsComplete = false;
+        _dataIsComplete = false;
       });
 
       /// Adding medicament to [globals.meds] (recent) list and saving it.
@@ -713,7 +712,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     List<String> adresse = await PersonalData.getAddress();
     if (adresse != null)
       setState(() {
-        shippingAddress = adresse[0] +
+        _shippingAddress = adresse[0] +
             ' ' +
             adresse[1] +
             '\n' +
