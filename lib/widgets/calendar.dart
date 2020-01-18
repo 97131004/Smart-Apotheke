@@ -385,7 +385,7 @@ class _CalendarState extends State<Calendar> {
 
   _showAddDialog() {
     List<Med> medList = [];
-    medList.addAll(meds);
+    medList.addAll(recentMeds);
     beginDate = _controller.selectedDay;
     bool isdatepicker = false;
     String actualSelectMed;
