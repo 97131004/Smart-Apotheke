@@ -39,22 +39,22 @@ void main() {
     /// Testing [isPureInteger]. Checks whether input string [s] is a pure 
     /// integer (only includes numbers 0 to 9).
     group('[testing isPureInteger]', () {
-      test('testing isPureInteger with letters', () async {
+      test('with letters', () async {
         expect(Helper.isPureInteger('text'), false);
       });
-      test('testing isPureInteger with minus sign', () async {
+      test('with minus sign', () async {
         expect(Helper.isPureInteger('-123'), false);
       });
-      test('testing isPureInteger with double', () async {
+      test('with double', () async {
         expect(Helper.isPureInteger('123.567'), false);
       });
-      test('testing isPureInteger with plus sign', () async {
+      test('with plus sign', () async {
         expect(Helper.isPureInteger('+123'), false);
       });
-      test('testing isPureInteger with integer', () async {
+      test('with integer', () async {
         expect(Helper.isPureInteger('123'), true);
       });
-      test('testing isPureInteger with integer with leading zeros', () async {
+      test('with integer with leading zeros', () async {
         expect(Helper.isPureInteger('00012345'), true);
       });
     });
