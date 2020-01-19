@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the getMeds method from the MedGet class, for the Dart programming language.">
+  <title>getMeds method - MedGet class - med_get library - Dart API</title>
+  <!-- required because all the links are pseudo-absolute -->
+  <base href="../..">
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500,400i,400,300|Source+Sans+Pro:400,300,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="static-assets/github.css">
+  <link rel="stylesheet" href="static-assets/styles.css">
+  <link rel="icon" href="static-assets/favicon.png">
+  
+</head>
+
+<body>
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <button id="sidenav-left-toggle" type="button">&nbsp;</button>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="index.html">maph_group3</a></li>
+    <li><a href="util_med_get/util_med_get-library.html">med_get</a></li>
+    <li><a href="util_med_get/MedGet-class.html">MedGet</a></li>
+    <li class="self-crumb">getMeds method</li>
+  </ol>
+  <div class="self-name">getMeds</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<main>
+
+  <div id="dartdoc-sidebar-left" class="col-xs-6 col-sm-3 col-md-2 sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+      <form class="search-sidebar" role="search">
+        <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+      </form>
+    </header>
+    
+    <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+      <li><a href="index.html">maph_group3</a></li>
+      <li><a href="util_med_get/util_med_get-library.html">med_get</a></li>
+      <li><a href="util_med_get/MedGet-class.html">MedGet</a></li>
+      <li class="self-crumb">getMeds method</li>
+    </ol>
+    
+    <h5>MedGet class</h5>
+    <ol>
+      <li class="section-title"><a href="util_med_get/MedGet-class.html#constructors">Constructors</a></li>
+      <li><a href="util_med_get/MedGet/MedGet.html">MedGet</a></li>
+    
+      <li class="section-title inherited">
+        <a href="util_med_get/MedGet-class.html#instance-properties">Properties</a>
+      </li>
+      <li class="inherited"><a href="util_med_get/MedGet/hashCode.html">hashCode</a></li>
+      <li class="inherited"><a href="util_med_get/MedGet/runtimeType.html">runtimeType</a></li>
+    
+      <li class="section-title inherited"><a href="util_med_get/MedGet-class.html#instance-methods">Methods</a></li>
+      <li class="inherited"><a href="util_med_get/MedGet/noSuchMethod.html">noSuchMethod</a></li>
+      <li class="inherited"><a href="util_med_get/MedGet/toString.html">toString</a></li>
+    
+      <li class="section-title inherited"><a href="util_med_get/MedGet-class.html#operators">Operators</a></li>
+      <li class="inherited"><a href="util_med_get/MedGet/operator_equals.html">operator ==</a></li>
+    
+    
+      <li class="section-title"><a href="util_med_get/MedGet-class.html#static-methods">Static methods</a></li>
+      <li><a href="util_med_get/MedGet/getMedInfo.html">getMedInfo</a></li>
+      <li><a href="util_med_get/MedGet/getMedInfoData.html">getMedInfoData</a></li>
+      <li><a href="util_med_get/MedGet/getMeds.html">getMeds</a></li>
+      <li><a href="util_med_get/MedGet/getMedsPrefix.html">getMedsPrefix</a></li>
+      <li><a href="util_med_get/MedGet/isMedInRecentMedsList.html">isMedInRecentMedsList</a></li>
+    
+    </ol>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-main-content" class="col-xs-12 col-sm-9 col-md-8 main-content">
+      <div><h1><span class="kind-method">getMeds</span> method</h1></div>
+
+    <section class="multi-line-signature">
+      <span class="returntype">Future<span class="signature">&lt;<wbr><span class="type-parameter">List<span class="signature">&lt;<wbr><span class="type-parameter"><a href="data_med/Med-class.html">Med</a></span>&gt;</span></span>&gt;</span></span>
+            <span class="name ">getMeds</span>
+(<wbr><span class="parameter" id="getMeds-param-searchValue"><span class="type-annotation">String</span> <span class="parameter-name">searchValue</span>, </span> <span class="parameter" id="getMeds-param-pageIndex"><span class="type-annotation">int</span> <span class="parameter-name">pageIndex</span>, </span> <span class="parameter" id="getMeds-param-resultsPerPage"><span class="type-annotation">int</span> <span class="parameter-name">resultsPerPage</span>, [</span> <span class="parameter" id="getMeds-param-isMedSearch"><span class="type-annotation">bool</span> <span class="parameter-name">isMedSearch</span> = <span class="default-value">false</span></span> ])
+      
+    </section>
+    <section class="desc markdown">
+      <p>First sends a GET-Request with a search query to <code>docmorris.de</code>
+(including the <code>searchValue</code>, <code>pageIndex</code>, <code>resultsPerPage</code>),
+then gets a response, parses it to acquire the <code>pzn</code> and <code>name</code>. Then uses that <code>pzn</code>
+to search on <code>beipackzettel.de</code> with <a href="util_med_get/MedGet/getMedInfo.html">getMedInfo</a> to acquire the package leaflet <code>url</code>,
+then returns a list of found <a href="data_med/data_med-library.html">med</a>'s. <code>isMedSearch</code> is true if search is done in
+<a href="widgets_med_search/widgets_med_search-library.html">med_search</a>, so it will skip returning entries that are already in the local
+<a href="maph_group3.globals/recentMeds.html">globals.recentMeds</a> list; those are shown with the <a href="util_med_get/MedGet/getMedsPrefix.html">getMedsPrefix</a> function.</p>
+    </section>
+    
+    <section class="summary source-code" id="source">
+      <h2><span>Implementation</span></h2>
+      <pre class="language-dart"><code class="language-dart">static Future&lt;List&lt;Med&gt;&gt; getMeds(
+    String searchValue, int pageIndex, int resultsPerPage,
+    [bool isMedSearch = false]) async {
+  List&lt;Med&gt; list = new List&lt;Med&gt;();
+
+  try {
+    final resp = await http.get(&#39;https:&#47;&#47;www.docmorris.de&#47;search?query=&quot;&#39; +
+        searchValue +
+        &#39;&quot;&amp;page=&#39; +
+        pageIndex.toString() +
+        &#39;&amp;resultsPerPage=&#39; +
+        resultsPerPage.toString());
+
+    if (resp.statusCode == HttpStatus.ok) {
+      String html = resp.body;
+
+      List&lt;String&gt; pzns =
+          Helper.parseMid(html, &#39;exactag.product_id = \&#39;&#39;, &#39;\&#39;;&#39;).split(&#39;,&#39;);
+
+      if (pzns.length &gt; 1) {
+        &#47;&#47;&#47; Multi-page results.
+        int searchIndex = 0;
+        int index = 0;
+
+        if (index == pzns.length - 1) return list;
+
+        while (true) {
+          &#47;&#47;&#47; Break if medicament is already in local [globals.recentMeds] list.
+          if (isMedSearch &amp;&amp; isMedInRecentMedsList(pzns[index])) break;
+
+          searchIndex =
+              html.indexOf(&#39;&lt;span class=&quot;link name&quot;&gt;&#39;, searchIndex + 1);
+
+          &#47;&#47;&#47; Break if no medicaments found.
+          if (searchIndex == -1) break;
+
+          String medName = Helper.parseMid(
+              html, &#39;&lt;span class=&quot;link name&quot;&gt;&#39;, &#39;&lt;&#47;span&gt;&#39;, searchIndex);
+
+          if (index &lt; pzns.length) {
+            Med m = new Med(medName, pzns[index]);
+
+            &#47;&#47;&#47; Retrieving package leaflet [url].
+            await getMedInfo(m);
+            if (m.name.length &gt; 0 &amp;&amp; m.pzn != &#39;00000000&#39;) {
+              list.add(m);
+            }
+            index++;
+          }
+        }
+      } else if (pzns.length == 1) {
+        &#47;&#47;&#47; Single-page results.
+        if (!(isMedSearch &amp;&amp; isMedInRecentMedsList(pzns[0]))) {
+          String medName =
+              Helper.parseMid(html, &#39;&lt;h1 itemprop=&quot;name&quot;&gt;&#39;, &#39;&lt;&#47;h1&gt;&#39;);
+          Med m = new Med(medName, pzns[0]);
+
+          &#47;&#47;&#47; Retrieving package leaflet [url].
+          await getMedInfo(m);
+          if (m.name.length &gt; 0 &amp;&amp; m.pzn != &#39;00000000&#39;) {
+            list.add(m);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    print(&#39;Caught error: $err&#39;);
+  }
+
+  return list;
+}</code></pre>
+    </section>
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-right" class="col-xs-6 col-sm-6 col-md-2 sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    maph_group3 1.0.0+1
+  </span>
+
+  
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="static-assets/typeahead.bundle.min.js"></script>
+<script src="static-assets/highlight.pack.js"></script>
+<script src="static-assets/URI.js"></script>
+<script src="static-assets/script.js"></script>
+
+
+</body>
+
+</html>
