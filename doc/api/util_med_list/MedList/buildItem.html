@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the buildItem method from the MedList class, for the Dart programming language.">
+  <title>buildItem method - MedList class - med_list library - Dart API</title>
+  <!-- required because all the links are pseudo-absolute -->
+  <base href="../..">
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500,400i,400,300|Source+Sans+Pro:400,300,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="static-assets/github.css">
+  <link rel="stylesheet" href="static-assets/styles.css">
+  <link rel="icon" href="static-assets/favicon.png">
+  
+</head>
+
+<body>
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <button id="sidenav-left-toggle" type="button">&nbsp;</button>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="index.html">maph_group3</a></li>
+    <li><a href="util_med_list/util_med_list-library.html">med_list</a></li>
+    <li><a href="util_med_list/MedList-class.html">MedList</a></li>
+    <li class="self-crumb">buildItem method</li>
+  </ol>
+  <div class="self-name">buildItem</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<main>
+
+  <div id="dartdoc-sidebar-left" class="col-xs-6 col-sm-3 col-md-2 sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+      <form class="search-sidebar" role="search">
+        <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+      </form>
+    </header>
+    
+    <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+      <li><a href="index.html">maph_group3</a></li>
+      <li><a href="util_med_list/util_med_list-library.html">med_list</a></li>
+      <li><a href="util_med_list/MedList-class.html">MedList</a></li>
+      <li class="self-crumb">buildItem method</li>
+    </ol>
+    
+    <h5>MedList class</h5>
+    <ol>
+      <li class="section-title"><a href="util_med_list/MedList-class.html#constructors">Constructors</a></li>
+      <li><a href="util_med_list/MedList/MedList.html">MedList</a></li>
+    
+      <li class="section-title inherited">
+        <a href="util_med_list/MedList-class.html#instance-properties">Properties</a>
+      </li>
+      <li class="inherited"><a href="util_med_list/MedList/hashCode.html">hashCode</a></li>
+      <li class="inherited"><a href="util_med_list/MedList/runtimeType.html">runtimeType</a></li>
+    
+      <li class="section-title inherited"><a href="util_med_list/MedList-class.html#instance-methods">Methods</a></li>
+      <li class="inherited"><a href="util_med_list/MedList/noSuchMethod.html">noSuchMethod</a></li>
+      <li class="inherited"><a href="util_med_list/MedList/toString.html">toString</a></li>
+    
+      <li class="section-title inherited"><a href="util_med_list/MedList-class.html#operators">Operators</a></li>
+      <li class="inherited"><a href="util_med_list/MedList/operator_equals.html">operator ==</a></li>
+    
+      <li class="section-title"><a href="util_med_list/MedList-class.html#static-properties">Static properties</a></li>
+      <li><a href="util_med_list/MedList/tapPosition.html">tapPosition</a></li>
+    
+      <li class="section-title"><a href="util_med_list/MedList-class.html#static-methods">Static methods</a></li>
+      <li><a href="util_med_list/MedList/build.html">build</a></li>
+      <li><a href="util_med_list/MedList/buildItem.html">buildItem</a></li>
+    
+    </ol>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-main-content" class="col-xs-12 col-sm-9 col-md-8 main-content">
+      <div><h1><span class="kind-method">buildItem</span> method</h1></div>
+
+    <section class="multi-line-signature">
+      <span class="returntype">Widget</span>
+            <span class="name ">buildItem</span>
+(<wbr><span class="parameter" id="buildItem-param-context"><span class="type-annotation">BuildContext</span> <span class="parameter-name">context</span>, </span> <span class="parameter" id="buildItem-param-index"><span class="type-annotation">int</span> <span class="parameter-name">index</span>, </span> <span class="parameter" id="buildItem-param-item"><span class="type-annotation"><a href="data_med/Med-class.html">Med</a></span> <span class="parameter-name">item</span>, [</span> <span class="parameter" id="buildItem-param-removable"><span class="type-annotation">bool</span> <span class="parameter-name">removable</span> = <span class="default-value">false</span>, </span> <span class="parameter" id="buildItem-param-onSwipe"><span class="type-annotation">dynamic</span> <span class="parameter-name">onSwipe</span>(<span class="parameter" id="onSwipe-param-"><span class="type-annotation"><a href="data_med/Med-class.html">Med</a></span></span>), </span> <span class="parameter" id="buildItem-param-onButtonDelete"><span class="type-annotation">dynamic</span> <span class="parameter-name">onButtonDelete</span>(<span class="parameter" id="onButtonDelete-param-"><span class="type-annotation"><a href="data_med/Med-class.html">Med</a></span></span>)</span> ])
+      
+    </section>
+    <section class="desc markdown">
+      <p>Visualizes a single medicament <code>item</code>. Implements the callback for the
+swipe gesture <code>onSwipe</code>.</p>
+    </section>
+    
+    <section class="summary source-code" id="source">
+      <h2><span>Implementation</span></h2>
+      <pre class="language-dart"><code class="language-dart">static Widget buildItem(BuildContext context, int index, Med item,
+    [bool removable = false,
+    Function(Med) onSwipe,
+    Function(Med) onButtonDelete]) {
+  return Theme(
+    data: ThemeData(
+      dividerColor: Colors.transparent,
+
+      &#47;&#47;&#47; Represent the arrow color when the expansion tile is opened.
+      accentColor: Colors.black,
+    ),
+    child: (removable)
+        ? GestureDetector(
+            onTapDown: (details) {
+              tapPosition = details.globalPosition;
+            },
+            child: Dismissible(
+              key: UniqueKey(),
+              onDismissed: (direction) {
+                if (onSwipe != null) {
+                  onSwipe(item);
+                }
+              },
+              child: _buildItemCore(context, item, removable, onButtonDelete),
+            ),
+          )
+        : _buildItemCore(context, item, removable, onButtonDelete),
+  );
+}</code></pre>
+    </section>
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-right" class="col-xs-6 col-sm-6 col-md-2 sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    maph_group3 1.0.0+1
+  </span>
+
+  
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="static-assets/typeahead.bundle.min.js"></script>
+<script src="static-assets/highlight.pack.js"></script>
+<script src="static-assets/URI.js"></script>
+<script src="static-assets/script.js"></script>
+
+
+</body>
+
+</html>

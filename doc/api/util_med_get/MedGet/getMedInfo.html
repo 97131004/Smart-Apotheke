@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the getMedInfo method from the MedGet class, for the Dart programming language.">
+  <title>getMedInfo method - MedGet class - med_get library - Dart API</title>
+  <!-- required because all the links are pseudo-absolute -->
+  <base href="../..">
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500,400i,400,300|Source+Sans+Pro:400,300,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="static-assets/github.css">
+  <link rel="stylesheet" href="static-assets/styles.css">
+  <link rel="icon" href="static-assets/favicon.png">
+  
+</head>
+
+<body>
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <button id="sidenav-left-toggle" type="button">&nbsp;</button>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="index.html">maph_group3</a></li>
+    <li><a href="util_med_get/util_med_get-library.html">med_get</a></li>
+    <li><a href="util_med_get/MedGet-class.html">MedGet</a></li>
+    <li class="self-crumb">getMedInfo method</li>
+  </ol>
+  <div class="self-name">getMedInfo</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<main>
+
+  <div id="dartdoc-sidebar-left" class="col-xs-6 col-sm-3 col-md-2 sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+      <form class="search-sidebar" role="search">
+        <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+      </form>
+    </header>
+    
+    <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+      <li><a href="index.html">maph_group3</a></li>
+      <li><a href="util_med_get/util_med_get-library.html">med_get</a></li>
+      <li><a href="util_med_get/MedGet-class.html">MedGet</a></li>
+      <li class="self-crumb">getMedInfo method</li>
+    </ol>
+    
+    <h5>MedGet class</h5>
+    <ol>
+      <li class="section-title"><a href="util_med_get/MedGet-class.html#constructors">Constructors</a></li>
+      <li><a href="util_med_get/MedGet/MedGet.html">MedGet</a></li>
+    
+      <li class="section-title inherited">
+        <a href="util_med_get/MedGet-class.html#instance-properties">Properties</a>
+      </li>
+      <li class="inherited"><a href="util_med_get/MedGet/hashCode.html">hashCode</a></li>
+      <li class="inherited"><a href="util_med_get/MedGet/runtimeType.html">runtimeType</a></li>
+    
+      <li class="section-title inherited"><a href="util_med_get/MedGet-class.html#instance-methods">Methods</a></li>
+      <li class="inherited"><a href="util_med_get/MedGet/noSuchMethod.html">noSuchMethod</a></li>
+      <li class="inherited"><a href="util_med_get/MedGet/toString.html">toString</a></li>
+    
+      <li class="section-title inherited"><a href="util_med_get/MedGet-class.html#operators">Operators</a></li>
+      <li class="inherited"><a href="util_med_get/MedGet/operator_equals.html">operator ==</a></li>
+    
+    
+      <li class="section-title"><a href="util_med_get/MedGet-class.html#static-methods">Static methods</a></li>
+      <li><a href="util_med_get/MedGet/getMedInfo.html">getMedInfo</a></li>
+      <li><a href="util_med_get/MedGet/getMedInfoData.html">getMedInfoData</a></li>
+      <li><a href="util_med_get/MedGet/getMeds.html">getMeds</a></li>
+      <li><a href="util_med_get/MedGet/getMedsPrefix.html">getMedsPrefix</a></li>
+      <li><a href="util_med_get/MedGet/isMedInRecentMedsList.html">isMedInRecentMedsList</a></li>
+    
+    </ol>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-main-content" class="col-xs-12 col-sm-9 col-md-8 main-content">
+      <div><h1><span class="kind-method">getMedInfo</span> method</h1></div>
+
+    <section class="multi-line-signature">
+      <span class="returntype">Future<span class="signature">&lt;<wbr><span class="type-parameter"><a href="data_med/Med-class.html">Med</a></span>&gt;</span></span>
+            <span class="name ">getMedInfo</span>
+(<wbr><span class="parameter" id="getMedInfo-param-item"><span class="type-annotation"><a href="data_med/Med-class.html">Med</a></span> <span class="parameter-name">item</span></span>)
+      
+    </section>
+    <section class="desc markdown">
+      <p>Retrieves the package leaflet <code>url</code> and adds it to the entered <code>item</code> object.
+Sends a GET-Request to <code>beipackzettel.de</code> with a search query based on the <code>pzn</code>.
+Then parses the response to acquire the package leaflet <code>url</code>.</p>
+    </section>
+    
+    <section class="summary source-code" id="source">
+      <h2><span>Implementation</span></h2>
+      <pre class="language-dart"><code class="language-dart">static Future&lt;Med&gt; getMedInfo(Med item) async {
+  final resp = await http.get(
+      &#39;http:&#47;&#47;www.beipackzettel.de&#47;search?utf8=%E2%9C%93&amp;term=&#39; + item.pzn);
+
+  if (resp.statusCode == HttpStatus.ok) {
+    String html = resp.body;
+
+    String medName = Helper.parseMid(
+        html, &#39;&lt;span class=&quot;hide-for-medium-down&quot;&gt;&#39;, &#39;&lt;&#47;span&gt;&#39;);
+    if (medName.length &gt; 0) {
+      &#47;&#47;&#47; Also changing [item]&#39;s name here, so it matches the one on the package leaflet.
+      item.name = medName;
+    }
+
+    String medUrl = Helper.parseMid(
+        html,
+        &#39;&lt;td class=&quot;medium-3 large-3 column&quot;&gt;&lt;a class=&quot;button&quot; href=&quot;&#39;,
+        &#39;&quot;&gt;Beipackzettel anzeigen&lt;&#47;a&gt;&lt;&#47;td&gt;&#39;);
+    if (medUrl.length &gt; 0) {
+      &#47;&#47;&#47; Changing [item]&#39;s package leaflet [url].
+      item.url = &#39;http:&#47;&#47;www.beipackzettel.de&#47;&#39; + medUrl;
+    }
+  }
+
+  return item;
+}</code></pre>
+    </section>
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-right" class="col-xs-6 col-sm-6 col-md-2 sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    maph_group3 1.0.0+1
+  </span>
+
+  
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="static-assets/typeahead.bundle.min.js"></script>
+<script src="static-assets/highlight.pack.js"></script>
+<script src="static-assets/URI.js"></script>
+<script src="static-assets/script.js"></script>
+
+
+</body>
+
+</html>

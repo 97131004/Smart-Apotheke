@@ -1,5 +1,4 @@
-# maph_group3
+Mobile Applications for Public Health - Group 3
 
-MAPH PROJECT - GROUP 3
+# Smart Apotheke
 
-// das ist index.html in dartdoc
