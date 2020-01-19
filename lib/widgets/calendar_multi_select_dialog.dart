@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-class MultiSelectDialogItem<V> {
-  const MultiSelectDialogItem(this.value, this.label);
+/// This File you can create your multiple select
+/// which has  labels and values
 
-  final V value;
-  final String label;
+class MultiSelectDialogItem<V> {
+  const MultiSelectDialogItem(this._value, this._label);
+  /// Constructor with [_value] and [_label]
+  final V _value;
+  final String _label;
 }
 
 class MultiSelectDialog<V> extends StatefulWidget {
   MultiSelectDialog({Key key, this.items, this.initialSelectedValues}) : super(key: key);
-
+  /// Constructor with List[items] and Set[initialSelectedValues]
   final List<MultiSelectDialogItem<V>> items;
   final Set<V> initialSelectedValues;
 
@@ -26,6 +29,7 @@ class _MultiSelectDialogState<V> extends State<MultiSelectDialog<V>> {
     }
   }
 
+  /// when CheckboxListTile has changed something
   void _onItemCheckedChange(V itemValue, bool checked) {
     setState(() {
       if (checked) {
@@ -35,11 +39,11 @@ class _MultiSelectDialogState<V> extends State<MultiSelectDialog<V>> {
       }
     });
   }
-
+  /// Come back to previous Page
   void _onCancelTap() {
     Navigator.pop(context);
   }
-
+  /// sending [_selectedValues] to previous Page
   void _onSubmitTap() {
       Navigator.pop(context, _selectedValues);
   }
@@ -51,7 +55,7 @@ class _MultiSelectDialogState<V> extends State<MultiSelectDialog<V>> {
       contentPadding: EdgeInsets.only(top: 12.0),
       content: SingleChildScrollView(
         child: ListTileTheme(
-          contentPadding: EdgeInsets.fromLTRB(14.0, 0.0, 24.0, 0.0),
+          contentPadding: EdgeInsets.fromLTRB(10.0, 0.0, 24.0, 0.0),
           child: ListBody(
             children: widget.items.map(_buildItem).toList(),
           ),
@@ -69,14 +73,14 @@ class _MultiSelectDialogState<V> extends State<MultiSelectDialog<V>> {
       ],
     );
   }
-
+  /// Display Multiple Dialog Item
   Widget _buildItem(MultiSelectDialogItem<V> item) {
-    final checked = _selectedValues.contains(item.value);
+    final checked = _selectedValues.contains(item._value);
     return CheckboxListTile(
       value: checked,
-      title: Text(item.label),
+      title: Text(item._label),
       controlAffinity: ListTileControlAffinity.leading,
-      onChanged: (checked) => _onItemCheckedChange(item.value, checked),
+      onChanged: (checked) => _onItemCheckedChange(item._value, checked),
     );
   }
 }

@@ -20,6 +20,7 @@ class LoadBar {
       alignment: const Alignment(0.0, 0.0),
     );
   }
+
   static Widget buildwithtext(String text) {
     return Container(
       child: Column(
