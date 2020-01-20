@@ -22,7 +22,7 @@ class ProductDetails extends StatefulWidget {
 class _ProductDetailsState extends State<ProductDetails> {
   /// search key and local shop item
   String _medSearchKey;
-  ShopItem _localShopItem;
+  ShopMeds _localShopItem;
 
   int _quantity = 1;
 

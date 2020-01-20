@@ -24,7 +24,7 @@ import '../util/med_get.dart';
 ///      mail or to collect it at a selected drug store.
 ///   4. Confirmation of the order
 class OrderSummary extends StatefulWidget {
-  final ShopItem item;
+  final ShopMeds item;
 
   OrderSummary({Key key, @required this.item}) : super(key: key);
 
@@ -129,8 +129,8 @@ class _OrderSummaryState extends State<OrderSummary> {
     double tax = grossPrice * 0.10;
     double netPrice = grossPrice - tax;
     return new Container(
-      padding: EdgeInsets.all(3),
-      decoration: _getContainerDecoration(1, 5),
+      padding: EdgeInsets.all(20),
+      decoration: _getContainerDecoration(0, 5, 0.1),
       child: Table(
         border: TableBorder(
           horizontalInside:
@@ -252,8 +252,8 @@ class _OrderSummaryState extends State<OrderSummary> {
   /// Build payment options container.
   Widget _buildPaymentOptions() {
     return new Container(
-      padding: EdgeInsets.all(3),
-      decoration: _getContainerDecoration(1, 5),
+      padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+      decoration: _getContainerDecoration(0, 5, 0.1),
       child: Column(
         children: <Widget>[
           Text('Zahlungsmöglichkeiten'),
@@ -281,8 +281,8 @@ class _OrderSummaryState extends State<OrderSummary> {
   /// Build shipping options container.
   Widget _buildShippingOptions() {
     return new Container(
-      padding: EdgeInsets.all(3),
-      decoration: _getContainerDecoration(1, 5),
+      padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+      decoration: _getContainerDecoration(0, 5, 0.1),
       child: Column(
         children: <Widget>[
           Text('Liefermöglichkeiten:'),
@@ -313,7 +313,8 @@ class _OrderSummaryState extends State<OrderSummary> {
                     else
                       {_deliverToApo = false}
                   })
-            });
+            }
+        );
   }
 
   /// Build billing/shipping address container.
@@ -322,9 +323,11 @@ class _OrderSummaryState extends State<OrderSummary> {
         _shippingAddress != '' ? _shippingAddress : 'Lieferadresse fehlt!';
     if (!_deliverToApo) {
       return Container(
+        padding: EdgeInsets.all(10),
+        child: Container(
           alignment: Alignment.centerLeft,
           padding: EdgeInsets.all(10),
-          decoration: _getContainerDecoration(1, 5),
+          decoration: _getContainerDecoration(1, 5, 0.1),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
@@ -347,7 +350,9 @@ class _OrderSummaryState extends State<OrderSummary> {
                 },
               ),
             ],
-          ));
+          ),
+        ),
+      );
     } else {
       return Container();
     }
@@ -358,10 +363,12 @@ class _OrderSummaryState extends State<OrderSummary> {
     if (_pickedApo != null) {
       return Visibility(
         visible: _deliverToApo,
-        child: Column(
-          children: <Widget>[
-            Container(
-                decoration: _getContainerDecoration(1, 0),
+        child: Container(
+          padding: EdgeInsets.all(10),
+          child:Column(
+            children: <Widget>[
+              Container(
+                decoration: _getContainerDecoration(1, 0, 1.0),
                 height: MediaQuery.of(context).size.height / 4,
                 width: MediaQuery.of(context).size.width,
                 child: Stack(
@@ -376,11 +383,12 @@ class _OrderSummaryState extends State<OrderSummary> {
                     ),
                     _buildSearchApoButton(),
                   ],
-                )),
+                )
+              ),
             _buildApoPickUpContainer(),
           ],
         ),
-      );
+      ),);
     } else {
       if (_deliverToApo) {
         return Container(
@@ -476,8 +484,8 @@ class _OrderSummaryState extends State<OrderSummary> {
   /// Build confirmation of order container.
   Widget _buildConfirmationContainer() {
     return new Container(
-      padding: EdgeInsets.all(3),
-      decoration: _getContainerDecoration(1, 5),
+      padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+      decoration: _getContainerDecoration(0, 5, 0.1),
       child: Column(
         children: <Widget>[
           Text('Geschäftsbedingungen und Benachrichtigungen'),
@@ -486,7 +494,7 @@ class _OrderSummaryState extends State<OrderSummary> {
               activeColor: Theme.of(context).primaryColor,
               labels: <String>[
                 'AGBs zustimmen',
-                'Ich bin damit einverstanden, dass...',
+                'Ich bin damit einverstanden, dass ...',
               ],
               onSelected: (List<String> checked) => {
                     _agbIsChecked = false,
@@ -507,12 +515,17 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
-  BoxDecoration _getContainerDecoration(double borderWidth, double circular) {
+  BoxDecoration _getContainerDecoration(double borderWidth, double circular, double opacity) {
+    Color color = Color.fromRGBO(Theme.of(context).splashColor.red,
+        Theme.of(context).splashColor.green,
+        Theme.of(context).splashColor.blue, opacity);
+
     return BoxDecoration(
-      border: Border.all(
+      border: borderWidth != 0 ? Border.all(
         color: Theme.of(context).splashColor,
         width: borderWidth,
-      ),
+      ) : Border(),
+      color: color,
       borderRadius: BorderRadius.circular(circular),
     );
   }

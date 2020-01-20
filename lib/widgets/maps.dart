@@ -197,9 +197,10 @@ class _MapsState extends State<Maps> {
               child: Text(name,
                 style: TextStyle(
                     color: Colors.indigo,
-                    fontSize: 20.0,
+                    fontSize: 30.0,
                     fontWeight: FontWeight.bold),
-              )),
+              )
+          ),
         ),
         SizedBox(height:5.0),
         Container(
@@ -207,31 +208,34 @@ class _MapsState extends State<Maps> {
               addr,
               style: TextStyle(
                 color: Colors.black54,
-                fontSize: 12.0,
               ),
-            )),
+            ),
+        ),
         SizedBox(height:5.0),
         Container(
             child: Text(
               open,
               style: TextStyle(
                   color: Colors.black54,
-                  fontSize: 12.0,
                   fontWeight: FontWeight.bold),
-            )),
+            )
+        ),
         SizedBox(height:5.0),
         Container(
           child: Row(
             children: <Widget>[
               IconButton(
-                icon: Icon(Icons.check_circle),
-                tooltip: 'Apotheke auswählen',
-                onPressed: () => Navigator.pop(context, _tabbedPlace),
-              ),
-              IconButton(
+                iconSize: 40.0,
                 icon: Icon(Icons.call),
                 tooltip: 'Apotheke anrufen',
                 onPressed: () => launch('tel://03012345678'),
+              ),
+              Padding(padding: EdgeInsets.all(20),),
+              IconButton(
+                iconSize: 40.0,
+                icon: Icon(Icons.check_circle),
+                tooltip: 'Apotheke auswählen',
+                onPressed: () => Navigator.pop(context, _tabbedPlace),
               ),
             ],
           ),

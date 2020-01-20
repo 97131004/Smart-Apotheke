@@ -31,8 +31,8 @@ List<Med> recentMeds = [
 /// List of shopping informations and descriptions about medicaments, that can be
 /// 'bought' from within the app using the iban and address entered by the user.
 /// This list should be later outsourced to a database.
-Map<String, ShopItem> items = {
-  '10019638': new ShopItem(
+Map<String, ShopMeds> items = {
+  '10019638': new ShopMeds(
       'Ibu Lysin ratiopharm 684mg Filmtabletten',
       '10019638',
       'ratiopharm Gmbh',
@@ -51,7 +51,7 @@ Map<String, ShopItem> items = {
           'Wasser eingenommen werden.',
       'ibuprofen',
       false), // Ibuprofen
-  '01647809': new ShopItem(
+  '01647809': new ShopMeds(
       'Eliquis 5mg Filmtabletten',
       '01647809',
       'Bristol-Myers Squibb',
@@ -72,7 +72,7 @@ Map<String, ShopItem> items = {
           'Übrigens: Für jedes rezeptpflichtige Medikament erhalten Sie einen Bonus.',
       'eliquis',
       true), // Eliquis
-  '04144658': new ShopItem(
+  '04144658': new ShopMeds(
       'Simvastatin - CT 40mg',
       '04144658',
       'AbZ-Pharma GmbH',
@@ -90,7 +90,7 @@ Map<String, ShopItem> items = {
           'Das Präparat gehört zu der Klasse der als „Statine" bezeichneten Arzneimittel.',
       'simvastin',
       true), // Simvastin
-  '01088942': new ShopItem(
+  '01088942': new ShopMeds(
       'Vertigoheel',
       '01088942',
       'Biologische Heilmittel Heel GmbH',
@@ -110,7 +110,7 @@ Map<String, ShopItem> items = {
           'ist auch eine längerfristige Anwendung möglich.',
       'vertigoheel',
       false), // Vertigoheel
-  '10108112': new ShopItem(
+  '10108112': new ShopMeds(
       'Omeprazol 20mg',
       '10108112',
       '1A Pharma GmbH',
