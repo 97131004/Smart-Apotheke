@@ -5,6 +5,7 @@ import '../data/globals.dart' as globals;
 import '../data/med.dart';
 import 'helper.dart';
 
+/// Interface logic class for medicament information retrieval in the app.
 /// Functions to retrieve, handle and parse lists of medicaments from websites like 
 /// [docmorris.de] (to get the [name] or [pzn] based on [name] or [pzn]) and 
 /// [beipackzettel.de] (to get the package leaflet [url] based on [pzn]).
