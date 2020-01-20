@@ -46,10 +46,10 @@ class _ShopState extends State<Shop> {
   String _medSearchKey = '';
 
   /// current local shop item that is from our db
-  ShopMeds _localShopItem;
+  ShopItem _localShopItem;
 
   /// future list of medicaments from external vendors
-  Future<List<ShopMeds>> _itemList;
+  Future<List<ShopItem>> _itemList;
 
   @override
   void initState() {
@@ -64,8 +64,8 @@ class _ShopState extends State<Shop> {
     /// set our local medicament if it is available
     if (widget.med != null) {
       _medSearchKey = widget.med.name;
-      if (globals.items.containsKey(widget.med.pzn)) {
-        _localShopItem = globals.items[widget.med.pzn];
+      if (globals.shopMeds.containsKey(widget.med.pzn)) {
+        _localShopItem = globals.shopMeds[widget.med.pzn];
         _medSearchKey = _localShopItem.searchKey;
       }
     }
@@ -217,7 +217,7 @@ class _ShopState extends State<Shop> {
 
   /// Build list view for vendors items.
   Widget _buildListView(String searchKey) {
-    return FutureBuilder<List<ShopMeds>>(
+    return FutureBuilder<List<ShopItem>>(
         future: _itemList,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -324,7 +324,7 @@ class _ShopState extends State<Shop> {
   /// Send HTML-Request to vendors website and parse the dom model.
   /// Returns a list of ShopItem.
   /// Vendor: [DocMorris.com]
-  Future<List<ShopMeds>> getDocMorrisList(String name) async {
+  Future<List<ShopItem>> getDocMorrisList(String name) async {
     String urlDocMorris = 'https://www.docmorris.de/search?query=' + name;
     String htmlDocMorris = await Helper.fetchHTML(urlDocMorris);
     var listDocMorris =
@@ -335,7 +335,7 @@ class _ShopState extends State<Shop> {
   /// Send HTML-Request to vendors website and parse the dom model.
   /// Returns a list of ShopItem.
   /// Vendor: [MedPex.de]
-  Future<List<ShopMeds>> getMedPexList(String name) async {
+  Future<List<ShopItem>> getMedPexList(String name) async {
     String urlMedpex = 'https://www.medpex.de/search.do?q=' + name;
     String htmlMedpex = await Helper.fetchHTML(urlMedpex);
     var listMedPex =
@@ -345,7 +345,7 @@ class _ShopState extends State<Shop> {
 
   /// Launches an in-app browser with the url to the requested medicament.
   /// Users can order the medicament from there.
-  Future launchUrl(ShopMeds item) async {
+  Future launchUrl(ShopItem item) async {
     String url;
     if (item.merchant == 'Medpex') {
       url = 'https://www.medpex.de/' + item.link;

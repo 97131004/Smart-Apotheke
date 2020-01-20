@@ -24,7 +24,7 @@ import '../util/med_get.dart';
 ///      mail or to collect it at a selected drug store.
 ///   4. Confirmation of the order
 class OrderSummary extends StatefulWidget {
-  final ShopMeds item;
+  final ShopItem item;
 
   OrderSummary({Key key, @required this.item}) : super(key: key);
 
