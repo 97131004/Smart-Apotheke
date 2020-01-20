@@ -135,47 +135,40 @@ class _CalendarState extends State<Calendar> {
   /// Removing a event and concurent Notification with a ID
   /// ID consisted of month, day, index event, hour
   void _removeNotification(
-      int year, int month, int day, int event_index, String list_hours) async {
-    String string_list_time = await Helper.readDataFromsp(list_hours);
-    for (int i = 0; i < jsonDecode(string_list_time).length; i++) {
+      int year, int month, int day, int eventIndex, String listHours) async {
+    String stringListTime = await Helper.readDataFromsp(listHours);
+    for (int i = 0; i < jsonDecode(stringListTime).length; i++) {
       int id = _generateIDNotification(
-          year, month, day, event_index, jsonDecode(string_list_time)[i]);
+          year, month, day, eventIndex, jsonDecode(stringListTime)[i]);
       //print(id);
       await flutterLocalNotificationsPlugin.cancel(id);
     }
   }
 
-  /// Removing all notification
-  /// was not applied in this programm
-  void _removeAllNotification() async {
-    await flutterLocalNotificationsPlugin.cancelAll();
-  }
-
   /// Creating a ID for Notification consisted of month, day, index of event, hour
   /// year I was remove because the nummer is so big out of int: 2^-31 to 2^31-1
   int _generateIDNotification(
-      int year, int month, int day, int event_index, int hour) {
+      int year, int month, int day, int eventIndex, int hour) {
     int id = int.parse(month.toString() +
         day.toString() +
-        event_index.toString() +
+        eventIndex.toString() +
         hour.toString());
     return id;
   }
 
   /// Saving Hours in the Local, in order to remove Notification, which Event you saved before with uhrzeit
   Future<Null> _saveClockWithYearMonthDayIndexEvent(
-      int year, int month, int day, int event_index, List time) async {
+      int year, int month, int day, int eventIndex, List time) async {
     int id = int.parse(year.toString() +
         month.toString() +
         day.toString() +
-        event_index.toString());
+        eventIndex.toString());
     await _sharedPrefs.setString(id.toString(), jsonEncode(time));
   }
 
   /// show Nofitication at the time [hour]
   Future<void> _showDailyAtTime(
-      DateTime dateTime, int event_index, List time, String text) async {
-
+      DateTime dateTime, int eventIndex, List time, String text) async {
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'repeatDailyAtTime channel id',
       'repeatDailyAtTime channel name',
@@ -193,12 +186,13 @@ class _CalendarState extends State<Calendar> {
     int year = dateTime.year;
     int month = dateTime.month;
     int day = dateTime.day;
-    _saveClockWithYearMonthDayIndexEvent(year, month, day, event_index, time);
+    _saveClockWithYearMonthDayIndexEvent(year, month, day, eventIndex, time);
 
     if (time.length > 0) {
       for (int i = 0; i < time.length; i++) {
         int hour = time[i];
-        int id = _generateIDNotification(year, month, day, event_index, hour);
+        int id = _generateIDNotification(year, month, day, eventIndex, hour);
+        //print(id);
         await flutterLocalNotificationsPlugin.showDailyAtTime(
             id,
             'Medikamente: $text',
@@ -312,8 +306,8 @@ class _CalendarState extends State<Calendar> {
                         // what to do after an item has been swiped away.
                         onDismissed: (direction) async {
                           // Remove the clock for each event in a day by shared SharedPreferences to get clock .
-                          String string_remove = _selectedEvents[index];
-                          _readMapDateTimeList(_events, string_remove);
+                          String stringRemove = _selectedEvents[index];
+                          _readMapDateTimeList(_events, stringRemove);
                           // Then show a snackbar.
                           Scaffold.of(context).showSnackBar(
                               SnackBar(content: Text("$item dismissed")));
@@ -329,46 +323,43 @@ class _CalendarState extends State<Calendar> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () {
-          _showAddDialog();
-        }
-
+        child: Icon(Icons.add, color: Colors.white,),
+        onPressed: _showAddDialog,
       ),
     );
   }
 
   /// Read Map[_events] with for instead foreach,because  you can read with async easier
-  Future<void> _readMapDateTimeList(myMap, String string_remove) async {
+  Future<void> _readMapDateTimeList(myMap, String stringRemove) async {
     for (var entry in myMap.entries) {
       /// I can not remove this print , that is for async await reading map,
       /// If I do not show , I got just 2 elements of map
       print(entry.key); //not remove that is very important VAN TINH
-      await _removeAsyncEvent(entry.key, entry.value, string_remove);
+      await _removeAsyncEvent(entry.key, entry.value, stringRemove);
     }
   }
 
-  /// remove Event while finding [string_remove] and removeNotification
+  /// remove Event while finding [stringRemove] and removeNotification
   /// you have to set [_controller.setSelectedDay(dateTime)] to remove corresponding notification
-  _removeAsyncEvent(DateTime dateTime, List list_value, String string_remove) {
-    if (list_value.length > 0) {
+  _removeAsyncEvent(DateTime dateTime, List listValue, String stringRemove) {
+    if (listValue.length > 0) {
       // indexOf return 1 if not found end inversely
-      if (list_value.indexOf(string_remove) != -1) {
-        _selectedEvents = list_value;
+      if (listValue.indexOf(stringRemove) != -1) {
+        _selectedEvents = listValue;
         _controller.setSelectedDay(dateTime);
         int year = _controller.selectedDay.year;
         int month = _controller.selectedDay.month;
         int day = _controller.selectedDay.day;
-        String day_event_index_inner = (int.parse(year.toString() +
+        String dayEventIndexInner = (int.parse(year.toString() +
                 month.toString() +
                 day.toString() +
-                list_value.indexOf(string_remove).toString()))
+                listValue.indexOf(stringRemove).toString()))
             .toString();
 
-        _removeNotification(year, month, day, list_value.indexOf(string_remove),
-            day_event_index_inner);
-        _selectedEvents.removeAt(list_value
-            .indexOf(string_remove)); //remove with value of item in list
+        _removeNotification(year, month, day, listValue.indexOf(stringRemove),
+            dayEventIndexInner);
+        _selectedEvents.removeAt(listValue
+            .indexOf(stringRemove)); //remove with value of item in list
       }
     }
     setState(() {
@@ -445,8 +436,7 @@ class _CalendarState extends State<Calendar> {
           _dosage.text +
           "\nNote: " +
           _note.text;
-
-        _controller.setSelectedDay(beginDate);
+       
         for (int i = 0; i < int.parse(_day_duration.text); i++) {
           DateTime nextDay = beginDate.add(new Duration(days: i));
           if (_events[nextDay] != null) {
@@ -464,6 +454,7 @@ class _CalendarState extends State<Calendar> {
                 _stringCombination.toString());
           }
         }
+       _controller.setSelectedDay(beginDate, runCallback: true);
     }
     _stringCombination = '';
     _dosage.text = '';
@@ -497,8 +488,9 @@ class _CalendarState extends State<Calendar> {
                           onChanged: (String value) {
                             if (value == 'Benutzereingabe...') {
                               TextEditingController usermed = TextEditingController();
+                              bool medAdded = false;
                               showDialog(
-                                  barrierDismissible: false,
+                                 // barrierDismissible: false,
                                   builder: (context) => AlertDialog(
                                     title: Text('Schreiben Sie eine Medikament'),
                                     content: Form(
@@ -524,6 +516,7 @@ class _CalendarState extends State<Calendar> {
                                                   } else {
                                                     setState(() {
                                                       medList.add(Med(usermed.text, ''));
+                                                      medAdded = true;
                                                     });
                                                     Navigator.pop(context);
                                                   }
@@ -540,7 +533,9 @@ class _CalendarState extends State<Calendar> {
                                   context: context)
                                   .then((_) {
                                 setState(() {
+                                  if(medAdded)
                                   actualSelectMed = usermed.text;
+                                  else actualSelectMed = value;
                                 });
                               });
                             } else
@@ -606,7 +601,7 @@ class _CalendarState extends State<Calendar> {
                           }
                           return null;
                         },
-                        decoration: InputDecoration(labelText: 'Dosierung*'),
+                        decoration: InputDecoration(labelText: 'Einnahme pro Tag:*'),
                         controller: _dosage,
                       ),
                       SizedBox(height: 20),

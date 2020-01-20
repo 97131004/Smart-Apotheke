@@ -208,7 +208,9 @@ class _ShopState extends State<Shop> {
                 style: TextStyle(
                     color: Theme.of(context).errorColor,
                     decoration: TextDecoration.lineThrough)),*/
-            Text(_localShopItem.pricePerUnit),
+            Flexible(
+              child: Text(_localShopItem.pricePerUnit),
+            ),
           ],
         ));
   }
@@ -266,7 +268,9 @@ class _ShopState extends State<Shop> {
                                     color: Theme.of(context).errorColor,
                                     decoration: TextDecoration.lineThrough),
                                 ),
-                              Text(item.pricePerUnit ?? ''),
+                              Flexible(
+                                child: Text(item.pricePerUnit ?? ''),
+                              ),
                             ],
                           )
                       ),
