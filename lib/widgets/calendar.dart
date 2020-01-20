@@ -434,8 +434,7 @@ class _CalendarState extends State<Calendar> {
           _dosage.text +
           "\nNote: " +
           _note.text;
-
-        _controller.setSelectedDay(beginDate);
+       
         for (int i = 0; i < int.parse(_day_duration.text); i++) {
           DateTime nextDay = beginDate.add(new Duration(days: i));
           if (_events[nextDay] != null) {
@@ -453,6 +452,7 @@ class _CalendarState extends State<Calendar> {
                 _stringCombination.toString());
           }
         }
+       _controller.setSelectedDay(beginDate, runCallback: true);
     }
     _stringCombination = '';
     _dosage.text = '';
