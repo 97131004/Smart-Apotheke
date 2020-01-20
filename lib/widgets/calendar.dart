@@ -82,7 +82,7 @@ class _CalendarState extends State<Calendar> {
   /// Initialization a Notification for Android and IOS
   initializeNotifications() async {
     var initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     var initializationSettingsIOS = IOSInitializationSettings();
     var initializationSettings = InitializationSettings(
         initializationSettingsAndroid, initializationSettingsIOS);
@@ -196,7 +196,6 @@ class _CalendarState extends State<Calendar> {
       for (int i = 0; i < time.length; i++) {
         int hour = time[i];
         int id = _generateIDNotification(year, month, day, event_index, hour);
-        //print(id);
         await flutterLocalNotificationsPlugin.showDailyAtTime(
             id,
             'Medikamente: $text',
@@ -328,7 +327,10 @@ class _CalendarState extends State<Calendar> {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: _showAddDialog,
+        onPressed: () {
+          _showAddDialog();
+        }
+
       ),
     );
   }
