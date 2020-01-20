@@ -5,9 +5,17 @@ import 'package:flutter/material.dart';
 
 import 'package:google_maps_webservice/places.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:maph_group3/util/helper.dart';
 import 'package:maph_group3/util/maps_helper.dart';
+import 'package:maph_group3/util/no_internet_alert.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// This class will open a GoogleMaps-instance.
+/// Initially it will access the current location and will send an API-request
+/// to retrieve drug stores nearby that location.
+/// Furthermore the user can search in a defined area.
+/// After clicking on a marker, a details container will appear, where the user
+/// can select the drug store for the order process or launch a call there.
 class Maps extends StatefulWidget {
 
   Maps({Key key,}) : super(key: key);
@@ -20,21 +28,29 @@ class Maps extends StatefulWidget {
 
 class _MapsState extends State<Maps> {
 
-  GoogleMapController controller;
-  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-  Map<String, PlacesSearchResult> foundPlaces = <String, PlacesSearchResult>{};
-  PlacesSearchResult tabbedPlace;
+  /// Maps controller
+  GoogleMapController _controller;
+  /// global maps to buffer markers
+  Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
+  Map<String, PlacesSearchResult> _foundPlaces = <String, PlacesSearchResult>{};
+  PlacesSearchResult _tabbedPlace;
 
-  var previousMarkerId;
-
-  bool markerIsTabbed = false;
-  bool isLoaded = false;
+  /// when markerIsTabbed is [true], container with details appears
+  bool _markerIsTabbed = false;
 
   @override
   void initState() {
+    /// check for internet connection
+    Helper.hasInternet().then((internet) {
+      if (internet == null || !internet) {
+        NoInternetAlert.show(context);
+      }
+    });
+
     super.initState();
   }
 
+  /// Build the main page.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,12 +73,15 @@ class _MapsState extends State<Maps> {
     );
   }
 
+  /// Build a floating button that searches drug stores at the current location.
+  /// The current location in this context is the center of the screen.
   Widget _buildSearchInThisArea() {
     return Align(
       alignment: Alignment.topCenter,
         child: Opacity(
             opacity: 0.8,
           child: RaisedButton(
+            padding: EdgeInsets.all(10),
             onPressed: searchInSelectedArea,
             child: Row(
               children: <Widget>[
@@ -78,6 +97,7 @@ class _MapsState extends State<Maps> {
     );
   }
 
+  /// Build the google maps container and sets markers if there exist any.
   Widget _googleMapsContainer(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height,
@@ -86,14 +106,15 @@ class _MapsState extends State<Maps> {
         initialCameraPosition: MapsHelper.getInitialPosition(),
         mapType: MapType.normal,
         onMapCreated: _onMapCreated,
-        markers: Set<Marker>.of(markers.values),
+        markers: Set<Marker>.of(_markers.values),
       ),
     );
   }
 
+  /// Build the details container.
   Widget _buildContainer() {
     return Visibility(
-        visible: markerIsTabbed,
+        visible: _markerIsTabbed,
         child:Align(
           alignment: Alignment.bottomLeft,
           child: Container(
@@ -114,6 +135,7 @@ class _MapsState extends State<Maps> {
     );
   }
 
+  /// Warps the details container in a gesture detectors (not used currently).
   Widget _boxes() {
     return  GestureDetector(
       onTap: () {
@@ -155,14 +177,16 @@ class _MapsState extends State<Maps> {
     );
   }
 
+  /// Build the actual drug store details section with data from the
+  /// [PlaceSearchResult].
   Widget detailsContainer() {
     String name = '';
     String addr = '';
     String open = '';
-    if(tabbedPlace != null) {
-      name = tabbedPlace.name != null ? tabbedPlace.name : '';
-      addr = tabbedPlace.formattedAddress != null ? tabbedPlace.formattedAddress : '';
-      open = tabbedPlace.openingHours != null ? MapsHelper.getOpenString(tabbedPlace) : '';
+    if(_tabbedPlace != null) {
+      name = _tabbedPlace.name != null ? _tabbedPlace.name : '';
+      addr = _tabbedPlace.formattedAddress != null ? _tabbedPlace.formattedAddress : '';
+      open = _tabbedPlace.openingHours != null ? MapsHelper.getOpenString(_tabbedPlace) : '';
     }
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -202,7 +226,7 @@ class _MapsState extends State<Maps> {
               IconButton(
                 icon: Icon(Icons.check_circle),
                 tooltip: 'Apotheke auswählen',
-                onPressed: () => Navigator.pop(context, tabbedPlace),
+                onPressed: () => Navigator.pop(context, _tabbedPlace),
               ),
               IconButton(
                 icon: Icon(Icons.call),
@@ -216,8 +240,12 @@ class _MapsState extends State<Maps> {
     );
   }
 
+  /// Returns an image for the drugstore. Currently a default image is used
+  /// due to the pricing of the google maps/places API.
+  /// The free usage of the API is restricted only to a few requests a day.
   NetworkImage _apoImage() {
     NetworkImage image = new NetworkImage('https://www.abda.de/fileadmin/_processed_/d/3/csm_Apo_Logo_Neu_HKS13_neues_BE_42f1ed22ad.jpg');
+    /// this is commented here, because it will reduce amount of free google api requests per day
     /*var url = buildPhotoURL(photo);
     NetworkImage image;
 
@@ -229,16 +257,16 @@ class _MapsState extends State<Maps> {
     return image;
   }
 
+  /// Build the https-string for the requested drug store.
   String buildPhotoURL(String photoReference) {
     String apiKey = MapsHelper.getApiKey();
     return 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=$apiKey';
   }
 
+  /// Method will search for drug stores in the selected area and set markers
+  /// on the map.
+  /// The current location is the center of the map in this context.
   Future searchInSelectedArea() async {
-    setState(() {
-      isLoaded = false;
-    });
-
     //markers.clear();
     // get current position
 
@@ -253,22 +281,24 @@ class _MapsState extends State<Maps> {
     setState(() {
       if (result.status == 'OK') {
         result.results.forEach((f){
-          if(!foundPlaces.containsKey(f.id)) {
-            foundPlaces[f.id] = f;
+          if(!_foundPlaces.containsKey(f.id)) {
+            _foundPlaces[f.id] = f;
           }
           addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
         });
       }
-      isLoaded = true;
     });
   }
 
+  /// When the maps widget is created, the current location is determined and
+  /// drug stores nearby will be searched and added to the markers list.
+  /// Shows an error message on failure.
   Future _onMapCreated(GoogleMapController mapsController) async {
-    controller = mapsController;
+    _controller = mapsController;
 
     // move to current location
     var location = await MapsHelper.getCurrentLocation();
-    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+    _controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
       target: LatLng(location.latitude, location.longitude),
       zoom: 14.0,
     )));
@@ -281,8 +311,8 @@ class _MapsState extends State<Maps> {
     setState(() {
       if (result.status == 'OK') {
         result.results.forEach((f){
-          if(!foundPlaces.containsKey(f.id)) {
-            foundPlaces[f.id] = f;
+          if(!_foundPlaces.containsKey(f.id)) {
+            _foundPlaces[f.id] = f;
           }
           addMarker(f.id, LatLng(f.geometry.location.lat, f.geometry.location.lng), place: f);
         });
@@ -296,18 +326,17 @@ class _MapsState extends State<Maps> {
               );
             });
       }
-      isLoaded = true;
     });
   }
 
-
-
+  /// Calculate the center of the screen and return the current location for
+  /// this position.
   Future<LatLng> getCenterOfMap() async {
     final devicePixelRatio = Platform.isAndroid
         ? MediaQuery.of(context).devicePixelRatio
         : 1.0;
 
-    var coords = await controller.getLatLng(ScreenCoordinate(
+    var coords = await _controller.getLatLng(ScreenCoordinate(
       x: (context.size.width * devicePixelRatio) ~/ 2.0,
       y: (context.size.height * devicePixelRatio) ~/ 4.0,
     ));
@@ -315,6 +344,7 @@ class _MapsState extends State<Maps> {
     return coords;
   }
 
+  /// Add a marker to the marker list, depending on the given [PlaceSearchResult].
   void addMarker(var id, LatLng latlng, {PlacesSearchResult place, double colorDescriptor}) {
     final MarkerId markerId = MarkerId(id);
     Marker marker;
@@ -329,7 +359,7 @@ class _MapsState extends State<Maps> {
       String oh = MapsHelper.getOpenString(place);
 
       if(colorDescriptor == null) {
-        colorDescriptor = BitmapDescriptor.hueAzure;
+        colorDescriptor = BitmapDescriptor.hueRose;
       }
       marker = Marker(
         markerId: markerId,
@@ -345,20 +375,22 @@ class _MapsState extends State<Maps> {
     if(marker != null) {
       setState(() {
         // adding a new marker to map
-        if(!markers.containsKey(markerId)) {
-          markers[markerId] = marker;
+        if(!_markers.containsKey(markerId)) {
+          _markers[markerId] = marker;
         }
       });
     }
   }
 
+  /// Update when marker is tabbed.
   Future _onMarkerTapped(id) async {
     setState(() {
-      markerIsTabbed = true;
-      tabbedPlace = foundPlaces[id];
+      _markerIsTabbed = true;
+      _tabbedPlace = _foundPlaces[id];
     });
   }
 
+  /// Move to specific location. Not used right now.
   /*goToLocation(PlacesSearchResult foundPlace) async {
     controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
       target: LatLng(foundPlace.geometry.location.lat, foundPlace.geometry.location.lng),

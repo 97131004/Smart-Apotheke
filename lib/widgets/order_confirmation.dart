@@ -3,6 +3,9 @@ import 'package:maph_group3/util/nampr.dart';
 
 import 'home.dart';
 
+/// The class confirms the order at the end of the order workflow.
+/// The user has the possibility to wether go back to Home or to go back to the
+/// shop overview page.
 class OrderConfirmation extends StatefulWidget {
 
   OrderConfirmation({Key key}) : super(key: key);
@@ -28,6 +31,7 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
     _animationController.dispose();
   }
 
+  /// Build order confirmed text and animated icon.
   @override
   Widget build(BuildContext context) {
     return new WillPopScope(
@@ -42,16 +46,7 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
             alignment: Alignment.center,
             child: Column(
               children: <Widget>[
-                Expanded(
-                  child: GestureDetector(
-                    child: AnimatedIcon(
-                      size: 200,
-                      icon: AnimatedIcons.menu_home,
-                      progress: _animationController,
-                    ),
-                    onTap: _onBackToHome,
-                  ),
-                ),
+                _buildHomeButton(),
                 Expanded(
                   child: Text('Bestellung abgeschlossen.'),
                 ),
@@ -63,14 +58,30 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
     );
   }
 
+  /// Build animated icon.
+  Widget _buildHomeButton() {
+    return Expanded(
+      child: GestureDetector(
+        child: AnimatedIcon(
+          size: 200,
+          icon: AnimatedIcons.menu_home,
+          progress: _animationController,
+        ),
+        onTap: _onBackToHome,
+      ),
+    );
+  }
+
+  /// Method goes back 3 steps / pages.
   Future<bool> _onWillPop() {
     // go back to product details
     var nav = Navigator.of(context);
     nav.pop();
-    //nav.pop();
+    nav.pop();
     return nav.maybePop();
   }
 
+  /// Method goes back to Home page.
   Future<bool> _onBackToHome() {
     return Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => Home()));
   }

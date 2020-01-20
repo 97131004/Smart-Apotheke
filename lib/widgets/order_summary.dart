@@ -3,6 +3,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
+import 'package:maph_group3/data/med.dart';
+import 'package:maph_group3/util/helper.dart';
 import 'package:maph_group3/util/nampr.dart';
 import 'package:maph_group3/util/personal_data.dart';
 import 'package:maph_group3/util/shop_items.dart';
@@ -11,7 +13,16 @@ import 'package:maph_group3/widgets/order_confirmation.dart';
 import 'package:maph_group3/widgets/personal.dart';
 import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import '../util/med_get.dart';
 
+/// The class gives an overview of the order the user is going to execute.
+/// This page consists of different parts:
+///   1. Product overview: Name, amount and price of medicament, including
+///      tax and shipping (these values can change based on shipping options)
+///   2. Payment options
+///   3. Shipping options: Users can decide wether to ship the medicaments by
+///      mail or to collect it at a selected drug store.
+///   4. Confirmation of the order
 class OrderSummary extends StatefulWidget {
   final ShopItem item;
 
@@ -24,28 +35,27 @@ class OrderSummary extends StatefulWidget {
 }
 
 class _OrderSummaryState extends State<OrderSummary> {
+  /// google maps controller and markers
+  GoogleMapController _controller;
+  Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
+  Map<String, PlacesSearchResult> _foundPlaces = <String, PlacesSearchResult>{};
 
-  // google maps controller and markers
-  GoogleMapController controller;
-  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
-  Map<String, PlacesSearchResult> foundPlaces = <String, PlacesSearchResult>{};
+  PlacesSearchResult _currentMarker;
+  PlacesSearchResult _pickedApo;
 
-  bool agbIsChecked = false;
-  bool dataIsComplete = false;
-  bool visibilityShippingCosts = false;
-  bool deliverToApo = false;
+  /// used to load hidden / not yet loaded widgets depending on input
+  bool _agbIsChecked = false;
+  bool _dataIsComplete = false;
+  bool _deliverToApo = false;
+  bool _markerIsTabbed = false;
 
-  bool markerIsTabbed = false;
-  PlacesSearchResult currentMarker;
-  bool isLoaded = false;
-  String shippingAddress = '';
+  String _shippingAddress = '';
 
+  /// used to remember current state of radio group boxes
   String _pickedDelivered = 'Nach Hause liefern lassen ( + 2.99 € )';
   String _pickedPayment = 'Lastschrift';
 
-  PlacesSearchResult _pickedApo;
-
-  TextEditingController passwordController = new TextEditingController();
+  final TextEditingController _passwordController = new TextEditingController();
 
   @override
   initState() {
@@ -54,46 +64,65 @@ class _OrderSummaryState extends State<OrderSummary> {
     getShippingAddress();
   }
 
+  /// Build main view.
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Bestellübersicht'),
-      ),
-      body: Visibility(
-        visible: dataIsComplete,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 5.0),
-          child: Column(
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              _buildProductOverview(),
-              Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              _buildPaymentOptions(),
-              Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              _buildShippingOptions(),
-              Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              _buildConfirmationContainer(),
-              Padding(
-                padding: EdgeInsets.all(5),
-              ),
-            ],
-          ),
+    return WillPopScope(
+      onWillPop: () async {
+        int count = 0;
+        Navigator.of(context).popUntil((_) => count++ >= 2);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Bestellübersicht'),
         ),
+        body: Stack(
+          children: <Widget>[
+            Visibility(
+              visible: !_dataIsComplete,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            Visibility(
+              visible: _dataIsComplete,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 5.0),
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.all(5),
+                    ),
+                    _buildProductOverview(),
+                    Padding(
+                      padding: EdgeInsets.all(5),
+                    ),
+                    _buildPaymentOptions(),
+                    Padding(
+                      padding: EdgeInsets.all(5),
+                    ),
+                    _buildShippingOptions(),
+                    Padding(
+                      padding: EdgeInsets.all(5),
+                    ),
+                    _buildConfirmationContainer(),
+                    Padding(
+                      padding: EdgeInsets.all(5),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        )
       ),
     );
   }
 
+  /// Build product overview as a table.
   Widget _buildProductOverview() {
-    double shippingCosts = deliverToApo ? 0 : 2.99;
+    double shippingCosts = _deliverToApo ? 0 : 2.99;
     double grossPrice =
         ((widget.item.priceInt * widget.item.orderQuantity) / 100) +
             shippingCosts;
@@ -104,108 +133,123 @@ class _OrderSummaryState extends State<OrderSummary> {
       decoration: _getContainerDecoration(1, 5),
       child: Table(
         border: TableBorder(
-          horizontalInside: BorderSide(width: 1.0, color: Colors.black54),
+          horizontalInside:
+              BorderSide(width: 1.0, color: Theme.of(context).splashColor),
         ),
         columnWidths: {
-          0: FixedColumnWidth(MediaQuery.of(context).size.width * 0.65),
-          1: FixedColumnWidth(MediaQuery.of(context).size.width * 0.10),
-          2: FixedColumnWidth(MediaQuery.of(context).size.width * 0.25),
+          0: FlexColumnWidth(
+              1.0), //FixedColumnWidth(MediaQuery.of(context).size.width * 0.65),
+          1: FlexColumnWidth(0.2),
+          2: FlexColumnWidth(0.3),
         },
         children: [
-          TableRow(
-            children: [
-              Text(
-                '\nProdukt',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Center(
-                child: Text(
-                  '\nAnzahl',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              Center(
-                child: Text(
-                  '\nGesamtpreis',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-          TableRow(
-            children: [
-              Container(
-                child: Row(
-                  children: <Widget>[
-                    Image.asset(
-                      'assets/dummy_med.png',
-                      height: 50,
-                      width: 50,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(3),
-                    ),
-                    Flexible(
-                      child: Text(
-                        '\n' +
-                            widget.item.name +
-                            '\n' +
-                            widget.item.dosage +
-                            '\n',
-                        textWidthBasis: TextWidthBasis.parent,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Center(
-                child: Text('\n' + widget.item.orderQuantity.toString()),
-              ),
-              Center(
-                child: Text('\n' + netPrice.toStringAsFixed(2) + ' €\n'),
-              ),
-            ],
-          ),
-          TableRow(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text('\nMehrwertsteuer 10%'),
-                  Text('\nVersandkosten\n'),
-                ],
-              ),
-              Column(
-                children: <Widget>[
-                  Text(''),
-                  Text(''),
-                ],
-              ),
-              Column(
-                children: <Widget>[
-                  Text('\n' + tax.toStringAsFixed(2) + ' €'),
-                  Text('\n' + shippingCosts.toStringAsFixed(2) + ' €'),
-                ],
-              ),
-            ],
-          ),
-          TableRow(
-            children: [
-              Text(
-                '\nGesamtsumme:\n',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Center(child: Text('')),
-              Center(
-                child: Text('\n' + grossPrice.toStringAsFixed(2) + ' €'),
-              ),
-            ],
-          ),
+          _buildTableRowHeader(),
+          _buildTableRowProduct(netPrice),
+          _buildTableRowTaxAndShipping(tax, shippingCosts),
+          _buildGrossPrice(grossPrice),
         ],
       ),
     );
   }
 
+  /// Build table header.
+  TableRow _buildTableRowHeader() {
+    return TableRow(
+      children: [
+        Text(
+          '\nProdukt',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          '\nAnzahl',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          '\nGesamtpreis',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+  /// Build product row.
+  TableRow _buildTableRowProduct(double netPrice) {
+    return TableRow(
+      children: [
+        Container(
+          child: Row(
+            children: <Widget>[
+              Image.asset(
+                'assets/dummy_med.png',
+                height: 50,
+                width: 50,
+              ),
+              Padding(
+                padding: EdgeInsets.all(3),
+              ),
+              Flexible(
+                child: Text(
+                  '\n' + widget.item.name + '\n' + widget.item.dosage + '\n',
+                  textWidthBasis: TextWidthBasis.parent,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Center(
+          child: Text('\n' + widget.item.orderQuantity.toString()),
+        ),
+        Center(
+          child: Text('\n' + netPrice.toStringAsFixed(2) + ' €\n'),
+        ),
+      ],
+    );
+  }
+
+  /// Build shipping / tax  row.
+  TableRow _buildTableRowTaxAndShipping(double tax, double shippingCosts) {
+    return TableRow(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('\nMehrwertsteuer 10%'),
+            Text('\nVersandkosten\n'),
+          ],
+        ),
+        Column(
+          children: <Widget>[
+            Text(''),
+            Text(''),
+          ],
+        ),
+        Column(
+          children: <Widget>[
+            Text('\n' + tax.toStringAsFixed(2) + ' €'),
+            Text('\n' + shippingCosts.toStringAsFixed(2) + ' €'),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Build gross price row.
+  TableRow _buildGrossPrice(double grossPrice) {
+    return TableRow(
+      children: [
+        Text(
+          '\nGesamtsumme:\n',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        Center(child: Text('')),
+        Center(
+          child: Text('\n' + grossPrice.toStringAsFixed(2) + ' €'),
+        ),
+      ],
+    );
+  }
+
+  /// Build payment options container.
   Widget _buildPaymentOptions() {
     return new Container(
       padding: EdgeInsets.all(3),
@@ -213,22 +257,28 @@ class _OrderSummaryState extends State<OrderSummary> {
       child: Column(
         children: <Widget>[
           Text('Zahlungsmöglichkeiten'),
-          RadioButtonGroup(
-              activeColor: Colors.green,
-              labels: <String>[
-                'Lastschrift',
-                'PayPal',
-                'Nachname / Bar vor Ort',
-              ],
-              picked: _pickedPayment,
-              onSelected: (String selected) => {
-                    setState(() => {_pickedPayment = selected})
-                  })
+          _buildRadioButtonGroupPayment(),
         ],
       ),
     );
   }
 
+  /// Build radio button group for payment options.
+  RadioButtonGroup _buildRadioButtonGroupPayment() {
+    return RadioButtonGroup(
+        activeColor: Theme.of(context).primaryColor,
+        labels: <String>[
+          'Lastschrift',
+          'PayPal',
+          'Nachname / Bar vor Ort',
+        ],
+        picked: _pickedPayment,
+        onSelected: (String selected) => {
+              setState(() => {_pickedPayment = selected})
+            });
+  }
+
+  /// Build shipping options container.
   Widget _buildShippingOptions() {
     return new Container(
       padding: EdgeInsets.all(3),
@@ -236,23 +286,7 @@ class _OrderSummaryState extends State<OrderSummary> {
       child: Column(
         children: <Widget>[
           Text('Liefermöglichkeiten:'),
-          RadioButtonGroup(
-              activeColor: Colors.green,
-              labels: <String>[
-                'Nach Hause liefern lassen ( + 2.99 € )',
-                'An Apotheke liefern lassen',
-              ],
-              picked: _pickedDelivered,
-              onSelected: (String selected) => {
-                    _pickedDelivered = selected,
-                    if (_pickedApo == null) _findApo(selected),
-                    setState(() => {
-                          if (selected == 'An Apotheke liefern lassen')
-                            {deliverToApo = true}
-                          else
-                            {deliverToApo = false}
-                        })
-                  }),
+          _buildRadioButtonGroupShipping(),
           _buildGooglemapsContainer(),
           _buildApoAddressContainer(),
           _buildBillingAdress(),
@@ -261,18 +295,32 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
-  _findApo(String selected) async {
-    var result = await Navigator.push(
-        context, NoAnimationMaterialPageRoute(builder: (context) => Maps()));
-    if (result != null) {
-      _pickedApo = result;
-    }
+  /// Build radio button group for shipping options.
+  RadioButtonGroup _buildRadioButtonGroupShipping() {
+    return RadioButtonGroup(
+        activeColor: Theme.of(context).primaryColor,
+        labels: <String>[
+          'Nach Hause liefern lassen ( + 2.99 € )',
+          'An Apotheke liefern lassen',
+        ],
+        picked: _pickedDelivered,
+        onSelected: (String selected) => {
+              _pickedDelivered = selected,
+              if (_pickedApo == null) _findApo(selected),
+              setState(() => {
+                    if (selected == 'An Apotheke liefern lassen')
+                      {_deliverToApo = true}
+                    else
+                      {_deliverToApo = false}
+                  })
+            });
   }
 
+  /// Build billing/shipping address container.
   Widget _buildBillingAdress() {
     String address =
-        shippingAddress != '' ? shippingAddress : 'Lieferadresse fehlt!';
-    if (!deliverToApo) {
+        _shippingAddress != '' ? _shippingAddress : 'Lieferadresse fehlt!';
+    if (!_deliverToApo) {
       return Container(
           alignment: Alignment.centerLeft,
           padding: EdgeInsets.all(10),
@@ -305,15 +353,11 @@ class _OrderSummaryState extends State<OrderSummary> {
     }
   }
 
+  /// Build google maps container for maps view in shipping options.
   Widget _buildGooglemapsContainer() {
-    var temp = new DateTime.now();
-    var date = new DateTime(temp.year,temp.month, temp.day, temp.hour + 2, 30);
-    var formatter = new DateFormat('HH:mm - dd.MM.yyyy');
-    String formattedDate = formatter.format(date);
-
     if (_pickedApo != null) {
       return Visibility(
-        visible: deliverToApo,
+        visible: _deliverToApo,
         child: Column(
           children: <Widget>[
             Container(
@@ -327,51 +371,24 @@ class _OrderSummaryState extends State<OrderSummary> {
                           target: LatLng(52.45654549, 13.52600992)),
                       mapType: MapType.normal,
                       onMapCreated: _onMapCreated,
-                      markers: Set<Marker>.of(markers.values),
+                      markers: Set<Marker>.of(_markers.values),
                       //onTap: MapsHelper.openMap(currentMarker.geometry.location.lat, currentMarker.geometry.location.lng),
                     ),
-                    Positioned(
-                        right: 10.0,
-                        top: 10.0,
-                        child: Opacity(
-                          opacity: 0.6,
-                          child: FloatingActionButton.extended(
-                            icon: Icon(Icons.fullscreen),
-                            label: Text('Auswahl'),
-                            backgroundColor: Colors.green,
-                            onPressed: () {
-                              Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => Maps()));
-                            },
-                          ),
-                        ))
+                    _buildSearchApoButton(),
                   ],
                 )),
-            Container(
-              padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Icon(Icons.location_on),
-                  Column(
-                    children: <Widget>[
-                      Text(_pickedApo.name, style: TextStyle(fontWeight: FontWeight.bold),),
-                      Text(_pickedApo.formattedAddress),
-                      Text('Früheste Abholzeit: ' + formattedDate, style: TextStyle(color: Colors.red),),
-                    ],
-                  ),
-                ],
-              )
-            )
+            _buildApoPickUpContainer(),
           ],
         ),
       );
     } else {
-      if (deliverToApo) {
+      if (_deliverToApo) {
         return Container(
           child: IconButton(
             icon: Icon(Icons.add),
             onPressed: () => {
-              Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => Maps())),
+              Navigator.push(context,
+                  NoAnimationMaterialPageRoute(builder: (context) => Maps())),
             },
           ),
         );
@@ -381,17 +398,69 @@ class _OrderSummaryState extends State<OrderSummary> {
     }
   }
 
-  _buildApoAddressContainer() {
-    if (markerIsTabbed) {
+  /// Build search drug store button.
+  Widget _buildSearchApoButton() {
+    return Positioned(
+      right: 10.0,
+      top: 10.0,
+      child: Opacity(
+        opacity: 0.6,
+        child: FloatingActionButton.extended(
+          icon: Icon(Icons.fullscreen),
+          label: Text('Auswahl'),
+          backgroundColor: Theme.of(context).primaryColor,
+          onPressed: () {
+            Navigator.push(context,
+                NoAnimationMaterialPageRoute(builder: (context) => Maps()));
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Build pick up at drug store container, that displays the address and the
+  /// earliest pick up time at the drug store.
+  Widget _buildApoPickUpContainer() {
+    var temp = new DateTime.now();
+    var date = new DateTime(temp.year, temp.month, temp.day, temp.hour + 2, 30);
+    var formatter = new DateFormat('HH:mm - dd.MM.yyyy');
+    String formattedDate = formatter.format(date);
+
+    return Container(
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Icon(Icons.location_on),
+            Column(
+              children: <Widget>[
+                Text(
+                  _pickedApo.name,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(_pickedApo.formattedAddress),
+                Text(
+                  'Früheste Abholzeit: ' + formattedDate,
+                  style: TextStyle(color: Theme.of(context).errorColor),
+                ),
+              ],
+            ),
+          ],
+        ));
+  }
+
+  /// Build main address container
+  Widget _buildApoAddressContainer() {
+    if (_markerIsTabbed) {
       return Container(
           child: Row(
         children: <Widget>[
           Column(
             children: <Widget>[
               Flexible(
-                child: Text(currentMarker.name),
+                child: Text(_currentMarker.name),
               ),
-              Flexible(child: Text(currentMarker.formattedAddress)),
+              Flexible(child: Text(_currentMarker.formattedAddress)),
             ],
           ),
         ],
@@ -404,6 +473,7 @@ class _OrderSummaryState extends State<OrderSummary> {
     }
   }
 
+  /// Build confirmation of order container.
   Widget _buildConfirmationContainer() {
     return new Container(
       padding: EdgeInsets.all(3),
@@ -412,23 +482,24 @@ class _OrderSummaryState extends State<OrderSummary> {
         children: <Widget>[
           Text('Geschäftsbedingungen und Benachrichtigungen'),
           CheckboxGroup(
-              checkColor: Colors.white,
-              activeColor: Colors.green,
+              checkColor: Theme.of(context).backgroundColor,
+              activeColor: Theme.of(context).primaryColor,
               labels: <String>[
                 'AGBs zustimmen',
                 'Ich bin damit einverstanden, dass...',
               ],
               onSelected: (List<String> checked) => {
+                    _agbIsChecked = false,
                     checked.forEach((it) => {
-                      if(it == 'AGBs zustimmen') { agbIsChecked = true }
-                      else { agbIsChecked = false }
-                    })
+                          if (it == 'AGBs zustimmen')
+                            {_agbIsChecked = true}
+                        })
                   }),
           RaisedButton(
             onPressed: goToOrderConfirmed,
             child: Text(
               'Zahlungspflichtig bestellen',
-              style: TextStyle(color: Colors.green),
+              style: TextStyle(color: Theme.of(context).backgroundColor),
             ),
           ),
         ],
@@ -439,14 +510,16 @@ class _OrderSummaryState extends State<OrderSummary> {
   BoxDecoration _getContainerDecoration(double borderWidth, double circular) {
     return BoxDecoration(
       border: Border.all(
-        color: Colors.black54,
+        color: Theme.of(context).splashColor,
         width: borderWidth,
       ),
       borderRadius: BorderRadius.circular(circular),
     );
   }
 
-  _checkData() async {
+  /// Check if user data is incomplete.
+  /// If the user data is missing, open Personal page, else set dataIsComplete to [true].
+  void _checkData() async {
     if (!(await PersonalData.isUserDataComplete())) {
       SchedulerBinding.instance.addPostFrameCallback((_) async {
         await _buildAlertDialog(context, 'Daten unvollständig',
@@ -458,7 +531,7 @@ class _OrderSummaryState extends State<OrderSummary> {
       });
     }
     setState(() {
-      dataIsComplete = true;
+      _dataIsComplete = true;
     });
   }
 
@@ -483,26 +556,36 @@ class _OrderSummaryState extends State<OrderSummary> {
     );
   }
 
+  /// Opens GoogleMaps page to search for a drug store.
+  void _findApo(String selected) async {
+    var result = await Navigator.push(
+        context, NoAnimationMaterialPageRoute(builder: (context) => Maps()));
+    if (result != null) {
+      _pickedApo = result;
+    }
+  }
+
+  /// Set marker when map is created.
   Future _onMapCreated(GoogleMapController mapsController) async {
-    controller = mapsController;
+    _controller = mapsController;
 
     if (_pickedApo != null) {
       final loc = LatLng(
           _pickedApo.geometry.location.lat, _pickedApo.geometry.location.lng);
       // final loc = Location(_pickedApo.geometry.location.lat, _pickedApo.geometry.location.lng);
 
-      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+      _controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target: loc,
         zoom: 14.0,
       )));
 
       setState(() {
         addMarker(_pickedApo.id, loc, place: _pickedApo);
-        isLoaded = true;
       });
     }
   }
 
+  /// Add marker to places list.
   void addMarker(var id, LatLng latlng,
       {PlacesSearchResult place, double colorDescriptor}) {
     final MarkerId markerId = MarkerId(id);
@@ -521,7 +604,7 @@ class _OrderSummaryState extends State<OrderSummary> {
             : 'Momentan geschlossen';
       }
       if (colorDescriptor == null) {
-        colorDescriptor = BitmapDescriptor.hueGreen;
+        colorDescriptor = BitmapDescriptor.hueRose;
       }
       marker = Marker(
         markerId: markerId,
@@ -537,22 +620,25 @@ class _OrderSummaryState extends State<OrderSummary> {
     if (marker != null) {
       setState(() {
         // adding a new marker to map
-        if (!markers.containsKey(markerId)) {
-          markers[markerId] = marker;
+        if (!_markers.containsKey(markerId)) {
+          _markers[markerId] = marker;
         }
       });
     }
   }
 
-  _onMarkerTapped(id) {
+  /// Set marker tapped to [true]
+  void _onMarkerTapped(id) {
     setState(() {
-      currentMarker = foundPlaces[id];
-      markerIsTabbed = true;
+      _currentMarker = _foundPlaces[id];
+      _markerIsTabbed = true;
     });
   }
 
+  /// Confirm order
+  /// If AGB's are not checked raise alert message.
   Future<void> goToOrderConfirmed() async {
-    if (agbIsChecked) {
+    if (_agbIsChecked) {
       var alert = createAlert(context);
       alert.show();
     } else {
@@ -562,12 +648,13 @@ class _OrderSummaryState extends State<OrderSummary> {
     }
   }
 
+  /// Create password confirmation dialog.
   Alert createAlert(BuildContext context) {
     var alert = Alert(
         context: context,
         title: 'Bestellung mit Passwort bestätigen.',
         content: TextField(
-          controller: passwordController,
+          controller: _passwordController,
           obscureText: true,
           decoration: InputDecoration(
             icon: Icon(Icons.lock),
@@ -576,31 +663,56 @@ class _OrderSummaryState extends State<OrderSummary> {
         ),
         buttons: [
           DialogButton(
-            color: Colors.green,
+            color: Theme.of(context).primaryColor,
             onPressed: () => _confirmPassword(),
             child: Text(
               'Bestätigen',
-              style: TextStyle(color: Colors.white, fontSize: 20),
+              style: TextStyle(
+                  color: Theme.of(context).backgroundColor, fontSize: 20),
             ),
           )
         ]);
     return alert;
   }
 
+  /// Check if entered password is correct.
   Future _confirmPassword() async {
-    if (await PersonalData.checkPassword(passwordController.text)) {
-      // go to confirmed page
-      Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => OrderConfirmation()));
-    } else {
+    if (await PersonalData.checkPassword(_passwordController.text)) {
 
+      Navigator.pop(context);
+
+      setState(() {
+        _dataIsComplete = false;
+      });
+
+      /// Adding medicament to [globals.recentMeds] (recent) list and saving it.
+      Med m = new Med(widget.item.name, widget.item.pzn, '', true);
+
+      /// Retrieving package leaflet for the medicament.
+      List<Med> mPzn = await MedGet.getMeds(widget.item.pzn, 0, 1);
+      if (mPzn.length > 0) {
+        m.url = mPzn[0].url;
+      }
+
+      Helper.recentMedsAdd(m);
+      await Helper.recentMedsSave();
+
+      // go to confirmed page
+      Navigator.push(
+          context,
+          NoAnimationMaterialPageRoute(
+              builder: (context) => OrderConfirmation()
+          )
+      );
     }
   }
 
+  /// Build shipping address string.
   Future<String> getShippingAddress() async {
-    List<String> adresse = await PersonalData.getadresse();
+    List<String> adresse = await PersonalData.getAddress();
     if (adresse != null)
       setState(() {
-        shippingAddress = adresse[0] +
+        _shippingAddress = adresse[0] +
             ' ' +
             adresse[1] +
             '\n' +

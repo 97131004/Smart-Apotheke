@@ -1,34 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:maph_group3/widgets/datenschutzerklaerung.dart';
-
-import 'data/med.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/home.dart';
+import 'widgets/intro.dart';
 
-void main() {
-  List<Med> medicaments = [
-    Med('', '10019621'),
-    Med('', '1502726'),
-    Med('', 'test'),
-    Med('', '00000000'),
-    Med('', '01343682')
-  ];
+/// Entry function for the app.
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-  //medicaments = [];
+  /// Checking whether this app start is the first one based on a first 
+  /// run variable saved into android's shared preferences.
+  final String saveKeyFirstRun = 'firstRun';
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool firstRun = (prefs.getBool(saveKeyFirstRun) == null ||
+      (prefs.getBool(saveKeyFirstRun) != null &&
+          prefs.getBool(saveKeyFirstRun)));
 
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: 'MAPH',
-    theme: ThemeData(
-      appBarTheme: AppBarTheme( color: Colors.green,),
-      accentColorBrightness: Brightness.light,
-      backgroundColor: Colors.white,
-      scaffoldBackgroundColor: Colors.white,
-      primaryTextTheme: TextTheme(title: TextStyle(color: Colors.white)),
-    ),
-    home: Home(),
-    //home: MedSearch(),
-    //home: MedScan(meds: medicaments),
-    //home: Personal(),
-    //home: Shop(med: globals.meds[0]),
-  ));
+  /// Fixating app to portrait device orientation.
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
+    runApp(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Smart Apotheke',
+      theme: ThemeData(
+        /// Setting global color and text themes,
+        /// which will be referred in the app code.
+        appBarTheme: AppBarTheme(color: Colors.redAccent),
+        accentColorBrightness: Brightness.light,
+        backgroundColor: Colors.white,
+        scaffoldBackgroundColor: Colors.white,
+        primaryTextTheme: TextTheme(title: TextStyle(color: Colors.white)),
+        primaryColor: Colors.redAccent,
+        accentColor: Colors.redAccent,
+        buttonColor: Colors.redAccent,
+        splashColor: Colors.black54,
+        errorColor: Colors.red,
+        textTheme: TextTheme(
+          headline: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
+          title: TextStyle(fontSize: 20.0),
+          body1: TextStyle(fontSize: 15.0),
+          body2: TextStyle(fontSize: 16.0),
+        ),
+      ),
+
+      /// Starting [intro] page if app is run for the first time,
+      /// otherwise starting [home] page.
+      home: firstRun ? Intro() : Home(),
+    ));
+  });
 }

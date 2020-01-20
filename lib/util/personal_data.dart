@@ -1,95 +1,116 @@
 import 'dart:async';
-
 import 'package:steel_crypt/steel_crypt.dart';
 import '../util/helper.dart';
 
-class PersonalData {
-  static String keyPassword = 'password';
-  static String keyIban = 'iban';
-  static String keyadresse = 'adresse';
-  static var hasher = HashCrypt("SHA-3/512");
+/// Helper class to manage personal data, including encryption, decryption, hashing, loading 
+/// and saving of passwords, name, address and iban. The password is saved as a hash to the
+/// android's shared preferences. The name, adress and iban are encrypted on write and 
+/// decrypted on read from android's shared preferences.
 
+class PersonalData {
+  /// Save key for password's load and save functions.
+  static final String _saveKeyPassword = 'password';
+
+  /// Save key for iban's load and save functions.
+  static final String _saveKeyIban = 'iban';
+
+  /// Save key for address' load and save functions.
+  static final String _saveKeyAddress = 'address';
+
+  /// Initializing hasher with a hashing type. Used for password checks.
+  static var _hasher = HashCrypt('SHA-3/512');
+
+  /// Returns whether user data is complete.
   static Future<bool> isUserDataComplete() async {
-    final addr = await Helper.readDataFromsp(keyadresse);
-    final iban = await Helper.readDataFromsp(keyIban);
+    final addr = await Helper.readDataFromsp(_saveKeyAddress);
+    final iban = await Helper.readDataFromsp(_saveKeyIban);
     return addr != '' && iban != '';
   }
 
-  static Future<bool> isPasswordExists() async {
-    final value = await Helper.readDataFromsp(keyPassword);
-    //print('read: $value');
+  /// Returns whether a password has been already set.
+  static Future<bool> passwordExists() async {
+    final value = await Helper.readDataFromsp(_saveKeyPassword);
     if (value != '') return true;
     return false;
   }
 
-  static Future setpassword(String password) async {
-    String hash = hasher.hash(password);
-    Helper.writeDatatoSp(keyPassword, hash);
+  /// Sets a new password and saves it.
+  static Future setPassword(String password) async {
+    String hash = _hasher.hash(password);
+    Helper.writeDatatoSp(_saveKeyPassword, hash);
   }
 
+  /// Checks whether a password is valid.
   static Future<bool> checkPassword(String password) async {
-    final value = await Helper.readDataFromsp(keyPassword);
-    if (value != '') return hasher.checkhash(password, value);
+    final value = await Helper.readDataFromsp(_saveKeyPassword);
+    if (value != '') return _hasher.checkhash(password, value);
     return false;
   }
 
-  static Future<bool> resetPassword(String oldp, String newp) async {
-    if (await checkPassword(oldp)) {
-      await setpassword(newp);
+  /// Changes a password from [oldPass] to [newPass] and saves it.
+  static Future<bool> resetPassword(String oldPass, String newPass) async {
+    if (await checkPassword(oldPass)) {
+      await setPassword(newPass);
       return true;
     }
     return false;
   }
 
+  /// Changes the iban and saves it. Requires the current password.
   static Future<bool> changeIban(String iban, String password) async {
     if (await checkPassword(password)) {
       iban = await encrypt(iban);
-      Helper.writeDatatoSp(keyIban, iban);
+      Helper.writeDatatoSp(_saveKeyIban, iban);
       return true;
     }
     return false;
   }
 
-  static Future<bool> changeadresse(
-      List<String> adresse, String password) async {
+  /// Changes the address and saves it.
+  static Future<bool> changeAddress(
+      List<String> address, String password) async {
     if (await checkPassword(password)) {
-      String _adresse = adresse.join('?').toString();
-      _adresse = await encrypt(_adresse);
-      Helper.writeDatatoSp(keyadresse, _adresse);
+      String addr = address.join('?').toString();
+      addr = await encrypt(addr);
+      Helper.writeDatatoSp(_saveKeyAddress, addr);
       return true;
     }
     return false;
   }
 
+  /// Returns the current iban.
   static Future<String> getIban() async {
-    String ibanencrypted = await Helper.readDataFromsp(keyIban);
-    if (ibanencrypted.isNotEmpty)
-      return decrypt(ibanencrypted);
+    String ibanEncrypted = await Helper.readDataFromsp(_saveKeyIban);
+    if (ibanEncrypted.isNotEmpty)
+      return decrypt(ibanEncrypted);
     else
       return '';
   }
 
-  static Future<List<String>> getadresse() async {
-    String adresseencrypted = await Helper.readDataFromsp(keyadresse);
-    if (adresseencrypted.isNotEmpty)
-      return (await decrypt(adresseencrypted)).split('?');
+  /// Returns the current address.
+  static Future<List<String>> getAddress() async {
+    String addressEncrypted = await Helper.readDataFromsp(_saveKeyAddress);
+    if (addressEncrypted.isNotEmpty)
+      return (await decrypt(addressEncrypted)).split('?');
     return null;
   }
 
+  /// Encrypts a string with the symmetric AES algorithm.
   static Future<String> encrypt(String text) async {
-    var FortunaKey  = CryptKey().genFortuna();
-    var iv2 = CryptKey().genDart(12);
-    var encrypter3 = AesCrypt(FortunaKey , 'cbc', 'iso10126-2');
-    String en = encrypter3.encrypt(text, iv2);
-    return FortunaKey + " " + iv2 + " " + en;
+    String fortunaKey = CryptKey().genFortuna();
+    String iv = CryptKey().genDart(12);
+    var encrypter = AesCrypt(fortunaKey, 'cbc', 'iso10126-2');
+    String en = encrypter.encrypt(text, iv);
+    return fortunaKey + ' ' + iv + ' ' + en;
   }
 
+  /// Decrypts a string with the symmetric AES algorithm.
   static Future<String> decrypt(String encrypted) async {
-    List<String> enc = encrypted.split(" ");
-    String FortunaKey = enc[0];
-    String iv2 = enc[1];
+    List<String> enc = encrypted.split(' ');
+    String fortunaKey = enc[0];
+    String iv = enc[1];
     encrypted = enc[2];
-    var encrypter3 = AesCrypt(FortunaKey , 'cbc', 'iso10126-2');
-    return encrypter3.decrypt(encrypted, iv2);
+    var encrypter = AesCrypt(fortunaKey, 'cbc', 'iso10126-2');
+    return encrypter.decrypt(encrypted, iv);
   }
 }

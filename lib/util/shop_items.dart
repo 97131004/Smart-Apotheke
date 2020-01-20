@@ -3,6 +3,7 @@ import 'dart:core';
 import 'package:html/parser.dart' show parse;
 import 'package:html/dom.dart';
 
+/// ShopItem object holds all data that is used in order process
 class ShopItem {
   String name;
   String pzn;
@@ -20,8 +21,10 @@ class ShopItem {
   String searchKey;
   bool onlyAvailableOnPrescription;
 
+  /// Empty constructor
   ShopItem.empty();
 
+  /// Default contructor
   ShopItem(String name, String pzn, String brand, [String dosage, String link,
     String image, String price, String crossedOutPrice, String pricePerUnit, String merchant, String desc, String searchKey, bool onlyAvailableOnPrescription]) {
     this.name = name;
@@ -44,6 +47,7 @@ class ShopItem {
     this.priceInt = ((double.tryParse(price.substring(0, price.length-2).replaceAll(',', '.')) ?? 0.0)*100).toInt();
   }
 
+  /// Returns a map of details for a [ShopItem].
   Map<String, dynamic> toMap() {
     var map = new Map<String, dynamic>();
 
@@ -62,6 +66,7 @@ class ShopItem {
     return map;
   }
 
+  /// Compares two [ShopItem].
   int compareTo(ShopItem item) {
     if(this.priceInt == null) return 1;
     if(item.priceInt == null) return 0;
@@ -71,7 +76,17 @@ class ShopItem {
   }
 }
 
+/// The class will handle the parsing of the vendors websites.
+/// This is only a temporary solution due to the prices for API usage
+/// of these merchants.
+/// Alternatively Google Shopping API can be used, which affords a
+/// business licence and is fee based.
 class ShopListParser {
+
+  /// Parses a html string to DOM model and than iterates over the nodes
+  /// to collect the required data.
+  /// Returns a future list of [ShopItem].
+  /// Vendor: [MedPex.de].
   static Future<List<ShopItem>> parseHtmlToShopListItemMedpex(String html) async {
     List<ShopItem> resultList = new List<ShopItem>();
     var htmlDom = parse(html);
@@ -120,6 +135,10 @@ class ShopListParser {
     return Future<List<ShopItem>>.value(resultList);
   }
 
+  /// Parses a html string to DOM model and than iterates over the nodes
+  /// to collect the required data.
+  /// Returns a future list of [ShopItem].
+  /// Vendor: [DocMorris.com].
   static Future<List<ShopItem>> parseHtmlToShopListItemDocMorris(String html) async {
     List<ShopItem> resultList = new List<ShopItem>();
     var htmlDom = parse(html);
@@ -150,6 +169,7 @@ class ShopListParser {
     return Future<List<ShopItem>>.value(resultList);
   }
 
+  /// Retrieve product details for DocMorris.
   static void _getProductDetailsDocMorris(Element productDetails, ShopItem item) {
     try {
       if(productDetails != null && productDetails.className != null) {
@@ -196,6 +216,8 @@ class ShopListParser {
     }
   }
 
+  /// The function merges two lists of [ShopItem].
+  /// Returns a future list of [ShopItem].
   static Future<List<ShopItem>> mergeLists(List<ShopItem> listA, List<ShopItem> listB) {
     if(listA == null || listA.length == 0) {
       return Future<List<ShopItem>>.value(listB);
@@ -211,6 +233,5 @@ class ShopListParser {
         tempList.add(listB.elementAt(i));
     }
     return Future<List<ShopItem>>.value(tempList);
-    //return tempList;
   }
 }

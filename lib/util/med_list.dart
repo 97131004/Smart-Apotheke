@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
-
+import 'package:maph_group3/widgets/med_search.dart';
 import '../widgets/shop.dart';
 import '../widgets/med_info.dart';
 import '../data/med.dart';
 import 'nampr.dart';
 
+/// Functions to visualize a list of [med] objects across multiple pages of the app.
+/// Uses an [ExpansionTile] to display the [name] and [pzn] of the medicament.
+/// After opening the tile, you get access to the package leaflet, order and
+/// remove entry buttons.
+
 class MedList {
+  /// Stores the tap position for the [GestureDetector] to recognize swipes.
+  /// Requires to be public by definition.
+  static Offset tapPosition;
+
+  /// Visualizes a whole [List<Med>]. Passes optional parameters, such as whether
+  /// the item is [removable], and callback functions [onSwipe] for the swipe gesture
+  /// and [onButtonDelete] for the pressed delete button.
   static Widget build(BuildContext context, List<Med> meds,
       [bool removable = false,
       Function(Med) onSwipe,
@@ -21,11 +33,8 @@ class MedList {
     );
   }
 
-  static Offset tapPosition;
-  static void storePosition(TapDownDetails details) {
-    tapPosition = details.globalPosition;
-  }
-
+  /// Visualizes a single medicament [item]. Implements the callback for the
+  /// swipe gesture [onSwipe].
   static Widget buildItem(BuildContext context, int index, Med item,
       [bool removable = false,
       Function(Med) onSwipe,
@@ -33,11 +42,15 @@ class MedList {
     return Theme(
       data: ThemeData(
         dividerColor: Colors.transparent,
-        accentColor: Colors.black, //arrow color when selected
+
+        /// Represent the arrow color when the expansion tile is opened.
+        accentColor: Colors.black,
       ),
       child: (removable)
           ? GestureDetector(
-              onTapDown: storePosition,
+              onTapDown: (details) {
+                tapPosition = details.globalPosition;
+              },
               child: Dismissible(
                 key: UniqueKey(),
                 onDismissed: (direction) {
@@ -45,33 +58,40 @@ class MedList {
                     onSwipe(item);
                   }
                 },
-                child: buildItemCore(context, item, removable, onButtonDelete),
+                child: _buildItemCore(context, item, removable, onButtonDelete),
               ),
             )
-          : buildItemCore(context, item, removable, onButtonDelete),
+          : _buildItemCore(context, item, removable, onButtonDelete),
     );
   }
 
-  static Widget buildItemCore(BuildContext context, Med item, bool removable,
+  /// Core visualization of a medicament [item]. Implements the callback for the
+  /// pressed delete button [onButtonDelete].
+  static Widget _buildItemCore(BuildContext context, Med item, bool removable,
       Function(Med) onButtonDelete) {
     return ExpansionTile(
       key: new PageStorageKey<Key>(item.key),
-      backgroundColor: Colors.yellow, //background color when selected
+
+      /// Background color of an opened expansion tile.
+      backgroundColor: Color(0xffFFD4D4),
       title: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Stack(
             children: <Widget>[
-              if (item.isHistory)
+              /// Do not draw a history icon, if [pzn] is unknown ([item.name.length <= 0]).
+              if (item.isHistory && item.name.length > 0)
                 Icon(
                   Icons.history,
                   size: 25,
                 ),
               Padding(
-                padding: EdgeInsets.only(left: (item.isHistory) ? 30 : 0),
+                padding: EdgeInsets.only(
+                    left: (item.isHistory && item.name.length > 0) ? 30 : 0),
                 child: Text(
-                  (item.name != '') ? item.name : '<PZN unbekannt>',
+                  /// Default text on unknown [pzn] number.
+                  (item.name.length > 0) ? item.name : '<PZN unbekannt>',
                   style: Theme.of(context).textTheme.title,
                 ),
               )
@@ -84,7 +104,8 @@ class MedList {
         ],
       ),
       children: <Widget>[
-        if (item.name != '')
+        /// Buttons that will show on an opened expansion tile.
+        if (item.name.length > 0)
           FlatButton(
             padding: EdgeInsets.all(16),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -92,7 +113,7 @@ class MedList {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Beipackzettel anzeigen',
-                style: TextStyle(fontSize: 16),
+                style: Theme.of(context).textTheme.body2,
               ),
             ),
             onPressed: () {
@@ -104,7 +125,7 @@ class MedList {
             },
             color: Colors.white38,
           ),
-        if (item.name != '')
+        if (item.name.length > 0)
           FlatButton(
             padding: EdgeInsets.all(16),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -112,7 +133,7 @@ class MedList {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Bestellen',
-                style: TextStyle(fontSize: 16),
+                style: Theme.of(context).textTheme.body2,
               ),
             ),
             onPressed: () {
@@ -124,7 +145,9 @@ class MedList {
             },
             color: Colors.white38,
           ),
-        if (item.name != '' && removable)
+
+        /// Shows a delete button if [removable] is [true].
+        if (item.name.length > 0 && removable)
           FlatButton(
             padding: EdgeInsets.all(16),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -132,7 +155,7 @@ class MedList {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Löschen',
-                style: TextStyle(fontSize: 16),
+                style: Theme.of(context).textTheme.body2,
               ),
             ),
             onPressed: () {
@@ -140,6 +163,27 @@ class MedList {
                 onButtonDelete(item);
               }
               return;
+            },
+            color: Colors.white38,
+          ),
+
+        /// Button that will pop on an item with an unknown [pzn].
+        if (item.name.length <= 0)
+          FlatButton(
+            padding: EdgeInsets.all(16),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Name / PZN manuell eingeben',
+                style: Theme.of(context).textTheme.body2,
+              ),
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                NoAnimationMaterialPageRoute(builder: (context) => MedSearch()),
+              );
             },
             color: Colors.white38,
           ),

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:maph_group3/widgets/scanner.dart';
-
 import '../util/no_internet_alert.dart';
 import '../util/nampr.dart';
 import '../util/helper.dart';
@@ -9,6 +7,10 @@ import '../util/load_bar.dart';
 import '../util/med_get.dart';
 import '../data/med.dart';
 import 'med_search.dart';
+
+/// Page after successful scanning process. Input parameter is a [List<Med> meds],
+/// which includes previously scanned medicaments. Since these only include a [pzn],
+/// some post-processing is done to get the medicament [name] and leaflet [url].
 
 class MedScan extends StatefulWidget {
   final List<Med> meds;
@@ -22,11 +24,13 @@ class MedScan extends StatefulWidget {
 }
 
 class _MedScanState extends State<MedScan> {
-  bool getMedsDone = false;
-  List<Med> display = new List<Med>();
+  /// [true] when [_getMeds] finished processing medicaments.
+  bool _getMedsDone = false;
 
   @override
   void initState() {
+    /// Checks for internet connection. If there's no connection, a
+    /// [no_internet_alert] will be shown.
     Helper.hasInternet().then((internet) {
       if (internet == null || !internet) {
         NoInternetAlert.show(context);
@@ -35,60 +39,80 @@ class _MedScanState extends State<MedScan> {
 
     super.initState();
 
+    /// Starting post-processing medicaments.
     if (widget.meds != null && widget.meds.length > 0) {
-      getMeds();
+      _getMeds();
     } else {
-      setState(() {
-        getMedsDone = true;
-      });
+      if (this.mounted) {
+        setState(() {
+          _getMedsDone = true;
+        });
+      }
     }
   }
 
-  Future getMeds() async {
+  /// Post-processing input medicaments. Updating medicament [name] and leaflet [url].
+  Future _getMeds() async {
     for (int i = 0; i < widget.meds.length; i++) {
       String pzn = widget.meds[i].pzn;
-      if (Helper.isNumber(pzn)) {
+      if (Helper.isPureInteger(pzn)) {
+        /// Getting remaining data based on [pzn]. Searching on page 1,
+        /// since result is expected to be singular.
         List<Med> med = await MedGet.getMeds(pzn, 0, 1);
         if (med.length > 0) {
           widget.meds[i] = med[0];
         }
       }
     }
-    setState(() {
-      getMedsDone = true;
-    });
+
+    /// Refreshing UI.
+    if (this.mounted) {
+      setState(() {
+        _getMedsDone = true;
+      });
+    }
+
+    /// Adding scanned medicaments to [globals.recentMeds] list and saving it.
+    for (int i = 0; i < widget.meds.length; i++) {
+      /// Skipping those, to which no medicament [name] could be found.
+      if (widget.meds[i].name.length > 0) {
+        Helper.recentMedsAdd(widget.meds[i]);
+      }
+    }
+    await Helper.recentMedsSave();
   }
 
+  /// Showing list of scanned medicaments or loading bar.
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        //back to home page, skipping scanner
-        Scanner.imageloaddone = false;
+        /// Returning [true] to go back to home page, skipping scanner page.
         Navigator.pop(context);
         return true;
       },
       child: Scaffold(
         appBar: AppBar(
           title: Text('Gefundene Medikamente'),
-          backgroundColor: Colors.green,
         ),
-        body: getMedsDone ? buildList() : LoadBar.build(),
+        body: _getMedsDone ? _buildList() : LoadBar.build(),
       ),
     );
   }
 
-  Widget buildList() {
+  /// Builds final list, including top note, list of scanned medicaments,
+  /// buttons to do a manual medicament search or retry scan.
+  Widget _buildList() {
     return Scrollbar(
       child: ListView.builder(
         itemBuilder: (context, index) {
           int length = widget.meds.length;
           if (index == 0) {
-            //first item
+            /// Top note.
             return Container(
               width: double.infinity,
-              color: Colors.red[600],
-              padding: EdgeInsets.all(16),
+              color: Colors.blueAccent,
+              padding: EdgeInsets.all(15),
               child: Text(
                 'Bitte überprüfen Sie die Korrektheit der gescannten Medikamente. ' +
                     'Wir übernehmen keine Haftung. Nutzung auf eigene Gefahr.',
@@ -97,15 +121,15 @@ class _MedScanState extends State<MedScan> {
             );
           }
           if (length > 0 && index >= 1 && index <= length) {
-            //med items
+            /// Medicament items.
             return MedList.buildItem(context, index, widget.meds[index - 1]);
           }
           if (length == 0 && index == length + 1) {
-            //med items
+            /// No medicament items found.
             return Column(
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.only(top: 20),
                   child: Text('Keine Medikamente gefunden.'),
                 ),
               ],
@@ -113,18 +137,15 @@ class _MedScanState extends State<MedScan> {
           }
           if (length > 0 && index == length + 1 ||
               length == 0 && index == length + 2) {
-            //last item
+            /// Bottom buttons.
             return Column(
               children: <Widget>[
-                SizedBox(height: 10),
+                SizedBox(height: 20),
                 ButtonTheme(
-                  buttonColor: Colors.grey[200],
-                  minWidth: double.infinity,
+                  buttonColor: Theme.of(context).buttonColor,
+                  minWidth: MediaQuery.of(context).size.width * 0.75,
                   height: 50.0,
                   child: RaisedButton.icon(
-                    shape: new RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(30.0),
-                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -132,24 +153,24 @@ class _MedScanState extends State<MedScan> {
                             builder: (context) => MedSearch()),
                       );
                     },
-                    icon: Icon(Icons.edit),
-                    label: Text("Name / PZN manuell eingeben"),
+                    icon: Icon(Icons.edit, color: Colors.white),
+                    label: Text('Name / PZN manuell eingeben',
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 4),
                 ButtonTheme(
-                  buttonColor: Colors.grey[200],
-                  minWidth: double.infinity,
+                  buttonColor: Theme.of(context).buttonColor,
+                  minWidth: MediaQuery.of(context).size.width * 0.75,
                   height: 50.0,
                   child: RaisedButton.icon(
-                    icon: Icon(Icons.update),
-                    shape: new RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(30.0),
-                    ),
-                    onPressed: onScanAgainClick,
-                    label: Text("Nochmals scannen"),
+                    icon: Icon(Icons.update, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                    label: Text('Nochmals scannen',
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ),
+                SizedBox(height: 20),
               ],
             );
           }
@@ -157,10 +178,5 @@ class _MedScanState extends State<MedScan> {
         },
       ),
     );
-  }
-
-  void onScanAgainClick() {
-    Scanner.imageloaddone = false;
-    Navigator.pop(context);
   }
 }
