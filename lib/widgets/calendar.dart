@@ -82,7 +82,7 @@ class _CalendarState extends State<Calendar> {
   /// Initialization a Notification for Android and IOS
   initializeNotifications() async {
     var initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     var initializationSettingsIOS = IOSInitializationSettings();
     var initializationSettings = InitializationSettings(
         initializationSettingsAndroid, initializationSettingsIOS);
