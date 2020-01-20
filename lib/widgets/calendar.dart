@@ -11,7 +11,7 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/globals.dart';
 import '../util/nampr.dart';
-import 'calendar_multi_select_dialog.dart';
+import '../util/calendar_multi_select_dialog.dart';
 import 'package:maph_group3/data/globals.dart';
 import 'package:maph_group3/data/med.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
@@ -92,7 +92,7 @@ class _CalendarState extends State<Calendar> {
         onSelectNotification: _onSelectNotification);
   }
 
-  /// Initialization a SharedPreferences and read data events, which saved with the string name events
+  /// Initialization a [SharedPreferences] and read data [events], which saved with the string name [events]
   _initSharedPreferences() async {
     _sharedPrefs = await SharedPreferences.getInstance();
     setState(() {
@@ -111,7 +111,7 @@ class _CalendarState extends State<Calendar> {
     return newMap;
   }
 
-  /// Decoding Map when you read Map from SharedPreferences
+  /// Decoding [Map] when you read Map from [SharedPreferences]
   /// and you have to convert DateTime from String to DateTime, which you changed before
   Map<DateTime, dynamic> _decodeMap(Map<String, dynamic> map) {
     Map<DateTime, dynamic> newMap = {};
@@ -364,10 +364,10 @@ class _CalendarState extends State<Calendar> {
     }
     setState(() {
       _sharedPrefs.setString(
-          "events", json.encode(_encodeMap(_events))); //setup again events
+          "events", json.encode(_encodeMap(_events))); //setup again [events]
     });
   }
-  // when you visibled day change like change to other month
+  // when visibled day was changed,like changed to other month
   void _onVisibleDaysChanged(
       DateTime first, DateTime last, CalendarFormat format) {
     //print('CALLBACK: _onVisibleDaysChanged');
