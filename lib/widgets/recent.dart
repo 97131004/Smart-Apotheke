@@ -23,11 +23,11 @@ class _RecentState extends State<Recent> {
   void initState() {
     super.initState();
 
-    _getGlobalMedList();
+    _getRecentMedsList();
   }
 
   /// Retrieving [globals.recentMeds] list, which represents a list of recent medicaments.
-  Future _getGlobalMedList() async {
+  Future _getRecentMedsList() async {
     if (this.mounted) {
       await Helper.recentMedsLoad();
       setState(() {});
