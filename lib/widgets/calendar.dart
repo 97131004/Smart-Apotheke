@@ -6,6 +6,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'dart:convert';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/globals.dart';
@@ -41,8 +42,7 @@ class _CalendarState extends State<Calendar> {
   final _formKey = GlobalKey<FormState>();
 
   /// global variable for LocalNotificationPlugin
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      new FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   /// global Calendar to show calendar
   CalendarController _controller = CalendarController();
@@ -77,6 +77,8 @@ class _CalendarState extends State<Calendar> {
     _selectedEvents = [];
     _selectedTimes = [9, 17];
     _stringCombination = "";
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    initializeNotifications();
   }
 
   /// Initialization a Notification for Android and IOS
@@ -173,6 +175,7 @@ class _CalendarState extends State<Calendar> {
   /// show Nofitication at the time [hour]
   Future<void> _showDailyAtTime(
       DateTime dateTime, int event_index, List time, String text) async {
+
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'repeatDailyAtTime channel id',
       'repeatDailyAtTime channel name',
@@ -612,17 +615,23 @@ class _CalendarState extends State<Calendar> {
                         controller: _note,
                       ),
                       SizedBox(height: 20),
-                      InkWell(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text('Uhrzeiten: '),
-                            Column(children: _showTimes())
-                          ],
+                      AnimatedContainer(
+                        duration: Duration(seconds: 2),
+                        curve: Curves.easeIn,
+                        child: Material(
+                            child: InkWell(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Text('Uhrzeiten: '),
+                                  Column(children: _showTimes())
+                                ],
+                              ),
+                              onTap: () {
+                                _showMultiSelect(context);
+                              },
+                            ),
                         ),
-                        onTap: () {
-                          _showMultiSelect(context);
-                        },
                       ),
                       SizedBox(height: 20),
                       RaisedButton(
