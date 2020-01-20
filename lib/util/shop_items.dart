@@ -4,7 +4,7 @@ import 'package:html/parser.dart' show parse;
 import 'package:html/dom.dart';
 
 /// ShopItem object holds all data that is used in order process
-class ShopItem {
+class ShopMeds {
   String name;
   String pzn;
   String brand;
@@ -22,10 +22,10 @@ class ShopItem {
   bool onlyAvailableOnPrescription;
 
   /// Empty constructor
-  ShopItem.empty();
+  ShopMeds.empty();
 
   /// Default contructor
-  ShopItem(String name, String pzn, String brand, [String dosage, String link,
+  ShopMeds(String name, String pzn, String brand, [String dosage, String link,
     String image, String price, String crossedOutPrice, String pricePerUnit, String merchant, String desc, String searchKey, bool onlyAvailableOnPrescription]) {
     this.name = name;
     this.pzn = pzn;
@@ -47,7 +47,7 @@ class ShopItem {
     this.priceInt = ((double.tryParse(price.substring(0, price.length-2).replaceAll(',', '.')) ?? 0.0)*100).toInt();
   }
 
-  /// Returns a map of details for a [ShopItem].
+  /// Returns a map of details for a [ShopMeds].
   Map<String, dynamic> toMap() {
     var map = new Map<String, dynamic>();
 
@@ -66,8 +66,8 @@ class ShopItem {
     return map;
   }
 
-  /// Compares two [ShopItem].
-  int compareTo(ShopItem item) {
+  /// Compares two [ShopMeds].
+  int compareTo(ShopMeds item) {
     if(this.priceInt == null) return 1;
     if(item.priceInt == null) return 0;
     if(this.priceInt == item.priceInt) return 0;
@@ -85,10 +85,10 @@ class ShopListParser {
 
   /// Parses a html string to DOM model and than iterates over the nodes
   /// to collect the required data.
-  /// Returns a future list of [ShopItem].
+  /// Returns a future list of [ShopMeds].
   /// Vendor: [MedPex.de].
-  static Future<List<ShopItem>> parseHtmlToShopListItemMedpex(String html) async {
-    List<ShopItem> resultList = new List<ShopItem>();
+  static Future<List<ShopMeds>> parseHtmlToShopListItemMedpex(String html) async {
+    List<ShopMeds> resultList = new List<ShopMeds>();
     var htmlDom = parse(html);
     var listElement = htmlDom.getElementById('product-list');//getElementsByTagName('div');
 
@@ -97,7 +97,7 @@ class ShopListParser {
         if(element?.className != null && element.className == 'product-list-entry') {
           var formElement = element.getElementsByTagName('form').isNotEmpty? element.getElementsByTagName('form').first : null;
           if(formElement != null) {
-            ShopItem item = new ShopItem.empty();
+            ShopMeds item = new ShopMeds.empty();
             // prices
             var prices = formElement.getElementsByClassName('transaction')?.first?.getElementsByClassName('prices')?.first;
             for(var priceElement in prices.children) {
@@ -132,15 +132,15 @@ class ShopListParser {
       }
     }
 
-    return Future<List<ShopItem>>.value(resultList);
+    return Future<List<ShopMeds>>.value(resultList);
   }
 
   /// Parses a html string to DOM model and than iterates over the nodes
   /// to collect the required data.
-  /// Returns a future list of [ShopItem].
+  /// Returns a future list of [ShopMeds].
   /// Vendor: [DocMorris.com].
-  static Future<List<ShopItem>> parseHtmlToShopListItemDocMorris(String html) async {
-    List<ShopItem> resultList = new List<ShopItem>();
+  static Future<List<ShopMeds>> parseHtmlToShopListItemDocMorris(String html) async {
+    List<ShopMeds> resultList = new List<ShopMeds>();
     var htmlDom = parse(html);
     var listElement = htmlDom.getElementsByClassName('search__results')?.first;
 
@@ -149,7 +149,7 @@ class ShopListParser {
         if(element.className != null && element.className.contains('list-item')) {
           var elementData = element.children.first.children.first;
           if(elementData != null) {
-            ShopItem item = new ShopItem.empty();
+            ShopMeds item = new ShopMeds.empty();
             if(elementData.attributes != null && elementData.attributes.containsKey('data-pzn')) {
               item.pzn = elementData.attributes['data-pzn'];
             }
@@ -166,11 +166,11 @@ class ShopListParser {
       }
     }
 
-    return Future<List<ShopItem>>.value(resultList);
+    return Future<List<ShopMeds>>.value(resultList);
   }
 
   /// Retrieve product details for DocMorris.
-  static void _getProductDetailsDocMorris(Element productDetails, ShopItem item) {
+  static void _getProductDetailsDocMorris(Element productDetails, ShopMeds item) {
     try {
       if(productDetails != null && productDetails.className != null) {
         if(productDetails.className.contains('product-image')) {
@@ -216,22 +216,22 @@ class ShopListParser {
     }
   }
 
-  /// The function merges two lists of [ShopItem].
-  /// Returns a future list of [ShopItem].
-  static Future<List<ShopItem>> mergeLists(List<ShopItem> listA, List<ShopItem> listB) {
+  /// The function merges two lists of [ShopMeds].
+  /// Returns a future list of [ShopMeds].
+  static Future<List<ShopMeds>> mergeLists(List<ShopMeds> listA, List<ShopMeds> listB) {
     if(listA == null || listA.length == 0) {
-      return Future<List<ShopItem>>.value(listB);
+      return Future<List<ShopMeds>>.value(listB);
     }
     if(listB == null || listB.length == 0) {
-      return Future<List<ShopItem>>.value(listA);
+      return Future<List<ShopMeds>>.value(listA);
     }
 
-    List<ShopItem> tempList = [];
+    List<ShopMeds> tempList = [];
     int length = listA.length > listB.length ? listB.length : listA.length;
     for(int i = 0; i < length - 1; i++) {
         tempList.add(listA.elementAt(i));
         tempList.add(listB.elementAt(i));
     }
-    return Future<List<ShopItem>>.value(tempList);
+    return Future<List<ShopMeds>>.value(tempList);
   }
 }
