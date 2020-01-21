@@ -327,7 +327,7 @@ class _CalendarState extends State<Calendar>
                 calendarController: _controller,
               ),
               ..._selectedEvents.map(
-                    (event) => Container(
+                (event) => Container(
                   height: 85,
                   decoration: BoxDecoration(
                     border: Border.all(width: 0.8),
