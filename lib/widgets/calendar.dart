@@ -85,16 +85,16 @@ class _CalendarState extends State<Calendar>
     _stringCombination = "";
     flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
     initializeNotifications();
-    // Initialaziton for the Animation with 2 seconds and with [SingleTickerProviderStateMixin]
+    // Initialaziton for the Animation with 0 seconds or you can change more time and with [SingleTickerProviderStateMixin]
     _animationController =
-        AnimationController(duration: Duration(seconds: 0), vsync: this)
-          ..forward();
+    AnimationController(duration: Duration(seconds: 0), vsync: this)
+      ..forward();
   }
 
   /// Initialization a Notification for Android and IOS
   initializeNotifications() async {
     var initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    AndroidInitializationSettings('@mipmap/ic_launcher');
     var initializationSettingsIOS = IOSInitializationSettings();
     var initializationSettings = InitializationSettings(
         initializationSettingsAndroid, initializationSettingsIOS);
@@ -156,24 +156,24 @@ class _CalendarState extends State<Calendar>
   }
 
   /// Creating a ID for Notification consisted of month, day, index of event, hour
+  /// the formular will return a unique int. because we have just 12 month
   /// year I was remove because the nummer is so big out of int: 2^-31 to 2^31-1
+  /// max 0 18 000 000 < 2^31
   int _generateIDNotification(
       int year, int month, int day, int eventIndex, int hour) {
-    int id = int.parse(month.toString() +
-        day.toString() +
-        eventIndex.toString() +
-        hour.toString());
+    int id = year * 12 * 30 * 24 + month*30*24 + day * 24 + eventIndex + hour;
     return id;
   }
 
   /// Saving Hours in the Local, in order to remove Notification, which Event you saved before with uhrzeit
   Future<Null> _saveClockWithYearMonthDayIndexEvent(
       int year, int month, int day, int eventIndex, List time) async {
-    int id = int.parse(year.toString() +
+    String id =
+        //year.toString() +
         month.toString() +
         day.toString() +
-        eventIndex.toString());
-    await _sharedPrefs.setString(id.toString(), jsonEncode(time));
+        eventIndex.toString();
+    await _sharedPrefs.setString(id, jsonEncode(time));
   }
 
   /// show Nofitication at the time [hour]
@@ -202,7 +202,6 @@ class _CalendarState extends State<Calendar>
       for (int i = 0; i < time.length; i++) {
         int hour = time[i];
         int id = _generateIDNotification(year, month, day, eventIndex, hour);
-        //print(id);
         await flutterLocalNotificationsPlugin.showDailyAtTime(
             id,
             'Medikamente: $text',
@@ -223,7 +222,6 @@ class _CalendarState extends State<Calendar>
     new IOSNotificationDetails();
     NotificationDetails platformChannelSpecifics = new NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-
     int year = dateTime.year;
     int month = dateTime.month;
     int day = dateTime.day;
@@ -235,7 +233,6 @@ class _CalendarState extends State<Calendar>
         int id = _generateIDNotification(year, month, day, eventIndex, hour);
         //print(id);
         DateTime datetimeNotification = new DateTime(year, month, day, hour);
-
         await flutterLocalNotificationsPlugin.schedule(
             id,
             'Medikamente: $text',
@@ -402,9 +399,9 @@ class _CalendarState extends State<Calendar>
         int month = _controller.selectedDay.month;
         int day = _controller.selectedDay.day;
         String dayEventIndexInner = (int.parse(year.toString() +
-                month.toString() +
-                day.toString() +
-                listValue.indexOf(stringRemove).toString()))
+            month.toString() +
+            day.toString() +
+            listValue.indexOf(stringRemove).toString()))
             .toString();
 
         _removeNotification(year, month, day, listValue.indexOf(stringRemove),
@@ -437,9 +434,9 @@ class _CalendarState extends State<Calendar>
         context,
         NoAnimationMaterialPageRoute<Set<int>>(
             builder: (context) => MultiSelectDialog(
-                  items: items,
-                  initialSelectedValues: _selectedTimes.toSet(),
-                )));
+              items: items,
+              initialSelectedValues: _selectedTimes.toSet(),
+            )));
 
     setState(() {
       if (result != null) {
@@ -492,15 +489,15 @@ class _CalendarState extends State<Calendar>
           _note.text;
       setState(() {
         _controller.setSelectedDay(_beginDate, runCallback: true);
-
         for (int i = 0; i < int.parse(_day_duration.text); i++) {
           DateTime nextDay = _beginDate.add(new Duration(days: i));
-
-          if (_events[nextDay] != null) {
-            _events[nextDay].add(_stringCombination);
-          } else {
-            _events[nextDay] = [_stringCombination];
-          }
+          _controller.setFocusedDay(nextDay);
+          _controller.setSelectedDay(nextDay, runCallback: true);
+            if (_events[_controller.selectedDay] != null) {
+              _events[_controller.selectedDay].add(_stringCombination);
+            } else {
+              _events[_controller.selectedDay] = [_stringCombination];
+            }
 
           if (_selectedTimes.length > 0) {
             _showDailyAtTime(
@@ -517,6 +514,7 @@ class _CalendarState extends State<Calendar>
                 _selectedTimes,
                 _stringCombination.toString());
           }*/
+          _controller.setSelectedDay(_beginDate, runCallback: true);
         }
       });
       _sharedPrefs.setString('events', json.encode(_encodeMap(_events)));
@@ -541,24 +539,24 @@ class _CalendarState extends State<Calendar>
     /// local variable For validator the input in form
     final _formKey = GlobalKey<FormState>();
     showGeneralDialog(
-            context: context,
-            pageBuilder: (context, anim1, anim2) {},
-            barrierDismissible: true,
-            barrierColor: Colors.black.withOpacity(0.4),
-            barrierLabel: '',
-            transitionBuilder: (context, anim1, anim2, child) {
-              return Transform.rotate(
-                  angle: math2.radians(anim1.value * 360),
-                  child: AlertDialog(
-                    shape: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16.0)),
-                    title: Text('Erinnerungen erstellen'),
-                    content: StatefulBuilder(
-                      builder: (BuildContext context, StateSetter setState) {
-                        return Form(
-                            key: _formKey,
-                            child: SingleChildScrollView(
-                                child: Column(
+        context: context,
+        pageBuilder: (context, anim1, anim2) {},
+        barrierDismissible: true,
+        barrierColor: Colors.black.withOpacity(0.4),
+        barrierLabel: '',
+        transitionBuilder: (context, anim1, anim2, child) {
+          return Transform.rotate(
+              angle: math2.radians(anim1.value * 360),
+              child: AlertDialog(
+                shape: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16.0)),
+                title: Text('Erinnerungen erstellen'),
+                content: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return Form(
+                        key: _formKey,
+                        child: SingleChildScrollView(
+                            child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
@@ -568,66 +566,66 @@ class _CalendarState extends State<Calendar>
                                     onChanged: (String value) {
                                       if (value == 'Benutzereingabe...') {
                                         TextEditingController usermed =
-                                            TextEditingController();
+                                        TextEditingController();
                                         bool medAdded = false;
                                         showDialog(
-                                                // barrierDismissible: false,
-                                                builder: (context) =>
-                                                    AlertDialog(
-                                                      title: Text(
-                                                          'Schreiben Sie eine Medikament'),
-                                                      content: Form(
-                                                        child: Column(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: <Widget>[
-                                                            Row(
-                                                              children: <
-                                                                  Widget>[
-                                                                Flexible(
-                                                                    child:
-                                                                        TextFormField(
+                                          // barrierDismissible: false,
+                                            builder: (context) =>
+                                                AlertDialog(
+                                                  title: Text(
+                                                      'Schreiben Sie eine Medikament'),
+                                                  content: Form(
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                      MainAxisSize.min,
+                                                      children: <Widget>[
+                                                        Row(
+                                                          children: <
+                                                              Widget>[
+                                                            Flexible(
+                                                                child:
+                                                                TextFormField(
                                                                   decoration: InputDecoration(
                                                                       labelText:
-                                                                          'Medikament *:'),
+                                                                      'Medikament *:'),
                                                                   controller:
-                                                                      usermed,
+                                                                  usermed,
                                                                 )),
-                                                                IconButton(
-                                                                  icon: Icon(
-                                                                    Icons.check,
-                                                                    size: 40,
-                                                                  ),
-                                                                  onPressed:
-                                                                      () {
-                                                                    if (usermed
-                                                                            .text ==
-                                                                        "") {
-                                                                      //do not come back
-                                                                    } else {
-                                                                      setState(
+                                                            IconButton(
+                                                              icon: Icon(
+                                                                Icons.check,
+                                                                size: 40,
+                                                              ),
+                                                              onPressed:
+                                                                  () {
+                                                                if (usermed
+                                                                    .text ==
+                                                                    "") {
+                                                                  //do not come back
+                                                                } else {
+                                                                  setState(
                                                                           () {
                                                                         medList.add(Med(
                                                                             usermed.text,
                                                                             ''));
                                                                         medAdded =
-                                                                            true;
+                                                                        true;
                                                                       });
-                                                                      Navigator.pop(
-                                                                          context);
-                                                                    }
-                                                                  },
-                                                                )
-                                                              ],
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                            ),
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                }
+                                                              },
+                                                            )
                                                           ],
+                                                          mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
                                                         ),
-                                                      ),
+                                                      ],
                                                     ),
-                                                context: context)
+                                                  ),
+                                                ),
+                                            context: context)
                                             .then((_) {
                                           setState(() {
                                             if (medAdded)
@@ -647,7 +645,7 @@ class _CalendarState extends State<Calendar>
                                 InkWell(
                                   child: Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
                                       Text(
                                         'Beginn',
@@ -670,17 +668,17 @@ class _CalendarState extends State<Calendar>
                                 ),
                                 isdatepicker
                                     ? DatePickerTimeline(
-                                        _beginDate,
-                                        width:
-                                            MediaQuery.of(context).size.width /
-                                                2,
-                                        locale: 'de_DE',
-                                        onDateChange: (date) {
-                                          setState(() {
-                                            _beginDate = date;
-                                          });
-                                        },
-                                      )
+                                  _beginDate,
+                                  width:
+                                  MediaQuery.of(context).size.width /
+                                      2,
+                                  locale: 'de_DE',
+                                  onDateChange: (date) {
+                                    setState(() {
+                                      _beginDate = date;
+                                    });
+                                  },
+                                )
                                     : Container(),
                                 TextFormField(
                                   validator: (value) {
@@ -709,14 +707,14 @@ class _CalendarState extends State<Calendar>
                                 SizedBox(height: 20),
                                 TextFormField(
                                   decoration:
-                                      InputDecoration(labelText: 'Notizen'),
+                                  InputDecoration(labelText: 'Notizen'),
                                   controller: _note,
                                 ),
                                 SizedBox(height: 20),
                                 InkWell(
                                   child: Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
                                       Text('Uhrzeiten: '),
                                       Column(children: _showTimes())
@@ -739,11 +737,11 @@ class _CalendarState extends State<Calendar>
                                 ),
                               ],
                             )));
-                      },
-                    ),
-                  ));
-            },
-            transitionDuration: Duration(milliseconds: 300))
+                  },
+                ),
+              ));
+        },
+        transitionDuration: Duration(milliseconds: 300))
         .then((_) => setState(() {}));
   }
 }
