@@ -6,7 +6,7 @@ An app to conveniently pick a (German) medicament prescription, scan it, receive
 
 ## Target system specifications
 
-**Target operating system**: Android
+**Target operating system**: Android  
 **Minimal Android SDK version**: 16 (Android 4.1)  
 **Targeted Android SDK version**: 28 (Android 9.0)  
 **Recommended hardware**: ~200 MB Storage, ~400 MB RAM  
@@ -35,14 +35,14 @@ The following workflow diagram shows all (ui) widget interconnections that can b
 
 We decided to use the naming conventions promoted by Flutter's development team (https://dart.dev/guides/language/effective-dart/style):
 
-**File name**: snake-case (e.g. snake_case.dart)
-**Class**: upper-camel-case (e.g. ClassName)
-**Function**: lower-camel-case (e.g. functionName)
-**Class variable**: lower-camel-case (e.g. classVariableName)
+**File name**: snake-case (e.g. snake_case.dart)  
+**Class**: upper-camel-case (e.g. ClassName)  
+**Function**: lower-camel-case (e.g. functionName)  
+**Class variable**: lower-camel-case (e.g. classVariableName)  
 
 ## Testing
 
-Since most widgets and interface logic generate uncertain output, we developed a few unit tests, that can be found in the **test** folder of the project's root folder.
+Since most widgets and interface logic generate uncertain output, we developed a few unit tests, that can be found in the **/test/** folder of the project's root folder.
 
 ## Technical Documentation
 
