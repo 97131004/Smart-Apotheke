@@ -4,8 +4,8 @@ import '../util/helper.dart';
 
 /// Helper class to manage personal data, including encryption, decryption, hashing, loading 
 /// and saving of passwords, name, address and iban. The password is saved as a hash to the
-/// android's shared preferences. The name, adress and iban are encrypted on write and 
-/// decrypted on read from android's shared preferences.
+/// android's shared preferences (local settings storage). The name, adress and iban are 
+/// encrypted on write and decrypted on read from android's shared preferences.
 
 class PersonalData {
   /// Save key for password's load and save functions.
