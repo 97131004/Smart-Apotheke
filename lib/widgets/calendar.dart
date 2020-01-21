@@ -74,6 +74,7 @@ class _CalendarState extends State<Calendar>  with SingleTickerProviderStateMixi
   /// variable to be using amimation for table calendar and the form
   AnimationController _animationController;
 
+  /// verity User really wanna remove all event on swipe
   @override
   void initState() {
     super.initState();
@@ -329,10 +330,15 @@ class _CalendarState extends State<Calendar>  with SingleTickerProviderStateMixi
                 ),
                 calendarController: _controller,
               ),
+              _selectedEvents.length > 0 ?
+                Container(
+                  padding: EdgeInsets.only(bottom: 10.0, left: 15.0, right: 15.0),
+                  child : Text('[Achtung]Wenn sie Swipe Link oder Recht machen, werden alle gleich Event automatisch gelöscht'),
+                ): Container(),
               ..._selectedEvents.map(
-                    (event) => Container(
+                    (event) =>
+                        Container(
                   height: 85,
-
                   decoration: BoxDecoration(
                     border: Border.all(width: 0.8),
                     borderRadius: BorderRadius.circular(12.0),
@@ -349,12 +355,12 @@ class _CalendarState extends State<Calendar>  with SingleTickerProviderStateMixi
                           // Provide a function that tells the app
                           // what to do after an item has been swiped away.
                           onDismissed: (direction) async {
-                            // Remove the clock for each event in a day by shared SharedPreferences to get clock .
-                            String stringRemove = _selectedEvents[index];
-                            _readMapDateTimeList(_events, stringRemove);
-                            // Then show a snackbar.
-                            Scaffold.of(context).showSnackBar(
-                                SnackBar(content: Text("$event dismissed")));
+                              // Remove the clock for each event in a day by shared SharedPreferences to get clock .
+                              String stringRemove = _selectedEvents[index];
+                              _readMapDateTimeList(_events, stringRemove);
+                              // Then show a snackbar.
+                              Scaffold.of(context).showSnackBar(
+                                  SnackBar(content: Text("$event dismissed")));
                           },
                           // Show a red background as the item is swiped away.
                           background: Container(color: Colors.red),
@@ -718,6 +724,6 @@ class _CalendarState extends State<Calendar>  with SingleTickerProviderStateMixi
             ),
           );
         },
-        transitionDuration: Duration(milliseconds: 300)).then((_) => setState(() {}));
+        transitionDuration: Duration(milliseconds: 600)).then((_) => setState(() {}));
   }
 }
