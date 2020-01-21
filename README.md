@@ -43,7 +43,7 @@ We decided to use the naming conventions promoted by Flutter's development team 
 
 ## Testing
 
-Since most widgets and interface logic generate uncertain output, we developed a few unit tests, that can be found in the **/test/** folder of the project's root folder.
+Since most widgets and interface logic generate uncertain output, we developed a few unit tests for our utility files, that can be found in the **test** folder of the project's root folder.
 
 ## Technical documentation
 
