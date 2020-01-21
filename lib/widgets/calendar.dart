@@ -86,7 +86,7 @@ class _CalendarState extends State<Calendar>  with SingleTickerProviderStateMixi
     initializeNotifications();
     // Initialaziton for the Animation with 2 seconds and with [SingleTickerProviderStateMixin]
     _animationController = AnimationController(
-      duration: Duration(seconds: 2),
+      duration: Duration(seconds: 0),
       vsync: this
     )..forward();
   }
@@ -213,6 +213,39 @@ class _CalendarState extends State<Calendar>  with SingleTickerProviderStateMixi
     }
   }
 
+  /*/// show Nofitication at the time [hour] with [Day]
+  Future<void> _showDailyAtTimeWithDate(
+      DateTime dateTime, int eventIndex, List time, String text) async {
+    var androidPlatformChannelSpecifics =
+    new AndroidNotificationDetails('your other channel id',
+        'your other channel name', 'your other channel description');
+    var iOSPlatformChannelSpecifics =
+    new IOSNotificationDetails();
+    NotificationDetails platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+
+    int year = dateTime.year;
+    int month = dateTime.month;
+    int day = dateTime.day;
+    _saveClockWithYearMonthDayIndexEvent(year, month, day, eventIndex, time);
+    print(new DateTime(year, month, day, 9));
+    if (time.length > 0) {
+      for (int i = 0; i < time.length; i++) {
+        int hour = time[i];
+        int id = _generateIDNotification(year, month, day, eventIndex, hour);
+        //print(id);
+        DateTime datetimeNotification = new DateTime(year, month, day, hour);
+
+        await flutterLocalNotificationsPlugin.schedule(
+            id,
+            'Medikamente: $text',
+            'Ein bisschen jeden Tag wird gut sein',
+            datetimeNotification,
+            platformChannelSpecifics);
+      }
+    }
+  }*/
+
   @override
   void dispose() {
     super.dispose();
@@ -309,11 +342,10 @@ class _CalendarState extends State<Calendar>  with SingleTickerProviderStateMixi
                   child: ListView.builder(
                       itemCount: 1,
                       itemBuilder: (context, index) {
-                        final item = event;
                         return Dismissible(
                           // Each Dismissible must contain a Key. Keys allow Flutter to
                           // uniquely identify widgets.
-                          key: Key(item),
+                          key: UniqueKey(),
                           // Provide a function that tells the app
                           // what to do after an item has been swiped away.
                           onDismissed: (direction) async {
@@ -322,11 +354,11 @@ class _CalendarState extends State<Calendar>  with SingleTickerProviderStateMixi
                             _readMapDateTimeList(_events, stringRemove);
                             // Then show a snackbar.
                             Scaffold.of(context).showSnackBar(
-                                SnackBar(content: Text("$item dismissed")));
+                                SnackBar(content: Text("$event dismissed")));
                           },
                           // Show a red background as the item is swiped away.
                           background: Container(color: Colors.red),
-                          child: ListTile(title: Text('$item')),
+                          child: ListTile(title: Text('$event')),
                         );
                       }),
                 ),
@@ -479,6 +511,14 @@ class _CalendarState extends State<Calendar>  with SingleTickerProviderStateMixi
                 _selectedTimes,
                 _stringCombination.toString());
           }
+
+         /* if (_selectedTimes.length > 0) {
+            await _showDailyAtTimeWithDate(
+                nextDay,
+                _events[nextDay].indexOf(_stringCombination),
+                _selectedTimes,
+                _stringCombination.toString());
+          }*/
         }
        _controller.setSelectedDay(_beginDate, runCallback: true);
     }
@@ -667,8 +707,8 @@ class _CalendarState extends State<Calendar>  with SingleTickerProviderStateMixi
                                   "Hinzufügen",
                                   style: TextStyle(color: Colors.white),
                                 ),
-                                onPressed: () async {
-                                  await _handelButtonSave(actualSelectMed, _formKey);
+                                onPressed: ()  {
+                                   _handelButtonSave(actualSelectMed, _formKey);
                                 },
                               ),
                             ],
