@@ -18,7 +18,7 @@ An app to conveniently pick a (German) medicament prescription, scan it, receive
 
 ## Build release version
 
-Run `flutter build apk --release` in the terminal of project's root folder to build a final executable package for Android. The file will be built into **build/app/outputs/apk/release/app-release.apk**. The app bundle includes Flutter's runtimes for ARM 32-bit, ARM 64-bit and Android 64-bit architectures.
+Run `flutter build apk --release` in the terminal of the project's root folder to build a final app bundle for Android. The file will be built into **build/app/outputs/apk/release/app-release.apk**. The app bundle includes Flutter's runtimes for ARM 32-bit, ARM 64-bit and Android 64-bit architectures.
 
 ## Technical documentation
 
