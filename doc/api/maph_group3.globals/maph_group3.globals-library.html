@@ -51,7 +51,7 @@
     <ol>
           <li class="section-title">Libraries</li>
           <li><a href="widgets_calendar/widgets_calendar-library.html">calendar</a></li>
-          <li><a href="widgets_calendar_multi_select_dialog/widgets_calendar_multi_select_dialog-library.html">calendar_multi_select_dialog</a></li>
+          <li><a href="util_calendar_multi_select_dialog/util_calendar_multi_select_dialog-library.html">calendar_multi_select_dialog</a></li>
           <li><a href="util_helper/util_helper-library.html">helper</a></li>
           <li><a href="widgets_home/widgets_home-library.html">home</a></li>
           <li><a href="widgets_intro/widgets_intro-library.html">intro</a></li>
@@ -92,16 +92,6 @@
       <h2>Properties</h2>
 
       <dl class="properties">
-        <dt id="items" class="property">
-          <span class="name"><a href="maph_group3.globals/items.html">items</a></span>
-          <span class="signature">&#8596; Map<span class="signature">&lt;<wbr><span class="type-parameter">String</span>, <span class="type-parameter"><a href="util_shop_items/ShopItem-class.html">ShopItem</a></span>&gt;</span></span>         
-        </dt>
-        <dd>
-          List of shopping informations and descriptions about medicaments, that can be
-'bought' from within the app using the iban and address entered by the user.
-This list should be later outsourced to a database.
-                  <div class="features">read / write</div>
-</dd>
         <dt id="recentMeds" class="property">
           <span class="name"><a href="maph_group3.globals/recentMeds.html">recentMeds</a></span>
           <span class="signature">&#8596; List<span class="signature">&lt;<wbr><span class="type-parameter"><a href="data_med/Med-class.html">Med</a></span>&gt;</span></span>         
@@ -110,6 +100,16 @@ This list should be later outsourced to a database.
           Globally accessible storage file.
 List of recently scanned or ordered medicaments (also includes some predefined
 dummy medicaments). This list should be later outsourced to a database.
+                  <div class="features">read / write</div>
+</dd>
+        <dt id="shopMeds" class="property">
+          <span class="name"><a href="maph_group3.globals/shopMeds.html">shopMeds</a></span>
+          <span class="signature">&#8596; Map<span class="signature">&lt;<wbr><span class="type-parameter">String</span>, <span class="type-parameter"><a href="util_shop_items/ShopItem-class.html">ShopItem</a></span>&gt;</span></span>         
+        </dt>
+        <dd>
+          List of shopping informations and descriptions about medicaments, that can be
+'bought' from within the app using the iban and address entered by the user.
+This list should be later outsourced to a database.
                   <div class="features">read / write</div>
 </dd>
       </dl>
@@ -128,8 +128,8 @@ dummy medicaments). This list should be later outsourced to a database.
     
     
       <li class="section-title"><a href="maph_group3.globals/maph_group3.globals-library.html#properties">Properties</a></li>
-      <li><a href="maph_group3.globals/items.html">items</a></li>
       <li><a href="maph_group3.globals/recentMeds.html">recentMeds</a></li>
+      <li><a href="maph_group3.globals/shopMeds.html">shopMeds</a></li>
     
     
     
