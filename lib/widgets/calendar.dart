@@ -154,11 +154,13 @@ class _CalendarState extends State<Calendar>
   void _removeNotification(
       int year, int month, int day, int eventIndex, String listHours) async {
     String stringListTime = await Helper.readDataFromsp(listHours);
-    for (int i = 0; i < jsonDecode(stringListTime).length; i++) {
-      int id = _generateIDNotification(
-          year, month, day, eventIndex, jsonDecode(stringListTime)[i]);
-      //print(id);
-      await flutterLocalNotificationsPlugin.cancel(id);
+    if(jsonDecode(stringListTime).length > 0){
+      for (int i = 0; i < jsonDecode(stringListTime).length; i++) {
+        int id = _generateIDNotification(
+            year, month, day, eventIndex, jsonDecode(stringListTime)[i]);
+        //print(id);
+        await flutterLocalNotificationsPlugin.cancel(id);
+      }
     }
   }
 
@@ -168,7 +170,7 @@ class _CalendarState extends State<Calendar>
   /// max 0 18 000 000 < 2^31
   int _generateIDNotification(
       int year, int month, int day, int eventIndex, int hour) {
-    int id = year * 12 * 30 * 24 + month*30*24 + day * 24 + eventIndex + hour;
+    int id = year * 12 * 30 * 24 + month * 30 * 24 + day * 24 + eventIndex + hour;
     return id;
   }
 
@@ -211,8 +213,8 @@ class _CalendarState extends State<Calendar>
         int id = _generateIDNotification(year, month, day, eventIndex, hour);
         await flutterLocalNotificationsPlugin.showDailyAtTime(
             id,
-            '$text',
-            'Es ist an der Zeit, Ihre Medikamente gemäß Zeitplan einzunehmen',
+            'Medikament : $text',
+            'Zeit,Ihre Medikamente gemäß Zeitplan einzunehmen',
             Time(hour, 0, 0),
             platformChannelSpecifics);
       }
@@ -511,7 +513,7 @@ class _CalendarState extends State<Calendar>
                 nextDay,
                 _events[nextDay].indexOf(_stringCombination),
                 _selectedTimes,
-                _stringCombination.toString());
+                actualSelectMed.toString() != null?actualSelectMed.toString(): _stringCombination.toString());
           }
 
           /* if (_selectedTimes.length > 0) {
