@@ -152,12 +152,13 @@ class _CalendarState extends State<Calendar>
   /// Removing a event and concurent Notification with a ID
   /// ID consisted of month, day, index event, hour
   void _removeNotification(
-      int year, int month, int day, int eventIndex, String listHours) async {
-    String stringListTime = await Helper.readDataFromsp(listHours);
+      int year, int month, int day, int eventIndex) async {
+    String _stringListTime = year.toString() + month.toString() + day.toString() + eventIndex.toString();
+    String stringListTime = await Helper.readDataFromsp(_stringListTime);
+
     if(jsonDecode(stringListTime).length > 0){
       for (int i = 0; i < jsonDecode(stringListTime).length; i++) {
-        int id = _generateIDNotification(
-            year, month, day, eventIndex, jsonDecode(stringListTime)[i]);
+        int id = _generateIDNotification(year, month, day, eventIndex, jsonDecode(stringListTime)[i]);
         //print(id);
         await flutterLocalNotificationsPlugin.cancel(id);
       }
@@ -177,16 +178,12 @@ class _CalendarState extends State<Calendar>
   /// Saving Hours in the Local, in order to remove Notification, which Event you saved before with uhrzeit
   Future<Null> _saveClockWithYearMonthDayIndexEvent(
       int year, int month, int day, int eventIndex, List time) async {
-    String id =
-        //year.toString() +
-        month.toString() +
-        day.toString() +
-        eventIndex.toString();
-    await _sharedPrefs.setString(id, jsonEncode(time));
+    String _stringListime = year.toString() + month.toString() + day.toString() + eventIndex.toString();
+    await _sharedPrefs.setString(_stringListime, jsonEncode(time));
   }
 
   /// show Nofitication at the time [hour]
-  Future<void> _showDailyAtTime(
+  Future<void> _showDailyAtTime (
       DateTime dateTime, int eventIndex, List time, String text) async {
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'repeatDailyAtTime channel id',
@@ -205,6 +202,7 @@ class _CalendarState extends State<Calendar>
     int year = dateTime.year;
     int month = dateTime.month;
     int day = dateTime.day;
+    // save list time with String = year.tostring() + month.toString() + day.toString() + eventIndex.toString()
     _saveClockWithYearMonthDayIndexEvent(year, month, day, eventIndex, time);
 
     if (time.length > 0) {
@@ -407,14 +405,8 @@ class _CalendarState extends State<Calendar>
         int year = _controller.selectedDay.year;
         int month = _controller.selectedDay.month;
         int day = _controller.selectedDay.day;
-        String dayEventIndexInner = (int.parse(year.toString() +
-            month.toString() +
-            day.toString() +
-            listValue.indexOf(stringRemove).toString()))
-            .toString();
+        _removeNotification(year, month, day, listValue.indexOf(stringRemove));
 
-        _removeNotification(year, month, day, listValue.indexOf(stringRemove),
-            dayEventIndexInner);
         _selectedEvents.removeAt(listValue
             .indexOf(stringRemove)); //remove with value of item in list
       }
@@ -740,8 +732,8 @@ class _CalendarState extends State<Calendar>
                                     "Hinzufügen",
                                     style: TextStyle(color: Colors.white),
                                   ),
-                                  onPressed: () {
-                                    _handelButtonSave(
+                                  onPressed: () async {
+                                    await _handelButtonSave(
                                         actualSelectMed, _formKey);
                                   },
                                 ),
