@@ -503,7 +503,7 @@ class _CalendarState extends State<Calendar>
           if (_selectedTimes.length > 0) {
             _showDailyAtTime(
                 nextDay,
-                _events[nextDay].indexOf(_stringCombination),
+                _events[_controller.selectedDay].indexOf(_stringCombination),
                 _selectedTimes,
                 actualSelectMed.toString() != null?actualSelectMed.toString(): _stringCombination.toString());
           }
