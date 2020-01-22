@@ -79,8 +79,8 @@ class _CalendarState extends State<Calendar>
   void initState() {
     super.initState();
     _events = {};
-    _initSharedPreferences();
     _readRecentMed();
+    _initSharedPreferences();
     _selectedEvents = [];
     _selectedTimes = [9, 17];
     _stringCombination = "";
@@ -92,7 +92,8 @@ class _CalendarState extends State<Calendar>
       ..forward();
   }
 
-  //read data recented, what you scanned or ordered (button [bestellen]) from history to calendar form
+
+  /// Read data [recentMed], what you scanned or ordered (by button [bestellen]) from history to calendar form
   void _readRecentMed() async {
     await Helper.recentMedsLoad();
   }
