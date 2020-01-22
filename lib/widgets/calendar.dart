@@ -80,6 +80,7 @@ class _CalendarState extends State<Calendar>
     super.initState();
     _events = {};
     _initSharedPreferences();
+    _readRecentMed();
     _selectedEvents = [];
     _selectedTimes = [9, 17];
     _stringCombination = "";
@@ -89,6 +90,11 @@ class _CalendarState extends State<Calendar>
     _animationController =
     AnimationController(duration: Duration(seconds: 0), vsync: this)
       ..forward();
+  }
+
+  //read data recented, what you scanned or ordered (button [bestellen]) from history to calendar form
+  void _readRecentMed() async {
+    await Helper.recentMedsLoad();
   }
 
   /// Initialization a Notification for Android and IOS
@@ -204,7 +210,7 @@ class _CalendarState extends State<Calendar>
         int id = _generateIDNotification(year, month, day, eventIndex, hour);
         await flutterLocalNotificationsPlugin.showDailyAtTime(
             id,
-            'Medikamente: $text',
+            '$text',
             'Es ist an der Zeit, Ihre Medikamente gemäß Zeitplan einzunehmen',
             Time(hour, 0, 0),
             platformChannelSpecifics);
@@ -372,7 +378,7 @@ class _CalendarState extends State<Calendar>
           Icons.add,
           color: Colors.white,
         ),
-        onPressed: _showAddDialog,
+        onPressed: _showAddDialog
       ),
     );
   }
@@ -528,11 +534,12 @@ class _CalendarState extends State<Calendar>
   }
 
   /// Showing Dialog with a [showGeneralDialog] and then a [Form] inside
-  _showAddDialog() {
+  _showAddDialog()  {
     List<Med> medList = [];
-    // selected Medicin
-    String actualSelectMed;
+    // add to list [medList]
     medList.addAll(recentMeds);
+    // selected Medicin for the Dropdown
+    String actualSelectMed;
     _beginDate = _controller.selectedDay;
     bool isdatepicker = false;
 
