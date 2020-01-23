@@ -743,7 +743,7 @@ class _CalendarState extends State<Calendar>
                 ),
               ));
         },
-        transitionDuration: Duration(milliseconds: 300))
+        transitionDuration: Duration(milliseconds: 600))
         .then((_) => setState(() {}));
   }
 }

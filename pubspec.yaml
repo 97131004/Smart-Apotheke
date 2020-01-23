@@ -54,6 +54,7 @@ dev_dependencies:
 #  test: ^1.11.0
   flutter_test:
     sdk: flutter
+  shared_preferences: ^0.5.4+5
 
 flutter_icons:
   android: true
