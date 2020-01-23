@@ -219,37 +219,6 @@ class _CalendarState extends State<Calendar>
     }
   }
 
-  /*/// show Nofitication at the time [hour] with [Day]
-  Future<void> _showDailyAtTimeWithDate(
-      DateTime dateTime, int eventIndex, List time, String text) async {
-    var androidPlatformChannelSpecifics =
-    new AndroidNotificationDetails('your other channel id',
-        'your other channel name', 'your other channel description');
-    var iOSPlatformChannelSpecifics =
-    new IOSNotificationDetails();
-    NotificationDetails platformChannelSpecifics = new NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    int year = dateTime.year;
-    int month = dateTime.month;
-    int day = dateTime.day;
-    _saveClockWithYearMonthDayIndexEvent(year, month, day, eventIndex, time);
-    print(new DateTime(year, month, day, 9));
-    if (time.length > 0) {
-      for (int i = 0; i < time.length; i++) {
-        int hour = time[i];
-        int id = _generateIDNotification(year, month, day, eventIndex, hour);
-        //print(id);
-        DateTime datetimeNotification = new DateTime(year, month, day, hour);
-        await flutterLocalNotificationsPlugin.schedule(
-            id,
-            'Medikamente: $text',
-            'Ein bisschen jeden Tag wird gut sein',
-            datetimeNotification,
-            platformChannelSpecifics);
-      }
-    }
-  }*/
-
   @override
   void dispose() {
     super.dispose();
@@ -490,6 +459,16 @@ class _CalendarState extends State<Calendar>
           _note.text;
       setState(() {
         _controller.setSelectedDay(_beginDate, runCallback: true);
+
+        // set notification for just one beginday, because this will work every day and I want to show just only one NOtification
+        if (_selectedTimes.length > 0) {
+          _showDailyAtTime(
+              _beginDate,
+              _events[_controller.selectedDay].indexOf(_stringCombination),
+              _selectedTimes,
+              actualSelectMed.toString() != null?actualSelectMed.toString(): _stringCombination.toString());
+        }
+
         for (int i = 0; i < int.parse(_day_duration.text); i++) {
           DateTime nextDay = _beginDate.add(new Duration(days: i));
           _controller.setFocusedDay(nextDay);
@@ -499,22 +478,6 @@ class _CalendarState extends State<Calendar>
             } else {
               _events[_controller.selectedDay] = [_stringCombination];
             }
-
-          if (_selectedTimes.length > 0) {
-            _showDailyAtTime(
-                nextDay,
-                _events[_controller.selectedDay].indexOf(_stringCombination),
-                _selectedTimes,
-                actualSelectMed.toString() != null?actualSelectMed.toString(): _stringCombination.toString());
-          }
-
-          /* if (_selectedTimes.length > 0) {
-            await _showDailyAtTimeWithDate(
-                nextDay,
-                _events[nextDay].indexOf(_stringCombination),
-                _selectedTimes,
-                _stringCombination.toString());
-          }*/
           _controller.setSelectedDay(_beginDate, runCallback: true);
         }
       });
