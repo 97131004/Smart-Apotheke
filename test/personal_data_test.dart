@@ -2,8 +2,8 @@ import 'package:maph_group3/util/personal_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Tests the main Calendar functions [parseMid] and [isPureInteger]
-/// from the [Calendar] file.
+/// Tests  functions in the file personal data
+/// We have to setup shared Preferences in yarm
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
