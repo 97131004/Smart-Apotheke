@@ -1,6 +1,6 @@
 import '../lib/util/helper.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 /// Tests the main helper functions [parseMid] and [isPureInteger]
 /// from the [helper] file.
 
@@ -56,6 +56,17 @@ void main() {
       });
       test('with integer with leading zeros', () async {
         expect(Helper.isPureInteger('00012345'), true);
+      });
+    });
+
+    /// tinhcv write test save data local with shared preferences
+    group('test write data to local', (){
+      TestWidgetsFlutterBinding.ensureInitialized();
+      SharedPreferences.setMockInitialValues({});
+      test('with integer with leading zeros', () async {
+        String write = await Helper.writeDatatoSp('123', "data");
+         String value = await Helper.readDataFromsp("123");
+        expect(value, "data");
       });
     });
   });
