@@ -31,7 +31,7 @@ List<Med> recentMeds = [
 /// List of shopping informations and descriptions about medicaments, that can be
 /// 'bought' from within the app using the iban and address entered by the user.
 /// This list should be later outsourced to a database.
-Map<String, ShopItem> items = {
+Map<String, ShopItem> shopMeds = {
   '10019638': new ShopItem(
       'Ibu Lysin ratiopharm 684mg Filmtabletten',
       '10019638',

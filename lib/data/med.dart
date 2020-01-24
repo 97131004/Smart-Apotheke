@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Stores all the information about a medicament. Includes medicament [name], [pzn],
-/// package leaflet [url] and whether it [isHistory] (belongs to the [recent] medicaments page).
+/// Stores all the information about a medicament. Gets passed around between multiple
+/// widgets. Includes medicament [name], [pzn], package leaflet [url] and whether it
+/// [isHistory] (belongs to the [recent] medicaments page).
 
 class Med {
   /// Medicament name.

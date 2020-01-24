@@ -34,8 +34,8 @@ class _ProductDetailsState extends State<ProductDetails> {
 
     /// get the local shop item by search key
     _medSearchKey = widget.searchKey;
-    if(globals.items.containsKey(_medSearchKey)) {
-      _localShopItem = globals.items[_medSearchKey];
+    if(globals.shopMeds.containsKey(_medSearchKey)) {
+      _localShopItem = globals.shopMeds[_medSearchKey];
     }
   }
 

@@ -64,8 +64,8 @@ class _ShopState extends State<Shop> {
     /// set our local medicament if it is available
     if (widget.med != null) {
       _medSearchKey = widget.med.name;
-      if (globals.items.containsKey(widget.med.pzn)) {
-        _localShopItem = globals.items[widget.med.pzn];
+      if (globals.shopMeds.containsKey(widget.med.pzn)) {
+        _localShopItem = globals.shopMeds[widget.med.pzn];
         _medSearchKey = _localShopItem.searchKey;
       }
     }
@@ -208,7 +208,9 @@ class _ShopState extends State<Shop> {
                 style: TextStyle(
                     color: Theme.of(context).errorColor,
                     decoration: TextDecoration.lineThrough)),*/
-            Text(_localShopItem.pricePerUnit),
+            Flexible(
+              child: Text(_localShopItem.pricePerUnit),
+            ),
           ],
         ));
   }
@@ -266,7 +268,9 @@ class _ShopState extends State<Shop> {
                                     color: Theme.of(context).errorColor,
                                     decoration: TextDecoration.lineThrough),
                                 ),
-                              Text(item.pricePerUnit ?? ''),
+                              Flexible(
+                                child: Text(item.pricePerUnit ?? ''),
+                              ),
                             ],
                           )
                       ),

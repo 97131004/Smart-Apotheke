@@ -4,25 +4,30 @@ import 'package:flutter/rendering.dart';
 import 'package:maph_group3/util/helper.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:convert';
+import 'dart:math' as math;
+import 'package:vector_math/vector_math.dart' as math2;
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/globals.dart';
 import '../util/nampr.dart';
-import 'calendar_multi_select_dialog.dart';
+import '../util/calendar_multi_select_dialog.dart';
 import 'package:maph_group3/data/globals.dart';
 import 'package:maph_group3/data/med.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 
 /// Page to show a Table Calendar. Here you can add the event for multiple day
-/// When you click button + on the right bottom you got a form
-/// The first field is a dropdow and a small text field, you can select existed Medical or wirte another Meidical
-/// The second field is selectedDay,you can change the beginday here,if you click on the day
-/// The next is for days, That means howlong will you be using the MEDICAL for yourself
-/// The text Dosierung = Dosage means that how should you use the medical
-/// Notizen is clearly, you can note somethings here
-/// Urzeiten: Heer you can select a Notification like medication reminders
+/// When you click button + on the right bottom you got a form.
+/// The first field is a dropdow and a small text field, you can select existed Medical or wirte another Meidical.
+/// The second field is selectedDay,you can change the beginday here,if you click on the day.
+/// The next is for days, That means howlong will you be using the MEDICAL for yourself.
+/// The text Dosierung = Dosage means that how should you use the medical.
+/// Notizen is clearly, you can note somethings here.
+/// Urzeiten: Heer you can select a Notification like medication reminders.
+/// Each Notification has a ID to control and has been working on just only hour.
+/// That works every day until you remove it.
 ///
 /// important referencens:
 /// https://pub.dev/packages/table_calendar
@@ -36,13 +41,10 @@ class Calendar extends StatefulWidget {
   }
 }
 
-class _CalendarState extends State<Calendar> {
-  /// For validator the input in form
-  final _formKey = GlobalKey<FormState>();
-
+class _CalendarState extends State<Calendar>
+    with SingleTickerProviderStateMixin {
   /// global variable for LocalNotificationPlugin
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      new FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   /// global Calendar to show calendar
   CalendarController _controller = CalendarController();
@@ -67,22 +69,39 @@ class _CalendarState extends State<Calendar> {
   ///  Storing Time for Notification
   List<int> _selectedTimes;
 
-  var beginDate;
+  /// variable to set selected Begin Day with your wish in the form
+  var _beginDate;
+
+  /// variable to be using amimation for table calendar and the form
+  AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     _events = {};
+    _readRecentMed();
     _initSharedPreferences();
     _selectedEvents = [];
     _selectedTimes = [9, 17];
     _stringCombination = "";
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    initializeNotifications();
+    // Initialaziton for the Animation with 0 seconds or you can change more time and with [SingleTickerProviderStateMixin]
+    _animationController =
+    AnimationController(duration: Duration(seconds: 0), vsync: this)
+      ..forward();
+  }
+
+
+  /// Read data [recentMed], what you scanned or ordered (by button [bestellen]) from history to calendar form
+  void _readRecentMed() async {
+    await Helper.recentMedsLoad();
   }
 
   /// Initialization a Notification for Android and IOS
   initializeNotifications() async {
     var initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    AndroidInitializationSettings('@mipmap/ic_launcher');
     var initializationSettingsIOS = IOSInitializationSettings();
     var initializationSettings = InitializationSettings(
         initializationSettingsAndroid, initializationSettingsIOS);
@@ -90,7 +109,7 @@ class _CalendarState extends State<Calendar> {
         onSelectNotification: _onSelectNotification);
   }
 
-  /// Initialization a SharedPreferences and read data events, which saved with the string name events
+  /// Initialization a [SharedPreferences] and read data [events], which saved with the string name [events]
   _initSharedPreferences() async {
     _sharedPrefs = await SharedPreferences.getInstance();
     setState(() {
@@ -109,7 +128,7 @@ class _CalendarState extends State<Calendar> {
     return newMap;
   }
 
-  /// Decoding Map when you read Map from SharedPreferences
+  /// Decoding [Map] when you read Map from [SharedPreferences]
   /// and you have to convert DateTime from String to DateTime, which you changed before
   Map<DateTime, dynamic> _decodeMap(Map<String, dynamic> map) {
     Map<DateTime, dynamic> newMap = {};
@@ -133,39 +152,38 @@ class _CalendarState extends State<Calendar> {
   /// Removing a event and concurent Notification with a ID
   /// ID consisted of month, day, index event, hour
   void _removeNotification(
-      int year, int month, int day, int eventIndex, String listHours) async {
-    String stringListTime = await Helper.readDataFromsp(listHours);
-    for (int i = 0; i < jsonDecode(stringListTime).length; i++) {
-      int id = _generateIDNotification(
-          year, month, day, eventIndex, jsonDecode(stringListTime)[i]);
-      //print(id);
-      await flutterLocalNotificationsPlugin.cancel(id);
+      int year, int month, int day, int eventIndex) async {
+    String _stringListTime = year.toString() + month.toString() + day.toString() + eventIndex.toString();
+    String stringListTime = await Helper.readDataFromsp(_stringListTime);
+
+    if(jsonDecode(stringListTime).length > 0){
+      for (int i = 0; i < jsonDecode(stringListTime).length; i++) {
+        int id = _generateIDNotification(year, month, day, eventIndex, jsonDecode(stringListTime)[i]);
+        //print(id);
+        await flutterLocalNotificationsPlugin.cancel(id);
+      }
     }
   }
 
   /// Creating a ID for Notification consisted of month, day, index of event, hour
+  /// the formular will return a unique int. because we have just 12 month
   /// year I was remove because the nummer is so big out of int: 2^-31 to 2^31-1
+  /// max 0 18 000 000 < 2^31
   int _generateIDNotification(
       int year, int month, int day, int eventIndex, int hour) {
-    int id = int.parse(month.toString() +
-        day.toString() +
-        eventIndex.toString() +
-        hour.toString());
+    int id = year * 12 * 30 * 24 + month * 30 * 24 + day * 24 + eventIndex + hour;
     return id;
   }
 
   /// Saving Hours in the Local, in order to remove Notification, which Event you saved before with uhrzeit
   Future<Null> _saveClockWithYearMonthDayIndexEvent(
       int year, int month, int day, int eventIndex, List time) async {
-    int id = int.parse(year.toString() +
-        month.toString() +
-        day.toString() +
-        eventIndex.toString());
-    await _sharedPrefs.setString(id.toString(), jsonEncode(time));
+    String _stringListime = year.toString() + month.toString() + day.toString() + eventIndex.toString();
+    await _sharedPrefs.setString(_stringListime, jsonEncode(time));
   }
 
   /// show Nofitication at the time [hour]
-  Future<void> _showDailyAtTime(
+  Future<void> _showDailyAtTime (
       DateTime dateTime, int eventIndex, List time, String text) async {
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'repeatDailyAtTime channel id',
@@ -184,17 +202,17 @@ class _CalendarState extends State<Calendar> {
     int year = dateTime.year;
     int month = dateTime.month;
     int day = dateTime.day;
+    // save list time with String = year.tostring() + month.toString() + day.toString() + eventIndex.toString()
     _saveClockWithYearMonthDayIndexEvent(year, month, day, eventIndex, time);
 
     if (time.length > 0) {
       for (int i = 0; i < time.length; i++) {
         int hour = time[i];
         int id = _generateIDNotification(year, month, day, eventIndex, hour);
-        //print(id);
         await flutterLocalNotificationsPlugin.showDailyAtTime(
             id,
-            'Medikamente: $text',
-            'Es ist an der Zeit, Ihre Medikamente gemäß Zeitplan einzunehmen',
+            'Medikament : $text',
+            'Zeit,Ihre Medikamente gemäß Zeitplan einzunehmen',
             Time(hour, 0, 0),
             platformChannelSpecifics);
       }
@@ -226,103 +244,111 @@ class _CalendarState extends State<Calendar> {
           )
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            TableCalendar(
-              //locale: 'de_DE',
-              events: _events,
-              initialCalendarFormat: CalendarFormat.month,
-              calendarStyle: CalendarStyle(
-                  canEventMarkersOverflow: true,
-                  todayColor: Colors.teal,
-                  selectedColor: Theme.of(context).primaryColor,
-                  todayStyle: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.0,
-                      color: Colors.white)),
-              headerStyle: HeaderStyle(
-                centerHeaderTitle: true,
-                formatButtonDecoration: BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.circular(20.0),
+      body: AnimatedBuilder(
+        animation: _animationController,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              TableCalendar(
+                //locale: 'de_DE',
+                events: _events,
+                initialCalendarFormat: CalendarFormat.month,
+                calendarStyle: CalendarStyle(
+                    canEventMarkersOverflow: true,
+                    todayColor: Colors.teal,
+                    selectedColor: Theme.of(context).primaryColor,
+                    todayStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18.0,
+                        color: Colors.white)),
+                headerStyle: HeaderStyle(
+                  centerHeaderTitle: true,
+                  formatButtonDecoration: BoxDecoration(
+                    color: Colors.teal,
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  formatButtonTextStyle: TextStyle(color: Colors.white),
+                  formatButtonShowsNext: false,
                 ),
-                formatButtonTextStyle: TextStyle(color: Colors.white),
-                formatButtonShowsNext: false,
-              ),
-              startingDayOfWeek: StartingDayOfWeek.monday,
-              onDaySelected: (date, events) {
-                setState(() {
-                  _selectedEvents = events;
-                });
-              },
-              onVisibleDaysChanged: _onVisibleDaysChanged,
-              builders: CalendarBuilders(
-                selectedDayBuilder: (context, date, events) => Container(
-                    margin: const EdgeInsets.all(4.0),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(25.0)),
-                    child: Text(
-                      date.day.toString(),
-                      style: TextStyle(color: Colors.white),
-                    )),
-                todayDayBuilder: (context, date, events) => Container(
-                    margin: const EdgeInsets.all(4.0),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        color: Colors.teal,
-                        borderRadius: BorderRadius.circular(25.0)),
-                    child: Text(
-                      date.day.toString(),
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ),
-              calendarController: _controller,
-            ),
-            ..._selectedEvents.map(
-              (event) => Container(
-                height: 85,
-
-                decoration: BoxDecoration(
-                  border: Border.all(width: 0.8),
-                  borderRadius: BorderRadius.circular(12.0),
+                startingDayOfWeek: StartingDayOfWeek.monday,
+                onDaySelected: (date, events) {
+                  setState(() {
+                    _selectedEvents = events;
+                  });
+                },
+                onVisibleDaysChanged: _onVisibleDaysChanged,
+                builders: CalendarBuilders(
+                  selectedDayBuilder: (context, date, events) => Container(
+                      margin: const EdgeInsets.all(4.0),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(25.0)),
+                      child: Text(
+                        date.day.toString(),
+                        style: TextStyle(color: Colors.white),
+                      )),
+                  todayDayBuilder: (context, date, events) => Container(
+                      margin: const EdgeInsets.all(4.0),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          color: Colors.teal,
+                          borderRadius: BorderRadius.circular(25.0)),
+                      child: Text(
+                        date.day.toString(),
+                        style: TextStyle(color: Colors.white),
+                      )),
                 ),
-                margin:
-                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                child: ListView.builder(
-                    itemCount: 1,
-                    itemBuilder: (context, index) {
-                      final item = event;
-                      return Dismissible(
-                        // Each Dismissible must contain a Key. Keys allow Flutter to
-                        // uniquely identify widgets.
-                        key: Key(item),
-                        // Provide a function that tells the app
-                        // what to do after an item has been swiped away.
-                        onDismissed: (direction) async {
-                          // Remove the clock for each event in a day by shared SharedPreferences to get clock .
-                          String stringRemove = _selectedEvents[index];
-                          _readMapDateTimeList(_events, stringRemove);
-                          // Then show a snackbar.
-                          Scaffold.of(context).showSnackBar(
-                              SnackBar(content: Text("$item dismissed")));
-                        },
-                        // Show a red background as the item is swiped away.
-                        background: Container(color: Colors.red),
-                        child: ListTile(title: Text('$item')),
-                      );
-                    }),
+                calendarController: _controller,
               ),
-            ),
-          ],
+              ..._selectedEvents.map(
+                (event) => Container(
+                  height: 85,
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 0.8),
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 4.0),
+                  child: ListView.builder(
+                      itemCount: 1,
+                      itemBuilder: (context, index) {
+                        return Dismissible(
+                          // Each Dismissible must contain a Key. Keys allow Flutter to
+                          // uniquely identify widgets.
+                          key: UniqueKey(),
+                          // Provide a function that tells the app
+                          // what to do after an item has been swiped away.
+                          onDismissed: (direction) async {
+                            // Remove the clock for each event in a day by shared SharedPreferences to get clock .
+                            String stringRemove = _selectedEvents[index];
+                            _readMapDateTimeList(_events, stringRemove);
+                            // Then show a snackbar.
+                            Scaffold.of(context).showSnackBar(
+                                SnackBar(content: Text("$event dismissed")));
+                          },
+                          // Show a red background as the item is swiped away.
+                          background: Container(color: Colors.red),
+                          child: ListTile(title: Text('$event')),
+                        );
+                      }),
+                ),
+              ),
+            ],
+          ),
         ),
+        builder: (context, child) => Transform.rotate(
+            child: child,
+            origin: Offset(50, 50),
+            angle: _animationController.value * 2.0 * math.pi),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add, color: Colors.white,),
-        onPressed: _showAddDialog,
+        child: Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+        onPressed: _showAddDialog
       ),
     );
   }
@@ -348,24 +374,19 @@ class _CalendarState extends State<Calendar> {
         int year = _controller.selectedDay.year;
         int month = _controller.selectedDay.month;
         int day = _controller.selectedDay.day;
-        String dayEventIndexInner = (int.parse(year.toString() +
-                month.toString() +
-                day.toString() +
-                listValue.indexOf(stringRemove).toString()))
-            .toString();
+        _removeNotification(year, month, day, listValue.indexOf(stringRemove));
 
-        _removeNotification(year, month, day, listValue.indexOf(stringRemove),
-            dayEventIndexInner);
         _selectedEvents.removeAt(listValue
             .indexOf(stringRemove)); //remove with value of item in list
       }
     }
     setState(() {
       _sharedPrefs.setString(
-          "events", json.encode(_encodeMap(_events))); //setup again events
+          "events", json.encode(_encodeMap(_events))); //setup again [events]
     });
   }
-  // when you visibled day change like change to other month
+
+  // when visibled day was changed,like changed to other month
   void _onVisibleDaysChanged(
       DateTime first, DateTime last, CalendarFormat format) {
     //print('CALLBACK: _onVisibleDaysChanged');
@@ -383,9 +404,9 @@ class _CalendarState extends State<Calendar> {
         context,
         NoAnimationMaterialPageRoute<Set<int>>(
             builder: (context) => MultiSelectDialog(
-                  items: items,
-                  initialSelectedValues: _selectedTimes.toSet(),
-                )));
+              items: items,
+              initialSelectedValues: _selectedTimes.toSet(),
+            )));
 
     setState(() {
       if (result != null) {
@@ -426,33 +447,42 @@ class _CalendarState extends State<Calendar> {
   }
 
   // Handling when you clicked save on the form
-  _handelButtonSave(String actualSelectMed) async{
-    if (_formKey.currentState.validate()) {
+  _handelButtonSave(String actualSelectMed, GlobalKey<FormState> _formKey) {
+    if (_formKey.currentState.validate() && actualSelectMed != null) {
       _formKey.currentState.save();
-      _stringCombination = "Medikament: " + actualSelectMed +
+
+      _stringCombination = "Medikament: " +
+          actualSelectMed +
           "\nDosierung: " +
           _dosage.text +
           "\nNote: " +
           _note.text;
-       
-        for (int i = 0; i < int.parse(_day_duration.text); i++) {
-          DateTime nextDay = beginDate.add(new Duration(days: i));
-          if (_events[nextDay] != null) {
-            _events[nextDay].add(_stringCombination);
-          } else {
-            _events[nextDay] = [_stringCombination];
-          }
-          _sharedPrefs.setString('events', json.encode(_encodeMap(_events)));
+      setState(() {
+        _controller.setSelectedDay(_beginDate, runCallback: true);
 
-          if (_selectedTimes.length > 0) {
-            await _showDailyAtTime(
-                nextDay,
-                _events[nextDay].indexOf(_stringCombination),
-                _selectedTimes,
-                _stringCombination.toString());
-          }
+        // set notification for just one beginday, because this will work every day and I want to show just only one NOtification
+        if (_selectedTimes.length > 0) {
+          _showDailyAtTime(
+              _beginDate,
+              _events[_controller.selectedDay].indexOf(_stringCombination),
+              _selectedTimes,
+              actualSelectMed.toString() != null?actualSelectMed.toString(): _stringCombination.toString());
         }
-       _controller.setSelectedDay(beginDate, runCallback: true);
+
+        for (int i = 0; i < int.parse(_day_duration.text); i++) {
+          DateTime nextDay = _beginDate.add(new Duration(days: i));
+          _controller.setFocusedDay(nextDay);
+          _controller.setSelectedDay(nextDay, runCallback: true);
+            if (_events[_controller.selectedDay] != null) {
+              _events[_controller.selectedDay].add(_stringCombination);
+            } else {
+              _events[_controller.selectedDay] = [_stringCombination];
+            }
+          _controller.setSelectedDay(_beginDate, runCallback: true);
+        }
+      });
+      _sharedPrefs.setString('events', json.encode(_encodeMap(_events)));
+      _controller.setSelectedDay(_beginDate, runCallback: true);
     }
     _stringCombination = '';
     _dosage.text = '';
@@ -461,177 +491,222 @@ class _CalendarState extends State<Calendar> {
     Navigator.of(context).pop();
   }
 
-  /// Showing Dialog with a Form inside
-  _showAddDialog() {
+  /// Showing Dialog with a [showGeneralDialog] and then a [Form] inside
+  _showAddDialog()  {
     List<Med> medList = [];
-    String actualSelectMed;
+    // add to list [medList]
     medList.addAll(recentMeds);
-    beginDate = _controller.selectedDay;
+    // selected Medicin for the Dropdown
+    String actualSelectMed;
+    _beginDate = _controller.selectedDay;
     bool isdatepicker = false;
 
-    showDialog(
+    /// local variable For validator the input in form
+    final _formKey = GlobalKey<FormState>();
+    showGeneralDialog(
         context: context,
-        builder: (context) => AlertDialog(content: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-              return Form(
-                  key: _formKey,
-                  child: SingleChildScrollView(
-                      child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      DropdownButton<String>(
-                          value: actualSelectMed,
-                          isExpanded: true,
-                          onChanged: (String value) {
-                            if (value == 'Benutzereingabe...') {
-                              TextEditingController usermed = TextEditingController();
-                              bool medAdded = false;
-                              showDialog(
-                                 // barrierDismissible: false,
-                                  builder: (context) => AlertDialog(
-                                    title: Text('Schreiben Sie eine Medikament'),
-                                    content: Form(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: <Widget>[
-                                          Row(
-                                            children: <Widget>[
-                                              Flexible(
-                                                  child: TextFormField(
-                                                    decoration: InputDecoration(
-                                                        labelText: 'Medikament *:'),
-                                                    controller: usermed,
-                                                  )),
-                                              IconButton(
-                                                icon: Icon(
-                                                  Icons.check,
-                                                  size: 40,
+        pageBuilder: (context, anim1, anim2) {},
+        barrierDismissible: true,
+        barrierColor: Colors.black.withOpacity(0.4),
+        barrierLabel: '',
+        transitionBuilder: (context, anim1, anim2, child) {
+          return Transform.rotate(
+              angle: math2.radians(anim1.value * 360),
+              child: AlertDialog(
+                shape: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16.0)),
+                title: Text('Erinnerungen erstellen'),
+                content: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return Form(
+                        key: _formKey,
+                        child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                DropdownButton<String>(
+                                    value: actualSelectMed,
+                                    isExpanded: true,
+                                    onChanged: (String value) {
+                                      if (value == 'Benutzereingabe...') {
+                                        TextEditingController usermed =
+                                        TextEditingController();
+                                        bool medAdded = false;
+                                        showDialog(
+                                          // barrierDismissible: false,
+                                            builder: (context) =>
+                                                AlertDialog(
+                                                  title: Text(
+                                                      'Schreiben Sie eine Medikament'),
+                                                  content: Form(
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                      MainAxisSize.min,
+                                                      children: <Widget>[
+                                                        Row(
+                                                          children: <
+                                                              Widget>[
+                                                            Flexible(
+                                                                child:
+                                                                TextFormField(
+                                                                  decoration: InputDecoration(
+                                                                      labelText:
+                                                                      'Medikament *:'),
+                                                                  controller:
+                                                                  usermed,
+                                                                )),
+                                                            IconButton(
+                                                              icon: Icon(
+                                                                Icons.check,
+                                                                size: 40,
+                                                              ),
+                                                              onPressed:
+                                                                  () {
+                                                                if (usermed
+                                                                    .text ==
+                                                                    "") {
+                                                                  //do not come back
+                                                                } else {
+                                                                  setState(
+                                                                          () {
+                                                                        medList.add(Med(
+                                                                            usermed.text,
+                                                                            ''));
+                                                                        medAdded =
+                                                                        true;
+                                                                      });
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                }
+                                                              },
+                                                            )
+                                                          ],
+                                                          mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
                                                 ),
-                                                onPressed: () {
-                                                  if (usermed.text == "") {
-                                                    //do not come back
-                                                  } else {
-                                                    setState(() {
-                                                      medList.add(Med(usermed.text, ''));
-                                                      medAdded = true;
-                                                    });
-                                                    Navigator.pop(context);
-                                                  }
-                                                },
-                                              )
-                                            ],
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                          ),
-                                        ],
+                                            context: context)
+                                            .then((_) {
+                                          setState(() {
+                                            if (medAdded)
+                                              actualSelectMed = usermed.text;
+                                            else
+                                              actualSelectMed = value;
+                                          });
+                                        });
+                                      } else
+                                        setState(() {
+                                          actualSelectMed = value;
+                                        });
+                                    },
+                                    hint: Text('Medikament'),
+                                    items: _getMedListForEventBox(medList)),
+                                SizedBox(height: 20),
+                                InkWell(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      Text(
+                                        'Beginn',
+                                        textAlign: TextAlign.left,
                                       ),
-                                    ),
+                                      Text(
+                                          _beginDate.day.toString() +
+                                              '.' +
+                                              _beginDate.month.toString() +
+                                              '.' +
+                                              _beginDate.year.toString(),
+                                          textAlign: TextAlign.right),
+                                    ],
                                   ),
-                                  context: context)
-                                  .then((_) {
-                                setState(() {
-                                  if(medAdded)
-                                  actualSelectMed = usermed.text;
-                                  else actualSelectMed = value;
-                                });
-                              });
-                            } else
-                              setState(() {
-                                actualSelectMed = value;
-                              });
-                          },
-                          hint: Text('Medikament'),
-                          items: _getMedListForEventBox(medList)),
-                      SizedBox(height: 20),
-                      InkWell(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text(
-                              'Beginn',
-                              textAlign: TextAlign.left,
-                            ),
-                            Text(
-                                beginDate.day.toString() +
-                                    '.' +
-                                    beginDate.month.toString() +
-                                    '.' +
-                                    beginDate.year.toString(),
-                                textAlign: TextAlign.right),
-                          ],
-                        ),
-                        onTap: () => {
-                          setState(() {
-                            isdatepicker = !isdatepicker;
-                          })
-                        },
-                      ),
-                      isdatepicker
-                          ? DatePickerTimeline(
-                              beginDate,
-                              width: MediaQuery.of(context).size.width / 2,
-                              locale: 'de_DE',
-                              onDateChange: (date) {
-                                setState(() {
-                                  beginDate = date;
-                                });
-                              },
-                            )
-                          : Container(),
-                      TextFormField(
-                        validator: (value) {
-                          if (value.isEmpty) {
-                            return 'Keine gültige Eingabe';
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                            labelText: 'Einnahmedauer (in Tagen)*'),
-                        keyboardType: TextInputType.number,
-                        controller: _day_duration,
-                      ),
-                      SizedBox(height: 20),
-                      TextFormField(
-                        validator: (value) {
-                          if (value.isEmpty) {
-                            return 'Keine gültige Eingabe';
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(labelText: 'Einnahme pro Tag:*'),
-                        controller: _dosage,
-                      ),
-                      SizedBox(height: 20),
-                      TextFormField(
-                        decoration: InputDecoration(labelText: 'Notizen'),
-                        controller: _note,
-                      ),
-                      SizedBox(height: 20),
-                      InkWell(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text('Uhrzeiten: '),
-                            Column(children: _showTimes())
-                          ],
-                        ),
-                        onTap: () {
-                          _showMultiSelect(context);
-                        },
-                      ),
-                      SizedBox(height: 20),
-                      RaisedButton(
-                        child: Text(
-                          "Hinzufügen",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        onPressed: () async {
-                           await _handelButtonSave(actualSelectMed);
-                        },
-                      ),
-                    ],
-                  )));
-            }))).then((_) => setState(() {}));
+                                  onTap: () => {
+                                    setState(() {
+                                      isdatepicker = !isdatepicker;
+                                    })
+                                  },
+                                ),
+                                isdatepicker
+                                    ? DatePickerTimeline(
+                                  _beginDate,
+                                  width:
+                                  MediaQuery.of(context).size.width /
+                                      2,
+                                  locale: 'de_DE',
+                                  onDateChange: (date) {
+                                    setState(() {
+                                      _beginDate = date;
+                                    });
+                                  },
+                                )
+                                    : Container(),
+                                TextFormField(
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Keine gültige Eingabe';
+                                    }
+                                    return null;
+                                  },
+                                  decoration: InputDecoration(
+                                      labelText: 'Einnahmedauer (in Tagen)*'),
+                                  keyboardType: TextInputType.number,
+                                  controller: _day_duration,
+                                ),
+                                SizedBox(height: 20),
+                                TextFormField(
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Keine gültige Eingabe';
+                                    }
+                                    return null;
+                                  },
+                                  decoration: InputDecoration(
+                                      labelText: 'Dosierung pro Tag:*'),
+                                  controller: _dosage,
+                                ),
+                                SizedBox(height: 20),
+                                TextFormField(
+                                  decoration:
+                                  InputDecoration(labelText: 'Notizen'),
+                                  controller: _note,
+                                ),
+                                SizedBox(height: 20),
+                                InkWell(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      Text('Uhrzeiten: '),
+                                      Column(children: _showTimes())
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    _showMultiSelect(context);
+                                  },
+                                ),
+                                SizedBox(height: 20),
+                                RaisedButton(
+                                  child: Text(
+                                    "Hinzufügen",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  onPressed: () async {
+                                    await _handelButtonSave(
+                                        actualSelectMed, _formKey);
+                                  },
+                                ),
+                              ],
+                            )));
+                  },
+                ),
+              ));
+        },
+        transitionDuration: Duration(milliseconds: 600))
+        .then((_) => setState(() {}));
   }
 }

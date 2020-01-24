@@ -11,7 +11,7 @@ import 'home.dart';
 
 /// Intro page is shown on the very first app start. Includes subpages for
 /// information about the app, privacy policy, eula and initial password prompt.
-/// Switches subpages by changing the [_curPage] variable. Input parameter [showOnlyPage]
+/// Switches subpages by changing the [_curPage] enum. Input parameter [showOnlyPage]
 /// defines which of the subpages should be shown (called from the [home] page).
 
 class Intro extends StatefulWidget {
@@ -248,6 +248,11 @@ class _IntroState extends State<Intro> {
             useRichText: true,
             onLinkTap: (url) async {
               if (await canLaunch(url)) {
+                /// Using [launch] function without parameters to open the website in a separate
+                /// browser app window. Embedding the browser window into the app makes it 
+                /// almost impossible to return back to the app (using the back button), 
+                /// since google's websites automatically forward the user to other pages
+                /// within their servers.
                 await launch(url);
               } else {
                 print('Could not launch $url');

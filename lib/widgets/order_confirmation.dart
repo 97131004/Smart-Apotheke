@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:maph_group3/util/nampr.dart';
+import 'package:maph_group3/widgets/calendar.dart';
 
 import 'home.dart';
 
@@ -45,13 +46,15 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
             padding: EdgeInsets.fromLTRB(0, MediaQuery.of(context).size.height/4, 0, 0),
             alignment: Alignment.center,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 _buildHomeButton(),
+                _buildCalendarButton(),
                 Expanded(
                   child: Text('Bestellung abgeschlossen.'),
                 ),
               ],
-            ),
+            )
           ),
         ),
       ),
@@ -63,7 +66,7 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
     return Expanded(
       child: GestureDetector(
         child: AnimatedIcon(
-          size: 200,
+          size: 100,
           icon: AnimatedIcons.menu_home,
           progress: _animationController,
         ),
@@ -71,6 +74,21 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
       ),
     );
   }
+
+  Widget _buildCalendarButton() {
+    return Expanded(
+      child: GestureDetector(
+        child: AnimatedIcon(
+          size: 100,
+          icon: AnimatedIcons.add_event,
+          progress: _animationController,
+        ),
+        onTap: _onBackToCalendar,
+      ),
+    );
+  }
+
+  /// Build
 
   /// Method goes back 3 steps / pages.
   Future<bool> _onWillPop() {
@@ -84,5 +102,14 @@ class _OrderConfirmationState extends State<OrderConfirmation> with SingleTicker
   /// Method goes back to Home page.
   Future<bool> _onBackToHome() {
     return Navigator.push(context, NoAnimationMaterialPageRoute(builder: (context) => Home()));
+  }
+
+  /// Method goes back to Calendar page.
+  Future<bool> _onBackToCalendar() {
+    return Navigator.push(
+      context,
+      NoAnimationMaterialPageRoute(
+          builder: (context) => Calendar()),
+    );
   }
 }

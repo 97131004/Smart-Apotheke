@@ -71,7 +71,7 @@ class Helper {
     return file.writeAsString('$data');
   }
 
-  /// Reads data from android's shared preferences (settings storage).
+  /// Reads data from android's shared preferences (local settings storage).
   static Future<String> readDataFromsp(String key) async {
     final prefs = await SharedPreferences.getInstance();
     final value = prefs.getString(key) ?? '';
@@ -79,7 +79,7 @@ class Helper {
     return value;
   }
 
-  /// Writes data to android's shared preferences (settings storage).
+  /// Writes data to android's shared preferences (local settings storage).
   static Future writeDatatoSp(String key, String data) async {
     final prefs = await SharedPreferences.getInstance();
     final value = data;
