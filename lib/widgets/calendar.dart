@@ -43,6 +43,9 @@ class Calendar extends StatefulWidget {
 
 class _CalendarState extends State<Calendar>
     with SingleTickerProviderStateMixin {
+  /// global variable For validator the input in form
+  final _formKey = GlobalKey<FormState>();
+
   /// global variable for LocalNotificationPlugin
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
@@ -249,7 +252,7 @@ class _CalendarState extends State<Calendar>
             id,
             'Medikament : $text',
             'Zeit,Ihre Medikamente gemäß Zeitplan einzunehmen',
-            DateTime(year, month, day, hour.toInt(), 0, 0),
+            DateTime(year, month, day,  hour.toInt(), 0, 0),
             platformChannelSpecifics);
       }
     }
@@ -519,12 +522,15 @@ class _CalendarState extends State<Calendar>
       });
       _sharedPrefs.setString('events', json.encode(_encodeMap(_events)));
       _controller.setSelectedDay(_beginDate, runCallback: true);
+
+      _stringCombination = '';
+      _dosage.text = '';
+      _day_duration.text = '';
+      _note.text = '';
+      Navigator.of(context).pop();
+    }else{
+      return false;
     }
-    _stringCombination = '';
-    _dosage.text = '';
-    _day_duration.text = '';
-    _note.text = '';
-    Navigator.of(context).pop();
   }
 
   /// Showing Dialog with a [showGeneralDialog] and then a [Form] inside
@@ -537,8 +543,6 @@ class _CalendarState extends State<Calendar>
     _beginDate = _controller.selectedDay;
     bool isdatepicker = false;
 
-    /// local variable For validator the input in form
-    final _formKey = GlobalKey<FormState>();
     showGeneralDialog(
         context: context,
         pageBuilder: (context, anim1, anim2) {},
@@ -670,9 +674,8 @@ class _CalendarState extends State<Calendar>
                                 isdatepicker
                                     ? DatePickerTimeline(
                                   _beginDate,
-                                  width:
-                                  MediaQuery.of(context).size.width /
-                                      2,
+                                  width: MediaQuery.of(context).size.width / 2,
+                                  height: 100.0,
                                   locale: 'de_DE',
                                   onDateChange: (date) {
                                     setState(() {
