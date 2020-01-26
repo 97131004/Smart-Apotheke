@@ -505,8 +505,7 @@ class _CalendarState extends State<Calendar>
             } else {
               _events[_controller.selectedDay] = [_stringCombination];
             }
-
-          // set notification for just one beginday, because this will work every day and I want to show just only one NOtification
+        // add for multiple day
           if (_selectedTimes.length > 0) {
             _showDailyAtTime(
                   nextDay,
