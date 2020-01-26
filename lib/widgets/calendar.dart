@@ -247,7 +247,7 @@ class _CalendarState extends State<Calendar>
             id,
             'Medikament : $text',
             'Zeit,Ihre Medikamente gemäß Zeitplan einzunehmen',
-            DateTime(year, month, day, hour, 0, 0),
+            DateTime(year, month, day, hour.toInt(), 0, 0),
             platformChannelSpecifics);
       }
     }
