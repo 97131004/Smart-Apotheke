@@ -552,7 +552,7 @@ class _CalendarState extends State<Calendar>
         transitionBuilder: (context, anim1, anim2, child) {
           return Transform.scale(
               //angle: math2.radians(anim1.value * 360),
-              scale: 1.5,
+              scale: 1.0,
               child: AlertDialog(
                 shape: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(50.0)),
