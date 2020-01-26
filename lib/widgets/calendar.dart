@@ -550,17 +550,19 @@ class _CalendarState extends State<Calendar>
         barrierColor: Colors.black.withOpacity(0.4),
         barrierLabel: '',
         transitionBuilder: (context, anim1, anim2, child) {
-          return Transform.rotate(
-              angle: math2.radians(anim1.value * 360),
+          return Transform.scale(
+              //angle: math2.radians(anim1.value * 360),
+              scale: 1.5,
               child: AlertDialog(
                 shape: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16.0)),
+                    borderRadius: BorderRadius.circular(50.0)),
                 title: Text('Erinnerungen erstellen'),
                 content: StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
                     return Form(
                         key: _formKey,
                         child: SingleChildScrollView(
+                            padding: EdgeInsets.only(top:10),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -745,7 +747,7 @@ class _CalendarState extends State<Calendar>
                 ),
               ));
         },
-        transitionDuration: Duration(milliseconds: 600))
+        transitionDuration: Duration(milliseconds: 800))
         .then((_) => setState(() {}));
   }
 }
