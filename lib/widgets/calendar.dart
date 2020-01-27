@@ -43,6 +43,9 @@ class Calendar extends StatefulWidget {
 
 class _CalendarState extends State<Calendar>
     with SingleTickerProviderStateMixin {
+  /// global variable For validator the input in form
+  final _formKey = GlobalKey<FormState>();
+
   /// global variable for LocalNotificationPlugin
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
@@ -167,8 +170,7 @@ class _CalendarState extends State<Calendar>
 
   /// Creating a ID for Notification consisted of month, day, index of event, hour
   /// the formular will return a unique int. because we have just 12 month
-  /// year I was remove because the nummer is so big out of int: 2^-31 to 2^31-1
-  /// max 0 18 000 000 < 2^31
+  /// year is diffezent I was remove because the nummer is so big out of int: 2^-31 to 2^31-1
   int _generateIDNotification(
       int year, int month, int day, int eventIndex, int hour) {
     int id = year * 12 * 30 * 24 + month * 30 * 24 + day * 24 + eventIndex + hour;
@@ -202,18 +204,55 @@ class _CalendarState extends State<Calendar>
     int year = dateTime.year;
     int month = dateTime.month;
     int day = dateTime.day;
+    //print(dateTime);
     // save list time with String = year.tostring() + month.toString() + day.toString() + eventIndex.toString()
     _saveClockWithYearMonthDayIndexEvent(year, month, day, eventIndex, time);
 
+    //show everday
+//    if (time.length > 0) {
+//      for (int i = 0; i < time.length; i++) {
+//        int hour = time[i];
+//        int id = _generateIDNotification(year, month, day, eventIndex, hour);
+//        await flutterLocalNotificationsPlugin.showDailyAtTime(
+//            id,
+//            'Medikament : $text',
+//            'Zeit,Ihre Medikamente gemäß Zeitplan einzunehmen',
+//            Time(hour, 0, 0),
+//            platformChannelSpecifics);
+//      }
+//    }
+    //show with day you want if you want  this is just one option for you
+//    static const Sunday = Day(1);
+//    static const Monday = Day(2);
+//    static const Tuesday = Day(3);
+//    static const Wednesday = Day(4);
+//    static const Thursday = Day(5);
+//    static const Friday = Day(6);
+//    static const Saturday = Day(7);
+//    if (time.length > 0) {
+//      for (int i = 0; i < time.length; i++) {
+//        int hour = time[i];
+//        int id = _generateIDNotification(year, month, day, eventIndex, hour);
+//        await flutterLocalNotificationsPlugin.showWeeklyAtDayAndTime(
+//            id,
+//            'Medikament : $text',
+//            'Zeit,Ihre Medikamente gemäß Zeitplan einzunehmen',
+//            Day(1),
+//            Time(hour, 0, 0),
+//            platformChannelSpecifics);
+//      }
+//    }
+      //show notification on time and day you want
     if (time.length > 0) {
       for (int i = 0; i < time.length; i++) {
         int hour = time[i];
         int id = _generateIDNotification(year, month, day, eventIndex, hour);
-        await flutterLocalNotificationsPlugin.showDailyAtTime(
+        //print(id);
+        await flutterLocalNotificationsPlugin.schedule(
             id,
             'Medikament : $text',
             'Zeit,Ihre Medikamente gemäß Zeitplan einzunehmen',
-            Time(hour, 0, 0),
+            DateTime(year, month, day,  hour.toInt(), 0, 0),
             platformChannelSpecifics);
       }
     }
@@ -460,15 +499,6 @@ class _CalendarState extends State<Calendar>
       setState(() {
         _controller.setSelectedDay(_beginDate, runCallback: true);
 
-        // set notification for just one beginday, because this will work every day and I want to show just only one NOtification
-        if (_selectedTimes.length > 0) {
-          _showDailyAtTime(
-              _beginDate,
-              _events[_controller.selectedDay].indexOf(_stringCombination),
-              _selectedTimes,
-              actualSelectMed.toString() != null?actualSelectMed.toString(): _stringCombination.toString());
-        }
-
         for (int i = 0; i < int.parse(_day_duration.text); i++) {
           DateTime nextDay = _beginDate.add(new Duration(days: i));
           _controller.setFocusedDay(nextDay);
@@ -478,17 +508,29 @@ class _CalendarState extends State<Calendar>
             } else {
               _events[_controller.selectedDay] = [_stringCombination];
             }
+        // add for multiple day
+          if (_selectedTimes.length > 0) {
+            _showDailyAtTime(
+                  nextDay,
+                _events[_controller.selectedDay].indexOf(_stringCombination),
+                _selectedTimes,
+                actualSelectMed.toString() != null?actualSelectMed.toString(): _stringCombination.toString());
+          }
+
           _controller.setSelectedDay(_beginDate, runCallback: true);
         }
       });
       _sharedPrefs.setString('events', json.encode(_encodeMap(_events)));
       _controller.setSelectedDay(_beginDate, runCallback: true);
+
+      _stringCombination = '';
+      _dosage.text = '';
+      _day_duration.text = '';
+      _note.text = '';
+      Navigator.of(context).pop();
+    }else{
+      return false;
     }
-    _stringCombination = '';
-    _dosage.text = '';
-    _day_duration.text = '';
-    _note.text = '';
-    Navigator.of(context).pop();
   }
 
   /// Showing Dialog with a [showGeneralDialog] and then a [Form] inside
@@ -501,8 +543,6 @@ class _CalendarState extends State<Calendar>
     _beginDate = _controller.selectedDay;
     bool isdatepicker = false;
 
-    /// local variable For validator the input in form
-    final _formKey = GlobalKey<FormState>();
     showGeneralDialog(
         context: context,
         pageBuilder: (context, anim1, anim2) {},
@@ -510,17 +550,19 @@ class _CalendarState extends State<Calendar>
         barrierColor: Colors.black.withOpacity(0.4),
         barrierLabel: '',
         transitionBuilder: (context, anim1, anim2, child) {
-          return Transform.rotate(
-              angle: math2.radians(anim1.value * 360),
+          return Transform.scale(
+              //angle: math2.radians(anim1.value * 360),
+              scale: 1.0,
               child: AlertDialog(
                 shape: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16.0)),
+                    borderRadius: BorderRadius.circular(50.0)),
                 title: Text('Erinnerungen erstellen'),
                 content: StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
                     return Form(
                         key: _formKey,
                         child: SingleChildScrollView(
+                            padding: EdgeInsets.only(top:10),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -634,9 +676,8 @@ class _CalendarState extends State<Calendar>
                                 isdatepicker
                                     ? DatePickerTimeline(
                                   _beginDate,
-                                  width:
-                                  MediaQuery.of(context).size.width /
-                                      2,
+                                  width: MediaQuery.of(context).size.width / 2,
+                                  height: 100.0,
                                   locale: 'de_DE',
                                   onDateChange: (date) {
                                     setState(() {
@@ -706,7 +747,7 @@ class _CalendarState extends State<Calendar>
                 ),
               ));
         },
-        transitionDuration: Duration(milliseconds: 600))
+        transitionDuration: Duration(milliseconds: 800))
         .then((_) => setState(() {}));
   }
 }

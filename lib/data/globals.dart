@@ -10,7 +10,7 @@ import 'med.dart';
 List<Med> recentMeds = [
   Med(
       'Ibu Lysin ratiopharm 684mg Filmtabletten',
-      '10019638',
+      '07628500',
       'http://www.beipackzettel.de/medikament/Ibu%2520Lysin%2520ratiopharm%2520684mg%2520Filmtabletten/AB4204',
       true),
   Med(
@@ -32,9 +32,9 @@ List<Med> recentMeds = [
 /// 'bought' from within the app using the iban and address entered by the user.
 /// This list should be later outsourced to a database.
 Map<String, ShopItem> shopMeds = {
-  '10019638': new ShopItem(
+  '07628500': new ShopItem(
       'Ibu Lysin ratiopharm 684mg Filmtabletten',
-      '10019638',
+      '07628500',
       'ratiopharm Gmbh',
       '20 Filmtabletten',
       '',
