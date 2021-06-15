@@ -7,8 +7,8 @@ import 'package:location/location.dart' as LocationManager;
 /// The class provides methods to handle google maps.
 class MapsHelper {
   /// Private google maps api key
-  //static String kGoogleApiKey = "AIzaSyAP2X_vG7-hXWunjAhzOyAj7BGwYOTSbU4";
-  static String kGoogleApiKey = "AIzaSyAFYotTBY_YeedSjlrOTXsVB7EKx79zR3U";
+  //static String kGoogleApiKey = "***";
+  static String kGoogleApiKey = "***";
   static GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: kGoogleApiKey);
 
   /// Default camera location is Berlin
