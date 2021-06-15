@@ -4,7 +4,10 @@ An app to conveniently pick a (German) medicament prescription, scan it, receive
 
 ![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph1.png?raw=true)
 ![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph2.png?raw=true)
-![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph3.png?raw=true)
+![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph4.png?raw=true)
+![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph6.png?raw=true)
+![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph5.png?raw=true)
+![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph7.png?raw=true)
 
 ## Target system specifications
 
