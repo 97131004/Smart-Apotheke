@@ -2,12 +2,12 @@
 
 A (proof-of-concept)-app to conveniently pick a (German) medicament prescription, scan it, receive a list of scanned medicaments, order them to your home or specify a pharmacy to pick them up, and track medicament intake using a build-in calendar.
 
-![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph1.png?raw=true)
-![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph2.png?raw=true)
-![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph4.png?raw=true)
-![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph6.png?raw=true)
-![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph5.png?raw=true)
-![screenshot](https://github.com/notpavlov/Smart-Apotheke/blob/master/scr/maph7.png?raw=true)
+![screenshot](https://github.com/97131004/Smart-Apotheke/blob/master/scr/maph1.png?raw=true)
+![screenshot](https://github.com/97131004/Smart-Apotheke/blob/master/scr/maph2.png?raw=true)
+![screenshot](https://github.com/97131004/Smart-Apotheke/blob/master/scr/maph4.png?raw=true)
+![screenshot](https://github.com/97131004/Smart-Apotheke/blob/master/scr/maph6.png?raw=true)
+![screenshot](https://github.com/97131004/Smart-Apotheke/blob/master/scr/maph5.png?raw=true)
+![screenshot](https://github.com/97131004/Smart-Apotheke/blob/master/scr/maph7.png?raw=true)
 
 ## Target system specifications
 
