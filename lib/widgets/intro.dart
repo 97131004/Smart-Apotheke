@@ -140,8 +140,8 @@ class _IntroState extends State<Intro> {
               SizedBox(height: 15),
               Text(
                   'Hochschule für Technik und Wirtschaft Berlin\n' +
-                      'Mobile Anwendungen im Gesundheitswesen\nWS 2019 / 2020\nGruppe 3\n\n' +
-                      'Albert Pavlov\nAnge Toko\nMichael Franz\nPhuong Pham\nVan Tinh Chu',
+                      '' +
+                      '',
                   style: TextStyle(
                     fontSize: 16,
                   )),
