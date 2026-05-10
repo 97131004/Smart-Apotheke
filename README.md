@@ -18,7 +18,7 @@ A (proof-of-concept)-app to conveniently pick a (German) medicament prescription
 
 ## Development specifications
 
-**Framework**: Flutter 1.12.13+hotfix.5 
+**Framework**: Flutter 1.12.13+hotfix.5  
 **Language**: Dart 2.7.0  
 **IDE**: Visual Studio Code 1.41.1  
 
