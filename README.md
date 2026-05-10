@@ -1,4 +1,4 @@
-# Smart Apotheke
+# Flutter - Smart Apotheke
 
 A (proof-of-concept)-app to conveniently pick a (German) medicament prescription, scan it, receive a list of scanned medicaments, order them to your home or specify a pharmacy to pick them up, and track medicament intake using a build-in calendar.
 
